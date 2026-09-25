@@ -22,7 +22,7 @@
 function J = default_joint()
   J.E=200000; J.FEXX=480;
   % beam IPE 160, A36
-  J.bm.h=160; J.bm.bf=82; J.bm.tf=7.4; J.bm.tw=5; J.bm.r=9;
+  J.bm.h=160; J.bm.bf=82; J.bm.tf=7.4; J.bm.tw=5; J.bm.r=0;
   J.bm.Fy=250; J.bm.Fu=400; J.bm.Zx=123900;
   % column HSS 200x100x4.  D = face in the STRONG direction.
   J.cl.D=200; J.cl.B=100; J.cl.t=4; J.cl.Fy=250; J.cl.Fu=400;
@@ -59,13 +59,13 @@ function J = default_joint()
   % Share of the vertical reaction taken by the SHELF plate.
   %   1.0 = shelf alone (conservative, and what fit-up guarantees)
   %   0.5 = shelf and cap share, a plastic mechanism needs a hinge in both
-  J.st.share=1.0;
+  J.st.share=.5;
   % Width of plate assumed to bend under the beam.
   %   1 = b_f, no dispersion (very conservative)
   %   2 = b_f + 2*e, 45 degree spread from the load
   %   3 = the same width used for the axial check, so one dispersion
   %       model is used for both actions (default)
-  J.st.wmode=4;        % width of plate that works, see joint_checks
+  J.st.wmode=1;        % width of plate that works, see joint_checks
   % Width of the strip used for the S8 INTERACTION.  The same width is
   % used for BOTH the axial and the bending term: mixing two widths at
   % one section is not a valid interaction, and taking the wider one for
@@ -213,6 +213,7 @@ Tn_front = 0.75 * b.Fu * b.bf * b.tf;
         Pbf, Tanc);
   end
 
+  
   % ---- seat ------------------------------------------------------------
   Vmax = max([cs.V(:); 0]);
   lb = p.L_lap;  k = b.tf + b.r;

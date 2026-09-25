@@ -17,8 +17,8 @@ DB = load_joint_db(fullfile(here, 'joint_db', 'joint_db.mat'));
 % ---- EDIT 1: the joints ----------------------------------------------
 %  Point unique names.  Beams, column and directions come from the
 %  database (build_joint_db prints the list of joints and their maps).
-joints = {'10'};
-% joints = {DB.joints.joint};            % every joint in the model
+%joints = {'10'};
+joints = {DB.joints.joint};            % every joint in the model
 
 % ---- EDIT 2: the detail ----------------------------------------------
 J = default_joint();      % sections, plates and welds live in dmj_lib.m
