@@ -9,7 +9,7 @@
 %  Edit the two blocks marked EDIT and run.
 % =====================================================================
 here = fileparts(mfilename('fullpath'));
-addpath(fullfile(here, 'etabs_joints'));
+addpath(here, fullfile(here, 'etabs_joints'));
 source(fullfile(here, 'dmj_lib.m'));
 
 DB = load_joint_db(fullfile(here, 'joint_db', 'joint_db.mat'));
@@ -33,14 +33,16 @@ for n = 1:numel(joints)
           strjoin({DB.joints.joint}, ' '));
   end
   jt  = DB.joints(k);
-  map = jt.map;
+  % beams by class (joint_classes.m) and the collar strip on each side
+  [map, Jj, msg] = joint_config(jt, J);
   map.skip = 'RSA';                     % signed combinations only
+  for m = 1:numel(msg), fprintf('WARNING %s\n', msg{m}); end
   if ~isempty(map.skew)
     fprintf('NOTE joint %s: beams %s are skew to the column axes\n', ...
             jt.joint, mat2str(map.skew));
   end
 
-  E = run_joint_res(J, jt.res, map, sprintf('JOINT %s', jt.joint));
+  E = run_joint_res(Jj, jt.res, map, sprintf('JOINT %s', jt.joint));
 
   f = fieldnames(E);  d = cellfun(@(t) E.(t).dcr, f);
   [w, i] = max(d);
