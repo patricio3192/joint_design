@@ -16,7 +16,7 @@
 %    3. dwj_cases_from_res   load cases from the joint database / toolkit
 %    4. dwj_run_joint_res    cases + report for one joint
 %    5. dwj_report           per-case table and envelope
-%    6. dwj_validity         AISC 360-16 Table K2.2A limits of applicability
+%    6. dwj_validity         AISC 360-10 Table K1.2A limits (reference only)
 %
 %  Model
 %    Beam flange = TRANSVERSE plate on the column face, force
@@ -26,10 +26,13 @@
 %    whose side walls are D long (200 mm). A beam in the WEAK direction
 %    lands on the face of width D, with side walls B long.
 %
-%  References: AISC 360-16 Chapter K (K1 parameters, Table K2.2 plate-to-
-%  rectangular-HSS, K5 welds), J2.4, J4, G2, F2, F7, H1.  EN 1993-1-8
-%  Table 7.13 as an [INFO] cross-check.  Equation numbers are not quoted
-%  for Chapter K: check the limit-state names against your edition.
+%  References: AISC 360-16.  K2.3: connections to rectangular HSS with
+%  concentrated loads are checked with the limit states of Chapter J; the
+%  effective width Be of a plate (here the beam flange) is K1-1, and the
+%  flange welds are K5 (K5-1, Table K5.1: le = 2 Be).  Side walls are
+%  checked as webs (J10.2, J10.3, J10.5).  Checks that only exist in
+%  AISC 360-10 Table K1.2 (punching, the applicability limits) are marked
+%  [360-10].  EN 1993-1-8 Table 7.13 is an [INFO] cross-check.
 %  Units inside: N, mm.
 % =====================================================================
 1;
@@ -44,8 +47,8 @@ function J = dwj_default_joint()
   J.bm.Fy=250; J.bm.Fu=400; J.bm.Zx=123900;
   % column HSS 200x100x4.  D = face in the STRONG direction.
   J.cl.D=200; J.cl.B=100; J.cl.t=4; J.cl.Fy=250; J.cl.Fu=400;
-  % outside corner radius, used by the side wall checks.  AISC K2.2
-  % takes 1.5 t when it is not known.
+  % outside corner radius, used by the side wall checks (k in J10.2);
+  % 1.5 t when it is not known.
   J.cl.ro=1.5*4;
   % column compression capacity from ETABS steel design; NaN = skip H1-1
   J.cl.phiPn=NaN;
@@ -96,7 +99,8 @@ end
 %   dpar   side wall length along the force
 %   Bt     face slenderness B/t
 %   beta   bf / Bface, <= 1
-%   le     K5 effective length of the flange fillets, both sides together
+%   Be     effective width of the flange, AISC 360-16 K1-1
+%   le     flange fillet effective length, both faces: 2 Be (Table K5.1)
 %   Lw     web weld length, each side
 function G = dwj_geometry(J)
   b=J.bm; c=J.cl;
@@ -105,7 +109,8 @@ function G = dwj_geometry(J)
   G.dpar  = [c.D c.B];
   G.Bt    = G.Bface/c.t;
   G.beta  = min(b.bf./G.Bface, 1.0);
-  G.le    = min(2*(10./G.Bt)*(c.Fy*c.t/(b.Fy*b.tf))*b.bf, 2*b.bf);
+  G.Be    = min((10*c.t./G.Bface)*(c.Fy*c.t/(b.Fy*b.tf))*b.bf, b.bf);   % K1-1
+  G.le    = 2*G.Be;                                                    % Table K5.1
   G.Lw    = b.h - 2*(b.tf + b.r);
 end
 
@@ -158,47 +163,49 @@ function C = dwj_checks(J, cs, nside)
     Bt   = G.Bt(d);
     beta = G.beta(d);
 
-    % F1 local yielding of the flange due to uneven load distribution:
-    %    only the width 10/(B/t) * Bp near the side walls is effective.
-    Rn = min(10/Bt*c.Fy*c.t*b.bf, b.Fy*b.tf*b.bf);
-    C = dwj_chk(C,['F1' s],['flange eff. width yielding, ' nm{d}], ...
-        'K2.2 plate local yield', 0.95*Rn, Td(d), 'F', ...
-        sprintf('0.95 x min(10/%s x %s x %s x %s , %s x %s x %s)', N(Bt), N(c.Fy), ...
-                N(c.t), N(b.bf), N(b.Fy), N(b.tf), N(b.bf)));
+    % F1 the flange yields over its effective width: the face is stiff
+    %    only next to the side walls, so only Be of the flange works.
+    %    Be from K1-1, then tension yielding J4.1 (J4-1), phi 0.90.
+    C = dwj_chk(C,['F1' s],['flange yielding over Be, ' nm{d}], ...
+        'K1-1 + J4.1 (J4-1)', 0.90*b.Fy*b.tf*G.Be(d), Td(d), 'F', ...
+        sprintf('Be = (10x%s/%s)(%sx%s/(%sx%s)) x %s = %s: 0.90 x %s x %s x %s', ...
+                N(c.t), N(B), N(c.Fy), N(c.t), N(b.Fy), N(b.tf), N(b.bf), N(G.Be(d)), ...
+                N(b.Fy), N(b.tf), N(G.Be(d))));
 
     % F2 shear yielding (punching) of the face, 0.85B <= Bp <= B-2t
     if b.bf >= 0.85*B && b.bf <= B - 2*c.t
       Bep = min(10*b.bf/Bt, b.bf);
-      C = dwj_chk(C,['F2' s],['face punching shear, ' nm{d}], ...
-          'K2.2 shear yielding', 0.95*0.60*c.Fy*c.t*(2*b.tf + 2*Bep), Td(d), 'F', ...
+      C = dwj_chk(C,['F2' s],['face punching shear [360-10], ' nm{d}], ...
+          '360-10 K1-8', 0.95*0.60*c.Fy*c.t*(2*b.tf + 2*Bep), Td(d), 'F', ...
           sprintf('Bep=%s: 0.95 x 0.60 x %s x %s x (2x%s + 2x%s)', N(Bep), N(c.Fy), ...
                   N(c.t), N(b.tf), N(Bep)));
     end
 
-    % F3, F4 side walls, only when the flange covers the flat width
-    %    (beta = 1 in K2.2; taken here as Bp >= B - 2t) [MODEL]
+    % F3, F4 side walls, checked as two webs (Chapter J, per K2.3), only
+    %    when the flange covers the flat width (Bp >= B - 2t) [MODEL]
     if b.bf >= B - 2*c.t
       C = dwj_chk(C,['F3' s],['side wall local yielding, ' nm{d}], ...
-          'K2.2 sidewall yield', 1.00*2*c.Fy*c.t*(5*c.ro + b.tf), Td(d), 'F', ...
+          'J10.2 (J10-2), 2 walls', 1.00*2*c.Fy*c.t*(5*c.ro + b.tf), Td(d), 'F', ...
           sprintf('1.00 x 2 x %s x %s x (5x%s + %s)', N(c.Fy), N(c.t), N(c.ro), N(b.tf)));
       Qf = dwj_Qf(J, cs, d, beta);
       H  = dpar(d);
       if nside(d)==2
-        Rn = 48*c.t^3/(H-3*c.t)*sqrt(J.E*c.Fy)*Qf;  phi = 0.90;  rf = 'K2.2 crippling, cross';
+        Rn = 48*c.t^3/(H-3*c.t)*sqrt(J.E*c.Fy)*Qf;  phi = 0.90;  rf = 'J10.5 (J10-8), 2 walls';
         sb = sprintf('0.90 x 48 x %s^3/(%s-3x%s) x sqrt(E Fy) x Qf=%.3f', N(c.t), N(H), N(c.t), Qf);
       else
-        Rn = 1.6*c.t^2*(1 + 3*b.tf/(H-3*c.t))*sqrt(J.E*c.Fy)*Qf;  phi = 0.75;  rf = 'K2.2 crippling, T';
+        Rn = 1.6*c.t^2*(1 + 3*b.tf/(H-3*c.t))*sqrt(J.E*c.Fy)*Qf;  phi = 0.75;  rf = 'J10.3 (J10-4), 2 walls';
         sb = sprintf('0.75 x 1.6 x %s^2 x (1 + 3x%s/(%s-3x%s)) x sqrt(E Fy) x Qf=%.3f', ...
                      N(c.t), N(b.tf), N(H), N(c.t), Qf);
       end
       C = dwj_chk(C,['F4' s],['side wall crippling, ' nm{d}], rf, phi*Rn, Td(d), 'F', sb);
     end
 
-    % F5 flange fillet welds, K5 effective length (both sides together)
+    % F5 flange fillet welds, both faces of the flange: K5-1 with
+    %    le = 2 Be (Table K5.1), Fnw = 0.60 FEXX, no directional increase
     if strcmpi(w.fl_type,'fillet')
-      C = dwj_chk(C,['F5' s],['flange welds, K5 eff. length, ' nm{d}], ...
-          'K5 + J2.4 (J2-3)', dwj_weldcap(w.leg_fl, G.le(d), J.FEXX), Td(d), 'F', ...
-          sprintf('le=%s: %s', N(G.le(d)), dwj_weldsub(w.leg_fl, N(G.le(d)), J.FEXX)));
+      C = dwj_chk(C,['F5' s],['flange welds, le = 2 Be, ' nm{d}], ...
+          'K5 (K5-1), Table K5.1', dwj_weldcap(w.leg_fl, G.le(d), J.FEXX), Td(d), 'F', ...
+          sprintf('le = 2 x %s = %s: %s', N(G.Be(d)), N(G.le(d)), dwj_weldsub(w.leg_fl, N(G.le(d)), J.FEXX)));
     end
 
     % F6 [INFO] chord face failure, EN 1993-1-8 Table 7.13, beta <= 0.85
@@ -229,7 +236,7 @@ function C = dwj_checks(J, cs, nside)
       dwj_weldsub(w.leg_web, ['2 x ' N(G.Lw)], J.FEXX));
   % W2 longitudinal plate under shear: the wall must not rupture before
   %    the web yields, tp <= Fu t / Fyp.  Demand and capacity in mm.
-  C = dwj_chk(C,'W2','wall vs web thickness, tw <= Fu t/Fy','K2.2 long. plate shear', ...
+  C = dwj_chk(C,'W2','wall vs web thickness, tw <= Fu t/Fy','360-10 K1.2, Manual Part 10', ...
       c.Fu*c.t/b.Fy, b.tw, 'L', sprintf('%s x %s / %s', N(c.Fu), N(c.t), N(b.Fy)));
   hw = G.Lw/b.tw;
   if hw<=2.24*sqrt(J.E/b.Fy), phiv=1.00; else, phiv=0.90; end
@@ -274,11 +281,12 @@ function T = dwj_sheet_data(J, nside)
   for d = 1:2
     rows = [rows, { ...
       {['Face width, ' nm{d} ' beams'], 'B_face', [N(G.Bface(d)) ' mm'], 'column side the beam lands on'}, ...
-      {['Face slenderness, ' nm{d}], 'B/t', sprintf('%.1f', G.Bt(d)), 'K2.2A: <= 35 flange, <= 40 web'}, ...
+      {['Face slenderness, ' nm{d}], 'B/t', sprintf('%.1f', G.Bt(d)), '360-10 K1.2A: <= 35 flange, <= 40 web'}, ...
+      {['Effective flange width, ' nm{d}], 'Be', sprintf('%.1f mm', G.Be(d)), 'K1-1: (10t/B)(Fy t/(Fyb tf)) bf <= bf'}, ...
       {['Width ratio, ' nm{d}], 'beta', sprintf('%.3f', G.beta(d)), 'bf / B_face'}, ...
       {['Side wall length, ' nm{d}], 'H', [N(G.dpar(d)) ' mm'], 'along the force'}, ...
       {['K5 effective weld length, ' nm{d}], 'le', sprintf('%.1f mm', G.le(d)), ...
-       '2 (10/(B/t)) (Fy t / Fyb tf) bf <= 2 bf'}}];
+       '2 Be, both faces of the flange (Table K5.1)'}}];
   end
   valid = {};
   for d = 1:2
@@ -293,7 +301,7 @@ function T = dwj_sheet_data(J, nside)
     {'column Fy <= 360 MPa', N(c.Fy), dwj_yn(c.Fy<=360)}, ...
     {'column Fy/Fu <= 0.8', sprintf('%.2f', c.Fy/c.Fu), dwj_yn(c.Fy/c.Fu<=0.8)}}];
   T = { {'Welds and column faces', {'Item','Symbol','Value','How it is obtained'}, rows}, ...
-        {'AISC 360-16 Table K2.2A, limits of applicability', {'Limit','Value',''}, valid} };
+        {'Limits of applicability, AISC 360-10 Table K1.2A (reference; 360-16 has no such table)', {'Limit','Value',''}, valid} };
 end
 
 % =====================================================================
@@ -420,14 +428,15 @@ function E = dwj_report(J, cs, map, title_str)
 end
 
 % =====================================================================
-% 6. LIMITS OF APPLICABILITY, AISC 360-16 Table K2.2A
+% 6. LIMITS OF APPLICABILITY, AISC 360-10 Table K1.2A (reference: 360-16
+%    K2.3 sends rectangular HSS to Chapter J and has no such table)
 %    Printed per direction that has beams.  Outside these limits the
 %    Chapter K equations are not a design basis.
 % =====================================================================
 function ok = dwj_validity(J, nside)
   b=J.bm; c=J.cl;
   Bface = [c.B c.D];  nm = {'strong','weak'};
-  fprintf('K2.2A limits of applicability:\n');
+  fprintf('360-10 Table K1.2A limits (reference):\n');
   ok = true;
   for d=1:2
     if nside(d)==0, continue; end
@@ -442,7 +451,7 @@ function ok = dwj_validity(J, nside)
      c.Fy, dwj_yn(rm(1)), c.Fy/c.Fu, dwj_yn(rm(2)));
   ok = ok && all(rm);
   if ~ok
-    fprintf('   *** outside K2.2A: the Chapter K checks for that face are indicative only\n');
+    fprintf('   *** outside the 360-10 limits: the Be and K5 checks for that face are indicative only\n');
   end
 end
 

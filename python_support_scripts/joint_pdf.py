@@ -95,6 +95,10 @@ SHAPE = {
     "hidden": ("#7A5A2F", 0.7, None, 0, (3, 2)),
     "weld":   ("#D0021B", 2.4, None, 0, None),
     "weldf":  ("#D0021B", 0.6, "#D0021B", 1.0, None),
+    "weld5":  ("#E0141E", 2.4, None, 0, None),          # 5 mm fillets: red
+    "weldf5": ("#E0141E", 0.6, "#E0141E", 1.0, None),
+    "weld4":  ("#8E3B1F", 2.4, None, 0, None),          # 4 mm fillets: brownish red
+    "weldf4": ("#8E3B1F", 0.6, "#8E3B1F", 1.0, None),
     "stab":   ("#2E6B30", 0.8, "#8CC084", 1.0, None),
     "tab":    ("#B06F00", 0.8, "#F5C66B", 1.0, None),
     "tabh":   ("#B06F00", 0.8, None, 0, (3, 2)),
@@ -164,6 +168,12 @@ def table(b, width):
 #    "r": rotation in degrees (optional)}
 #   {"t": "dim", "p": [x1, y1, x2, y2], "o": offset, "txt": text,
 #    "pos": "after"|"before"}   offset in mm, to the left of p1 -> p2
+#   {"t": "weld", "p": [xt, yt, xe, ye], "dir": 1|-1, "side": "arrow"|"other"|"both",
+#    "size": "5", "len": "80", "all": 0|1, "field": 0|1, "tail": text, "s": style}
+#       AWS A2.4 fillet weld symbol: arrow to (xt, yt), reference line from
+#       the elbow (xe, ye) to the right (dir 1) or left (-1); "all" draws
+#       the weld-all-around circle, "field" the field-weld flag; the
+#       triangle takes the colour of style s.  Drawn at a fixed size.
 # Everything is scaled to fit the width and the height; text and line
 # weights stay in points.
 def _style(shape, s, closed=True):
@@ -203,15 +213,24 @@ def drawing(b, width):
     for _ in range(4):
         X0, X1, Y0, Y1 = x0, x1, y0, y1
         for it in items:
+            if it["t"] == "weld":
+                q = aslist(it["p"])
+                ext = (_WREF + 12 + stringWidth(it.get("tail", ""), BASE, 6 * S.fs)) * S.fs / k
+                xa, xb = sorted([q[2], q[2] + it.get("dir", 1) * ext])
+                X0, X1 = min(X0, xa, q[0]), max(X1, xb, q[0])
+                Y0, Y1 = min(Y0, q[3] - 12 * S.fs / k, q[1]), max(Y1, q[3] + 14 * S.fs / k, q[1])
+                continue
             if it["t"] != "text" or it.get("r"):
                 continue
             px, py = aslist(it["p"])[:2]
             font, size, _col = S.text.get(it.get("s", "label"), S.text["label"])
-            w = stringWidth(it["txt"], font, size) / k
+            lines = it["txt"].split("\n")
+            w = max(stringWidth(t_, font, size) for t_ in lines) / k
             a = it.get("a", "start")
             lo = px - (w if a == "end" else w / 2 if a == "middle" else 0)
             X0, X1 = min(X0, lo), max(X1, lo + w)
-            Y0, Y1 = min(Y0, py - 0.3 * size / k), max(Y1, py + size / k)
+            Y0 = min(Y0, py - (0.3 + 1.25 * (len(lines) - 1)) * size / k)
+            Y1 = max(Y1, py + size / k)
         k = fit(X0, X1, Y0, Y1)
     x0, x1, y0, y1 = X0, X1, Y0, Y1
     W, H = (x1 - x0) * k + 2 * pad, (y1 - y0) * k + 2 * pad
@@ -235,10 +254,14 @@ def drawing(b, width):
             texts.append((X(p[0]), Y(p[1]), it["txt"], s, it.get("a", "start"), it.get("r", 0)))
         elif t == "dim":
             _dim(d, X, Y, p, it["o"] * k, it["txt"], it.get("pos", "after"))
+        elif t == "weld":
+            _weld(d, X(p[0]), Y(p[1]), X(p[2]), Y(p[3]), it)
     for x, y, txt, s, a, r in texts:              # text on top of everything
         font, size, col = S.text.get(s, S.text["label"])
-        st = String(0, 0, txt, fontName=font, fontSize=size, fillColor=_c(col), textAnchor=a)
-        g = Group(st)
+        # several lines, separated by newlines, spaced in points
+        g = Group(*[String(0, -i * 1.25 * size, t_, fontName=font, fontSize=size,
+                           fillColor=_c(col), textAnchor=a)
+                    for i, t_ in enumerate(txt.split("\n"))])
         ra = math.radians(r or 0)
         g.transform = (math.cos(ra), math.sin(ra), -math.sin(ra), math.cos(ra), x, y)
         d.add(g)
@@ -248,6 +271,57 @@ def drawing(b, width):
     if b.get("note"):
         out.append(P_(b["note"], S.par["capnote"]))
     return out
+
+
+_WREF = 44          # reference line length, points (times the text factor)
+
+
+def _weld(d, xt, yt, xe, ye, it):
+    """AWS A2.4 fillet weld symbol, in points."""
+    f = S.fs
+    blk = _c("#222222")
+    dr = 1 if it.get("dir", 1) >= 0 else -1
+    Lr = _WREF * f
+    xr = xe + dr * Lr
+    # arrow line and arrowhead at the joint
+    d.add(Line(xe, ye, xt, yt, strokeColor=blk, strokeWidth=0.6))
+    L = max(math.hypot(xt - xe, yt - ye), 1e-6)
+    ux, uy = (xt - xe) / L, (yt - ye) / L
+    al, aw = 5.5 * f, 1.8 * f
+    d.add(Polygon([xt, yt, xt - ux * al - uy * aw, yt - uy * al + ux * aw,
+                   xt - ux * al + uy * aw, yt - uy * al - ux * aw],
+                  fillColor=blk, strokeColor=blk, strokeWidth=0.3))
+    # reference line
+    d.add(Line(xe, ye, xr, ye, strokeColor=blk, strokeWidth=0.8))
+    # fillet triangle(s): perpendicular leg always on the left
+    h = 6 * f
+    xs = xe + 13 * f if dr > 0 else xe - 13 * f - h
+    fill = _c(SHAPE.get(it.get("s", "weld"), SHAPE["weld"])[0])
+    font, size, col = BASE, 6 * f, "#222222"
+    sides = {"arrow": [-1], "other": [1], "both": [-1, 1]}.get(it.get("side", "arrow"), [-1])
+    for sg in sides:
+        d.add(Polygon([xs, ye, xs, ye + sg * h, xs + h, ye], fillColor=fill,
+                      strokeColor=blk, strokeWidth=0.5))
+        ty = ye + (sg * h * 0.55 if sg > 0 else -h * 0.85)
+        if it.get("size"):
+            d.add(String(xs - 1.5 * f, ty, str(it["size"]), fontName=font, fontSize=size,
+                         fillColor=_c(col), textAnchor="end"))
+        if it.get("len"):
+            d.add(String(xs + h + 1.5 * f, ty, str(it["len"]), fontName=font, fontSize=size,
+                         fillColor=_c(col), textAnchor="start"))
+    if it.get("all"):
+        d.add(Circle(xe, ye, 2.8 * f, fillColor=None, strokeColor=blk, strokeWidth=0.6))
+    if it.get("field"):
+        top = ye + 10 * f
+        d.add(Line(xe, ye, xe, top, strokeColor=blk, strokeWidth=0.6))
+        d.add(Polygon([xe, top, xe + dr * 6 * f, top - 2 * f, xe, top - 4 * f],
+                      fillColor=blk, strokeColor=blk, strokeWidth=0.3))
+    if it.get("tail"):
+        tw = 4 * f
+        d.add(Line(xr, ye, xr + dr * tw, ye + tw, strokeColor=blk, strokeWidth=0.6))
+        d.add(Line(xr, ye, xr + dr * tw, ye - tw, strokeColor=blk, strokeWidth=0.6))
+        d.add(String(xr + dr * (tw + 1.5 * f), ye - size * 0.35, it["tail"], fontName=font,
+                     fontSize=size, fillColor=_c(col), textAnchor="start" if dr > 0 else "end"))
 
 
 def _dim(d, X, Y, p, off, txt, pos):

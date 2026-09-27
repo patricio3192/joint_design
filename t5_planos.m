@@ -19,6 +19,7 @@ S  = load(fullfile(here, 'joint_db', 'etabs_model.mat'));  M = S.M;
 % ---- EDIT ---------------------------------------------------------------
 J = default_joint();
 opts.gap  = 10;               % beam end to column face on the drawings, mm (<=)
+opts.proj = 10;               % column top above the upper collar, mm (for the fillet)
 opts.stab = [8 60 25 3];      % stability plates for C beams: t, length, depth, clearance (mm)
 % opts.project = 'Nombre del proyecto';
 

@@ -9,10 +9,13 @@ the same forces, beam and column as the collar joint (`dmj_lib.m`, manual
 `diaphragm_joint_manual.md`). It exists to show, with code equations, why the
 collar is needed.
 
-References are to **AISC 360-16** unless stated otherwise. Chapter K checks are
-quoted by table and limit-state name, not equation number. Check them against
-your edition, since the numbering moved between 2010 and 2016. EN 1993-1-8 is
-used once, as an `[INFO]` cross-check. Numbers quoted are for joint 10 (interior,
+References are to **AISC 360-16** unless stated otherwise. In 360-16, K2.3 says
+that connections to rectangular HSS with concentrated loads are checked with the
+limit states of **Chapter J**; there is no plate-to-rectangular-HSS table any
+more. Chapter K still supplies two things used here: the **effective width Be**
+of a plate on an HSS face (**K1-1**) and the **weld effective length** (**K5**,
+**Table K5.1**). Checks that only exist in AISC 360-10 (Table K1.2) are marked
+**[360-10]**. EN 1993-1-8 is used once, as an `[INFO]` cross-check. Numbers quoted are for joint 10 (interior,
 four IPE 160, HSS 200x100x4).
 
 ---
@@ -64,9 +67,10 @@ column walls, as in the collar joint (C1 here, T8 there).
 
 | phi | Applies to | Reference |
 |---|---|---|
-| 0.95 | plate local yielding (effective width), punching shear | Table K2.2 |
-| 1.00 | side wall local yielding | Table K2.2 |
-| 0.75 / 0.90 | side wall crippling, T- / cross-connection | Table K2.2 |
+| 0.90 | flange yielding over Be | K1-1 + J4.1 |
+| 0.95 | punching shear [360-10] | 360-10 K1-8 |
+| 1.00 | side wall local yielding (walls as webs) | J10.2 |
+| 0.75 / 0.90 | side wall crippling / compression buckling | J10.3 / J10.5 |
 | 0.75 | welds | J2.4 |
 | 0.90 | flange yielding, wall shear yielding, flexure | J4, F2, F7 |
 | 1.00 | beam web shear (compact web) | G2.1 |
@@ -74,7 +78,10 @@ column walls, as in the collar joint (C1 here, T8 there).
 
 ---
 
-## 4. Limits of applicability, AISC Table K2.2A
+## 4. Limits of applicability, AISC 360-10 Table K1.2A (reference)
+
+360-16 has no such table: K2.3 sends rectangular HSS to Chapter J. The 360-10
+limits are kept as a guide to where the effective-width model was calibrated.
 
 `dwj_validity` prints these for every face that has a beam.
 
@@ -100,21 +107,27 @@ the strong face alone, which is inside every limit.
 0.90 Fy bf tf = 0.90 x 250 x 82 x 7.4 = **136.5 kN**. This is the same as T2 in
 the collar joint, but with the smaller lever arm, so the demand is higher.
 
-### F1s, F1w - Local yielding of the flange from uneven load distribution, Table K2.2
+### F1s, F1w - Flange yielding over its effective width, K1-1 + J4.1 (J4-1)
 
-phi = 0.95. Rn = [10 / (B/t)] Fy t Bp <= Fyp tp Bp
+The face is stiff only next to the side walls, so only part of the flange can
+deliver force. AISC 360-16 K1-1 gives that part, the effective width:
 
-The flange is effective over only 10/(B/t) of its width. At B/t = 25 that is 40%
-of the flange, and at B/t = 50 it is 20%. Fy and t are those of the **column**,
-and Bp = bf. The upper bound is the flange's own yield strength.
+Be = (10 t / B) (Fy t / (Fyb tb)) Bb <= Bb
 
-- Strong: 0.95 x 10/25 x 250 x 4 x 82 = **31.2 kN**
-- Weak: 0.95 x 10/50 x 250 x 4 x 82 = **15.6 kN**
+with t, B, Fy of the **column** face and tb = tf, Bb = bf, Fyb of the **beam
+flange**. The flange then yields over Be (J4.1, phi 0.90):
 
-This applies for all beta. **It is the main AISC check for beta < 0.85**, and it
-fails at every joint.
+phi Rn = 0.90 Fyb tf Be
 
-### F2 - Punching shear of the face, Table K2.2
+- Strong: Be = (10 x 4/100)(250 x 4/(250 x 7.4)) x 82 = **17.7 mm** of 82 mm;
+  0.90 x 250 x 7.4 x 17.7 = **29.5 kN**
+- Weak: Be = **8.9 mm**; **14.8 kN**
+
+This is the same limit state as AISC 360-10 eq. K1-7 (Rn = [10/(B/t)] Fy t Bp,
+phi 0.95): multiplying out Fyb tf Be gives exactly that expression. Only phi
+changed, 0.95 -> 0.90, because 360-16 routes the check through J4.1.
+
+### F2 - Punching shear of the face [360-10], 360-10 K1-8
 
 phi = 0.95. Rn = 0.60 Fy t (2 tp + 2 Bep), with Bep = 10 Bp/(B/t) <= Bp.
 
@@ -122,24 +135,29 @@ This only applies when 0.85 B <= Bp <= B - 2t, and it never does here: on the
 strong face, 0.85 x 100 = 85 > 82. The script leaves it out when it doesn't
 apply.
 
-### F3, F4 - Side wall local yielding and crippling, Table K2.2
+### F3, F4 - Side walls checked as webs, J10.2, J10.3, J10.5
 
-These apply when beta = 1.0. The script takes that as a flange covering the flat
-width, Bp >= B - 2t `[MODEL]`. They never apply here. When they do:
+Following K2.3, the two side walls are checked with the Chapter J web equations,
+with t for tw and H - 3t for the web depth. They only matter when the flange
+covers the flat width of the face, taken as Bp >= B - 2t `[MODEL]`. They never
+apply here. When they do:
 
-- F3, phi 1.00: Rn = 2 Fy t (5k + lb), with k = outside corner radius
-  (`J.cl.ro`, 1.5 t when unknown) and lb = tf
-- F4, compression only, multiplied by Qf (section 7):
-  - T-connection, phi 0.75: Rn = 1.6 t^2 [1 + 3 lb/(H - 3t)] sqrt(E Fy) Qf
-  - cross-connection (two beams in that direction), phi 0.90:
-    Rn = [48 t^3 / (H - 3t)] sqrt(E Fy) Qf
+- F3, J10.2, phi 1.00: Rn = 2 Fy t (5k + lb), k = outside corner radius
+  (`J.cl.ro`, 1.5 t when unknown), lb = tf
+- F4, compression only, multiplied by Qf (section 7) as a reduction for column
+  stress:
+  - one beam, J10.3, phi 0.75: Rn = 1.6 t^2 [1 + 3 lb/(H - 3t)] sqrt(E Fy) Qf
+  - two opposite beams, J10.5, phi 0.90: Rn = [48 t^3 / (H - 3t)] sqrt(E Fy) Qf
 
-### F5s, F5w - Flange welds with the K5 effective length
+### F5s, F5w - Flange welds, K5 (K5-1) with le from Table K5.1
 
-AISC K5: the weld is only as effective as the face behind it. Weld effective
-length, both faces of the flange together:
+AISC K5: the weld is only as effective as the face behind it.
+Rn = Fnw tw le (K5-1), phi 0.75, Fnw = 0.60 FEXX with no directional increase,
+tw the throat. For a transverse plate welded on both faces, Table K5.1 gives
 
-le = 2 [10/(B/t)] [Fy t / (Fyp tp)] Bp <= 2 Bp
+le = 2 Be
+
+which is our case: each flange is fillet welded on its top and its bottom face.
 
 - Strong: le = 2 x 0.40 x (250 x 4)/(250 x 7.4) x 82 = **35.5 mm** out of 164 mm
   of weld. Capacity 0.75 x 0.60 x 480 x 0.707 x 5 x 35.5 = **27.1 kN**
@@ -158,7 +176,8 @@ gamma_M5 = 1.0.
 - Weak: **15.9 kN**
 
 This is a yield-line model, which is independent of AISC's effective-width
-rule. It agrees with F1 to within 8% on both faces. Two different theories give
+rule. It lands within 15% of F1 on both faces (33.6 against 29.5 kN, 15.9
+against 14.8 kN). Two different theories give
 the same answer, which makes that answer hard to argue with.
 
 ---
@@ -176,7 +195,7 @@ smaller z.
 Two fillets over Lw = h - 2(tf + r) = 145.2 mm each:
 0.75 x 0.60 x 480 x 0.707 x 4 x 2 x 145.2 = **177.4 kN**.
 
-### W2 - Wall against web thickness, Table K2.2, longitudinal plate under shear
+### W2 - Wall against web thickness [360-10], 360-10 Table K1.2 / Manual Part 10
 
 tp <= Fu t / Fyp, which requires the wall to be strong enough that it does not
 rupture before the web yields. Fu t / Fy = 400 x 4 / 250 = **6.40 mm** against
@@ -214,7 +233,7 @@ heavily loaded column. The PDF sheet prints U and Qf per case (section 5).
 | Flange force into the connection | F1, F5: 10/(B/t) of the flange width works | T1: three-sided weld to a 12 mm plate, full width |
 | Lever arm | h - tf = 152.6 mm | h + plates = 172 mm |
 | Force into the column | through the 4 mm face in bending | through the collar welds around the whole perimeter (T7), then wall shear (T8) |
-| Weak-direction face | B/t = 50, outside Table K2.2A | the plate spreads the force, so the face is not loaded in bending |
+| Weak-direction face | B/t = 50, outside the 360-10 Table K1.2A limits | the plate spreads the force, so the face is not loaded in bending |
 | Governing DCR, joint 10 | **3.93** (F5s) | **0.78** (S8) |
 
 The collar fixes the weak link. It takes the flange force over its full width
@@ -258,11 +277,11 @@ Gravity case **1.2D+L+1.6Lr**, strong direction:
 | Beam moment | beam 38, abs(M3) | 16.22 kNm |
 | Flange force | 16.22 x 10^6 / 152.6 + abs(-0.03 kN)/2 | **106.3 kN** |
 | B1 | 0.90 x 250 x 82 x 7.4 | 136.5 kN, DCR 0.78 |
-| F1s | 0.95 x 10/25 x 250 x 4 x 82 | 31.2 kN, **DCR 3.41** |
+| F1s | Be = 17.7 mm; 0.90 x 250 x 7.4 x 17.7 | 29.5 kN, **DCR 3.60** |
 | F5s | le = 35.5 mm; 0.75 x 0.60 x 480 x 0.707 x 5 x 35.5 | 27.1 kN, **DCR 3.93** |
 | F6s [INFO] | 250 x 16 x 4.296 / 0.512 | 33.6 kN, DCR 3.17 |
 
-Weak direction, same case: flange force 45.1 kN, F1w 15.6 kN (**2.89**), F5w
+Weak direction, same case: flange force 45.1 kN, F1w 14.8 kN (**3.05**), F5w
 13.5 kN (**3.33**), on a face outside the Specification limits.
 
 ### What it would take
@@ -276,15 +295,15 @@ Running `dwj_lib` with a thicker wall (and ro = 1.5 t) gives this governing DCR:
 | 8 mm | 0.98 | 0.81 |
 | 10 mm | 0.85 | 0.54 |
 
-A direct weld needs an **HSS 200x100x8**, which puts both faces inside Table
-K2.2A. That is twice the wall, and about 1.95 times the column weight, just to
+A direct weld needs an **HSS 200x100x8**, which puts both faces inside the
+360-10 Table K1.2A limits. That is twice the wall, and about 1.95 times the column weight, just to
 make the connection work. The collar joint does it with the 4 mm column and two
 12 mm plates.
 
 ### Three checks to do first
 
 1. T = 16.22 x 10^6 / 152.6 = about 106 300 N. Everything scales with z.
-2. F1s = 0.95 x 10/25 x 250 x 4 x 82 = 31 160 N. Compare it with T: this is the
+2. F1s = 0.90 x 250 x 7.4 x 17.7 = 29 520 N. Compare it with T: this is the
    whole argument.
 3. le = 2 x 0.4 x (1000/1850) x 82 = 35.5 mm, against 2 x 82 = 164 mm of weld
    actually laid.

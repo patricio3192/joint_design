@@ -10,6 +10,8 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
 % opts.beam, opts.column        section names for the notes
 % opts.stab   stability plates on the cap for C beams, [t L depth clear] mm
 % opts.gap    beam end to column face shown on the drawings, mm (<=)
+% opts.proj   column top above the upper collar, mm, so the collar fillet
+%             has a face on the column (flush would need a groove weld)
 % opts.python Python command
 %
 % All geometry and text is produced here from J, the joint classes, the
@@ -17,7 +19,7 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
 % Writes <outdir>/planos_uniones.json and .pdf.
 
   if nargin < 5, opts = struct(); end
-  def = struct('python', 'python3', 'stab', [8 60 25 3], 'gap', 10, ...
+  def = struct('python', 'python3', 'stab', [8 60 25 3], 'gap', 10, 'proj', 10, ...
                'project', 'Estructura metálica - uniones de vigas y columnas', ...
                'subtitle', '', 'beam', 'IPE 160', ...
                'column', sprintf('HSS %gx%gx%g', J.cl.D, J.cl.B, J.cl.t));
@@ -65,6 +67,7 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
     'Medidas en milímetros.'
     sprintf('Separación entre el extremo de la viga y la cara de la columna: ≤ %g mm.', opts.gap)
     'Collarín inferior: soldado a la columna en taller. Collarín superior: se coloca sobre las alas superiores y se suelda en obra.'
+    sprintf('La columna sobresale %g mm sobre el collarín superior, para el filete collarín-columna.', opts.proj)
     sprintf('Collarines a columna: filete de %g mm en todo el contorno. Alas de vigas M a collarines: filete de %g mm en 3 lados.', J.wl.leg_col, J.wl.leg_fl)
     'Las vigas C no se sueldan al collarín superior: quedan libres para girar.'
     'Las correas no se muestran en estos planos.'};
@@ -95,13 +98,15 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
   end
   n = n + 1;  nM = n;
   dM = blk_draw(section_moment(J, opts), 150, sprintf('DETALLE %d - UNIÓN A MOMENTO (M)', n), ...
-                'Corte a lo largo de la viga.');
+                sprintf(['Elevación a lo largo de la viga; la columna atraviesa ambos collarines. Collarín ' ...
+                         'superior sobre las alas, soldado en obra (bandera); inferior bajo las alas, soldado ' ...
+                         'en taller. Soldaduras: rojo filete de %g mm, marrón filete de %g mm.'], J.wl.leg_fl, J.wl.leg_col));
   n = n + 1;  nC = n;
   dC = blk_draw(section_shear(J, opts), 150, sprintf('DETALLE %d - UNIÓN A CORTE SOBRE EL COLLARÍN (C)', n), ...
-                'Corte a lo largo de la viga. El ala superior no se suelda.');
+                'Elevación a lo largo de la viga. El ala superior no se suelda.');
   n = n + 1;
   dL = blk_draw(section_seat(J, opts), 175, sprintf('DETALLE %d - VIGA BAJO EL COLLARÍN, APOYO EN ÁNGULO (LB)', n), ...
-                'Corte a lo largo de la viga. La altura de la viga respecto al collarín es la del proyecto.');
+                'Elevación a lo largo de la viga. La altura de la viga respecto al collarín es la del proyecto.');
   n = n + 1;
   lbj = lb_joints(DB, J, C, P);
   dF = blk_draw(seat_front(J, lbj), 175, sprintf('DETALLE %d - ÁNGULO DE APOYO, VISTA DE LA CARA DE LA COLUMNA', n), ...
@@ -114,7 +119,7 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
   dP = blk_draw(vv_plan(J), 175, sprintf('DETALLE %d - UNIÓN VIGA-VIGA A CORTE, PLANTA', n), ...
                 sprintf(['Aplica a todas las uniones viga-viga del detalle 1 (%d ubicaciones). En ' ...
                          'esquinas se recorta la viga marcada en el detalle 1.'], numel(P.vv)));
-  B = [B, {blk_row([0.21 0.21 0.29 0.29], {{d{1}}, {d{2}}, {dM}, {dC}}), blk_space(6), ...
+  B = [B, {blk_row([0.17 0.17 0.36 0.30], {{d{1}}, {d{2}}, {dM}, {dC}}), blk_space(6), ...
            blk_row([0.28 0.22 0.3 0.2], {{dL}, {dF}, {dV}, {dP}})}];
 
   % ---------------------------------------------------------------- joint plans
@@ -337,13 +342,28 @@ function it = type_drawing(T, J, style)
 end
 
 % =====================================================================
-%  Sections along a beam: x from the column face (0), y up from the top
-%  of the lower collar (0)
+%  Elevations along a beam: x = 0 on the column axis, the beam arrives
+%  from the right (+x); y up from the top of the lower collar (0).  The
+%  column passes through both collars; its top is flush with the top of
+%  the upper collar.  Column width shown: D (the side along the beam).
 % =====================================================================
-function it = column_cut(J, ytop, ybot)
-  c = J.cl;
-  it = {d_rectxy(-c.t, ybot, 0, ytop, 'column'), d_rectxy(-60, ybot, -c.t, ytop, 'void'), ...
-        d_line(-60, ybot, -60, ytop, 'cut'), d_text(-32, ybot - 16, 'pared de la columna', 'small', 'middle')};
+function it = collar_elev(J, ybot, wst, proj)
+  % column, both collars across it, collar welds at both faces
+  %   wst: {line style, fill style} for the 4 mm collar welds
+  %   proj: column top above the upper collar
+  c = J.cl;  b = J.bm;  p = J.pl;  a = c.D/2;  ov = p.L_lap + J.st.gap;
+  h = b.h;  ytop = h + p.t_cap;
+  it = {d_rectxy(-a, ybot, a, ytop + proj, 'column')};
+  zz = [-a ybot; -a/2 ybot + 8; 0 ybot - 6; a/2 ybot + 8; a ybot];        % break line
+  for i = 1:size(zz, 1) - 1, it{end+1} = d_line(zz(i,1), zz(i,2), zz(i+1,1), zz(i+1,2), 'cut'); end
+  it{end+1} = d_rectxy(-a - ov, -p.t_shf, a + ov, 0, 'plate');           % lower collar
+  it{end+1} = d_rectxy(-a - ov, h, a + ov, ytop, 'plate');               % upper collar
+  for sx = [-1 1]
+    it{end+1} = d_tri(sx*a, 0, sx*5, 5, wst{2});                          % lower collar, top face
+    it{end+1} = d_tri(sx*a, ytop, sx*5, 5, wst{2});                       % upper collar, top face
+  end
+  it{end+1} = d_text(0, ybot - 22, 'columna', 'small', 'middle');
+  it{end+1} = d_dim(a, ytop, a, ytop + proj, -18, mm_t(proj));
 end
 
 function it = beam_elev(x0, x1, ybot, b, style)
@@ -353,49 +373,58 @@ function it = beam_elev(x0, x1, ybot, b, style)
         d_line(x1, ybot - 10, x1, ybot + b.h + 10, 'cut')};
 end
 
+% AWS fillet weld symbol (see joint_pdf.py): arrow to (xt, yt), elbow (xe, ye)
+function it = d_weld(xt, yt, xe, ye, dr, side, sz, len, all, field, tail, s)
+  it = struct('t', 'weld', 'p', [xt yt xe ye], 'dir', dr, 'side', side, 'size', sz, ...
+              'len', len, 'all', all, 'field', field, 'tail', tail, 's', s);
+end
+
 function it = section_moment(J, opts)
-  b = J.bm;  p = J.pl;  g = opts.gap;  ov = p.L_lap + J.st.gap;  h = b.h;  x1 = ov + 150;
-  ytop = h + p.t_cap;
-  it = column_cut(J, ytop, -p.t_shf - 70);
-  it = [it, beam_elev(g, x1, 0, b, 'beam')];
-  it{end+1} = d_rectxy(0, -p.t_shf, ov, 0, 'plate');
-  it{end+1} = d_rectxy(0, h, ov, ytop, 'plate');
-  it{end+1} = d_line(ov - p.L_lap, 0, ov, 0, 'weld');
-  it{end+1} = d_line(ov - p.L_lap, h, ov, h, 'weld');
-  it{end+1} = d_tri(ov, h, 6, 6, 'weldf');
-  it{end+1} = d_tri(ov, 0, 6, -6, 'weldf');
-  it{end+1} = d_tri(0, ytop, 5, 5, 'weldf');
-  it{end+1} = d_tri(0, 0, 5, 5, 'weldf');
-  it{end+1} = d_dim(0, -p.t_shf, g, -p.t_shf, -28, ['≤ ' mm_t(g)], 'before');
-  it{end+1} = d_dim(ov - p.L_lap, ytop, ov, ytop, 28, mm_t(p.L_lap));
-  it{end+1} = d_dim(0, ytop, ov, ytop, 52, mm_t(ov));
+  % test detail: AWS weld symbols, and colours by weld size
+  b = J.bm;  p = J.pl;  c = J.cl;  g = opts.gap;  ov = p.L_lap + J.st.gap;  h = b.h;
+  a = c.D/2;  xe = a + ov;  x1 = xe + 150;  ytop = h + p.t_cap;
+  it = collar_elev(J, -p.t_shf - 80, {'weld4', 'weldf4'}, opts.proj);
+  it = [it, beam_elev(a + g, x1, 0, b, 'beam')];
+  it{end+1} = d_rectxy(a, h, xe, ytop, 'plate');                          % collar over the beam again
+  it{end+1} = d_rectxy(a, -p.t_shf, xe, 0, 'plate');
+  it{end+1} = d_line(xe - p.L_lap, 0, xe, 0, 'weld5');
+  it{end+1} = d_line(xe - p.L_lap, h, xe, h, 'weld5');
+  it{end+1} = d_tri(xe, h, 6, 6, 'weldf5');
+  it{end+1} = d_tri(xe, 0, 6, -6, 'weldf5');
+  % weld symbols: collar to column (all round; the upper one in the
+  % field), flanges to the collars (3 sides)
+  if J.wl.n_shf == 2, sd = 'both'; else, sd = 'arrow'; end
+  xl = -a - ov - 70;
+  it{end+1} = d_weld(-a - 2, 2, xl, -95, -1, sd, sprintf('%g', J.wl.leg_col), '', 1, 0, '', 'weld4');
+  it{end+1} = d_weld(-a - 2, ytop + 2, xl, ytop + 95, -1, 'arrow', sprintf('%g', J.wl.leg_col), '', 1, 1, '', 'weld4');
+  it{end+1} = d_weld(xe + 2, h + 3, xe + 95, h + 95, 1, 'arrow', sprintf('%g', J.wl.leg_fl), ...
+                     sprintf('%g', p.L_lap), 0, 1, '3 lados', 'weld5');
+  it{end+1} = d_weld(xe + 2, -3, xe + 95, -95, 1, 'arrow', sprintf('%g', J.wl.leg_fl), ...
+                     sprintf('%g', p.L_lap), 0, 0, '3 lados', 'weld5');
+  % dimensions
+  it{end+1} = d_dim(a, -p.t_shf, a + g, -p.t_shf, -28, ['≤ ' mm_t(g)], 'before');
+  it{end+1} = d_dim(a, ytop, xe, ytop, 40, mm_t(ov));
+  it{end+1} = d_dim(-a - ov, ytop, -a, ytop, 40, mm_t(ov), 'before');
+  it{end+1} = d_dim(-a, ytop, a, ytop, 40, mm_t(c.D));
   it{end+1} = d_dim(x1, 0, x1, h, -25, mm_t(h));
   it{end+1} = d_dim(x1, h, x1, ytop, -25, mm_t(p.t_cap));
   it{end+1} = d_dim(x1, -p.t_shf, x1, 0, -25, mm_t(p.t_shf), 'before');
-  xn = x1 + 50;  dy = 13;
-  it = [it, d_lines(xn, ytop - 2, {'collarín superior sobre', 'el ala, soldado en obra'}, 'label', 'start', dy)];
-  it = [it, d_lines(xn, h/2 + 12, {sprintf('alas: filete %g mm', J.wl.leg_fl), 'en 3 lados'}, 'red', 'start', dy)];
-  it = [it, d_lines(xn, h/2 - 16, {sprintf('(bordes %g mm y frente)', p.L_lap)}, 'small', 'start', dy)];
-  it = [it, d_lines(xn, 10, {'collarín inferior bajo', 'el ala, soldado en taller'}, 'label', 'start', dy)];
-  it = [it, d_lines(-66, ytop - 2, {sprintf('filete %g mm', J.wl.leg_col), 'todo el', 'contorno'}, 'red', 'end', dy)];
 end
 
 function it = section_shear(J, opts)
-  b = J.bm;  p = J.pl;  g = opts.gap;  ov = p.L_lap + J.st.gap;  h = b.h;  x1 = ov + 150;
-  st = opts.stab;  ytop = h + p.t_cap;
-  it = column_cut(J, ytop, -p.t_shf - 70);
-  it = [it, beam_elev(g, x1, 0, b, 'beam')];
-  it{end+1} = d_rectxy(0, -p.t_shf, ov, 0, 'plate');
-  it{end+1} = d_rectxy(0, h, ov, ytop, 'plate');
-  it{end+1} = d_rectxy(ov - st(2) - 10, h - st(3), ov - 10, h, 'stab');
-  it{end+1} = d_line(ov - st(2) - 10, h, ov - 10, h, 'weld');
-  it{end+1} = d_line(ov - p.L_lap, 0, ov, 0, 'weld');
-  it{end+1} = d_tri(ov, 0, 6, -6, 'weldf');
-  it{end+1} = d_tri(0, ytop, 5, 5, 'weldf');
-  it{end+1} = d_tri(0, 0, 5, 5, 'weldf');
-  it{end+1} = d_dim(0, -p.t_shf, g, -p.t_shf, -28, ['≤ ' mm_t(g)], 'before');
-  it{end+1} = d_dim(ov - p.L_lap, -p.t_shf, ov, -p.t_shf, -28, mm_t(p.L_lap));
-  it{end+1} = d_dim(ov - st(2) - 10, ytop, ov - 10, ytop, 28, mm_t(st(2)));
+  b = J.bm;  p = J.pl;  c = J.cl;  g = opts.gap;  ov = p.L_lap + J.st.gap;  h = b.h;
+  a = c.D/2;  xe = a + ov;  x1 = xe + 150;  st = opts.stab;  ytop = h + p.t_cap;
+  it = collar_elev(J, -p.t_shf - 80, {'weld', 'weldf'}, opts.proj);
+  it = [it, beam_elev(a + g, x1, 0, b, 'beam')];
+  it{end+1} = d_rectxy(a, h, xe, ytop, 'plate');
+  it{end+1} = d_rectxy(a, -p.t_shf, xe, 0, 'plate');
+  it{end+1} = d_rectxy(xe - st(2) - 10, h - st(3), xe - 10, h, 'stab');
+  it{end+1} = d_line(xe - st(2) - 10, h, xe - 10, h, 'weld');
+  it{end+1} = d_line(xe - p.L_lap, 0, xe, 0, 'weld');
+  it{end+1} = d_tri(xe, 0, 6, -6, 'weldf');
+  it{end+1} = d_dim(a, -p.t_shf, a + g, -p.t_shf, -28, ['≤ ' mm_t(g)], 'before');
+  it{end+1} = d_dim(xe - p.L_lap, -p.t_shf, xe, -p.t_shf, -28, mm_t(p.L_lap));
+  it{end+1} = d_dim(xe - st(2) - 10, ytop, xe - 10, ytop, 28, mm_t(st(2)));
   it{end+1} = d_dim(x1, h - st(3), x1, h, -25, mm_t(st(3)));
   xn = x1 + 50;  dy = 13;
   it = [it, d_lines(xn, ytop - 2, {'ala superior NO', 'soldada al collarín'}, 'red', 'start', dy)];
@@ -405,28 +434,24 @@ function it = section_shear(J, opts)
 end
 
 function it = section_seat(J, opts)
-  b = J.bm;  p = J.pl;  q = J.nl;  h = b.h;  ov = p.L_lap + J.st.gap;
-  Lv = q.ang(1);  Lo = q.ang(2);  tA = q.ang(3);  g = opts.gap;
+  b = J.bm;  p = J.pl;  q = J.nl;  c = J.cl;  h = b.h;
+  Lv = q.ang(1);  Lo = q.ang(2);  tA = q.ang(3);  g = opts.gap;  a = c.D/2;
   clr = 40;                                       % shown only; the level is the project's
   ybt = -p.t_shf - clr - h;                       % bottom of the LB beam
-  x1 = Lo + 170;  ytop = h + p.t_cap;
-  it = column_cut(J, ytop, ybt - Lv - 25);
-  it{end+1} = d_rectxy(0, -p.t_shf, ov, 0, 'plate');
-  it{end+1} = d_rectxy(0, h, ov, ytop, 'plate');
-  it{end+1} = d_text(ov + 8, h + 1, 'collarín superior', 'small', 'start');
-  it{end+1} = d_text(ov + 8, -p.t_shf + 1, 'collarín inferior', 'small', 'start');
-  it = [it, beam_elev(g, x1, ybt, b, 'beam')];
-  % angle: vertical leg against the wall, outstanding leg under the flange
-  it{end+1} = d_poly([0 ybt; Lo ybt; Lo ybt - tA; tA ybt - tA; tA ybt - Lv; 0 ybt - Lv], 'angle');
-  it{end+1} = d_line(0, ybt - Lv, 0, ybt, 'weld');
-  it{end+1} = d_line(g, ybt, Lo, ybt, 'weld');
-  it{end+1} = d_dim(0, ybt + h, g, ybt + h, 28, ['≤ ' mm_t(g)], 'before');
-  it{end+1} = d_dim(0, ybt - Lv, Lo, ybt - Lv, -25, mm_t(Lo));
-  it{end+1} = d_dim(-60, ybt - Lv, -60, ybt, 25, mm_t(Lv));
+  x1 = a + Lo + 170;
+  it = collar_elev(J, ybt - Lv - 40, {'weld', 'weldf'}, opts.proj);
+  it = [it, beam_elev(a + g, x1, ybt, b, 'beam')];
+  % angle on the column face: vertical leg down the face, outstanding leg under the flange
+  it{end+1} = d_poly([a ybt; a+Lo ybt; a+Lo ybt-tA; a+tA ybt-tA; a+tA ybt-Lv; a ybt-Lv], 'angle');
+  it{end+1} = d_line(a, ybt - Lv, a, ybt, 'weld');
+  it{end+1} = d_line(a + g, ybt, a + Lo, ybt, 'weld');
+  it{end+1} = d_dim(a, ybt + h, a + g, ybt + h, 14, ['≤ ' mm_t(g)], 'before');
+  it{end+1} = d_dim(a, ybt - Lv, a + Lo, ybt - Lv, -25, mm_t(Lo));
   it{end+1} = d_dim(x1, ybt, x1, ybt + h, -25, mm_t(h));
+  it{end+1} = d_dim(x1, ybt - Lv, x1, ybt, -25, mm_t(Lv), 'before');
   xn = x1 + 50;  dy = 13;
   it = [it, d_lines(xn, ybt + h - 4, {'ala superior libre,', 'sin unión al collarín'}, 'label', 'start', dy)];
-  it = [it, d_lines(xn, ybt + 20, {sprintf('ala inferior al ángulo:'), sprintf('filete %g mm, ambos bordes', q.leg_f)}, 'red', 'start', dy)];
+  it = [it, d_lines(xn, ybt + 20, {'ala inferior al ángulo:', sprintf('filete %g mm, ambos bordes', q.leg_f)}, 'red', 'start', dy)];
   it = [it, d_lines(xn, ybt - 22, {sprintf('ángulo L %gx%gx%g mm', Lv, Lo, tA), 'a la columna: filete', sprintf('%g mm en ambos extremos', q.leg_a)}, 'label', 'start', dy)];
 end
 
@@ -619,10 +644,10 @@ function it = d_circle(x, y, r, s)
   it = struct('t', 'circle', 'p', [x y r], 's', s);
 end
 
-% several lines of text, first line at y, going down
+% several lines of text, first line at y, going down (spacing set by the
+% printer, in points; dy is not used any more)
 function it = d_lines(x, y, lines, s, a, dy)
-  it = {};
-  for i = 1:numel(lines), it{end+1} = d_text(x, y - (i-1)*dy, lines{i}, s, a); end
+  it = {d_text(x, y, strjoin(lines, sprintf('\n')), s, a)};
 end
 
 function it = d_text(x, y, txt, s, a)

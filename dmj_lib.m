@@ -457,11 +457,11 @@ function C = joint_checks(J, cs)
     fr = sqrt(fv^2 + (fm + fn)^2);
     C = chk(C,'P8','tab: welds to the column wall (V, V ea, N)','J2.4 (J2-3)', ...
         weldcap(q.leg, 2*hp, J.FEXX), fr*2*hp);
-    C = chk(C,'P9','tab: wall vs plate, tp <= Fu t/Fy','K2.2 long. plate shear', ...
+    C = chk(C,'P9','tab: wall vs plate, tp <= Fu t/Fy','360-10 K1.2, Manual Part 10', ...
         c.Fu*c.t/q.Fy, q.tp, 'L');
     C = chk(C,'P10','tab: beam web net shear rupture','J4.2 (J4-4)', ...
         0.75*0.60*b.Fu*(b.h - q.nb*q.dh)*b.tw, Vn);
-    C = chk(C,'P11','tab: face B/t <= 40, K2.2A [INFO]','K2.2A', 40, q.face/c.t, 'R');
+    C = chk(C,'P11','tab: face B/t <= 40 [INFO]','360-10 Table K1.2A', 40, q.face/c.t, 'R');
   end
 
   % ---- members (column interaction is left to ETABS) -----------------
