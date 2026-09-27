@@ -9,8 +9,12 @@ Printing only: every number and every line of text comes from the JSON.
 Document: {"title": ..., "blocks": [...],
            "page": "A4" (default) | "A2L" (A2 landscape),
            "fs": text size factor (default 1),
-           "frame": {"project", "subtitle", "sheetword", "sheets": [title of each sheet]}
-               optional: border and title strip on every page}
+           "frame": {"fields": [[label, value], ...], "widths": [fractions],
+                     "h": strip height mm, "sheets": [title of each sheet],
+                     "subtitle": text under the sheet title}
+               optional: border and a title block along the bottom of every
+               page.  A value "@sheet" prints the sheet title (and the
+               subtitle), "@page" prints "i / n"; newlines split lines.}
 Blocks:
     {"k": "h1" | "h2" | "h3" | "p" | "note", "t": text}
     {"k": "page"}          {"k": "space", "h": mm}
@@ -386,6 +390,21 @@ def flow(blocks, width):
     return story
 
 
+def _wrap(text, font, size, width):
+    """Split text into lines that fit the width (points)."""
+    out, cur = [], ""
+    for word in str(text).split():
+        t = (cur + " " + word).strip()
+        if stringWidth(t, font, size) <= width or not cur:
+            cur = t
+        else:
+            out.append(cur)
+            cur = word
+    if cur:
+        out.append(cur)
+    return out
+
+
 def main(src, dst):
     global S
     with open(src) as f:
@@ -393,8 +412,9 @@ def main(src, dst):
     S = Style(float(doc.get("fs", 1.0)))
     size = landscape(A2) if doc.get("page") == "A2L" else A4
     frame = doc.get("frame")
+    hb = float(frame.get("h", 20)) * mm if frame else 0
     m = 18 * mm if not frame else 16 * mm
-    bottom = 16 * mm if not frame else 34 * mm
+    bottom = 16 * mm if not frame else 8 * mm + hb + 8 * mm
     pdf = SimpleDocTemplate(dst, pagesize=size, leftMargin=m, rightMargin=m, topMargin=15 * mm,
                             bottomMargin=bottom, title=doc["title"])
     width = size[0] - 2 * m
@@ -404,26 +424,43 @@ def main(src, dst):
         if frame:
             sheets = aslist(frame.get("sheets"))
             n, i = len(sheets), d.page
-            canvas.setStrokeColor(_c("#333333"))
+            blk = _c("#222222")
+            canvas.setStrokeColor(blk)
             canvas.setLineWidth(1.2)
             canvas.rect(8 * mm, 8 * mm, size[0] - 16 * mm, size[1] - 16 * mm)
-            h, x0, y0, w = 20 * mm, 8 * mm, 8 * mm, size[0] - 16 * mm
+            x0, y0, w = 8 * mm, 8 * mm, size[0] - 16 * mm
             canvas.setLineWidth(0.8)
-            canvas.line(x0, y0 + h, x0 + w, y0 + h)
-            xs = [x0, x0 + 0.45 * w, x0 + 0.85 * w, x0 + w]
-            for x in xs[1:-1]:
-                canvas.line(x, y0, x, y0 + h)
-            canvas.setFillColor(_c("#111111"))
-            canvas.setFont(BOLD, 11)
-            canvas.drawString(xs[0] + 5 * mm, y0 + 12 * mm, frame.get("project", ""))
-            canvas.setFont(BASE, 8)
-            canvas.drawString(xs[0] + 5 * mm, y0 + 5.5 * mm, frame.get("subtitle", ""))
-            canvas.setFont(BOLD, 12)
-            canvas.drawString(xs[1] + 5 * mm, y0 + 8 * mm, sheets[i - 1] if i <= n else "")
-            canvas.setFont(BASE, 8)
-            canvas.drawString(xs[2] + 5 * mm, y0 + 13 * mm, frame.get("sheetword", "Sheet"))
-            canvas.setFont(BOLD, 16)
-            canvas.drawString(xs[2] + 5 * mm, y0 + 4.5 * mm, f"{i} / {n}")
+            canvas.line(x0, y0 + hb, x0 + w, y0 + hb)
+            fields = aslist(frame.get("fields"))
+            ws = aslist(frame.get("widths")) or [1 / len(fields)] * len(fields)
+            x = x0
+            for (label, value), f in zip(fields, ws):
+                cw = f * w
+                if x > x0:
+                    canvas.line(x, y0, x, y0 + hb)
+                pad = 3 * mm
+                canvas.setFillColor(_c("#555555"))
+                canvas.setFont(BOLD, 6.5)
+                canvas.drawString(x + pad, y0 + hb - 5 * mm, label)
+                canvas.setFillColor(_c("#111111"))
+                if value == "@page":
+                    canvas.setFont(BOLD, 18)
+                    canvas.drawCentredString(x + cw / 2, y0 + hb / 2 - 5 * mm, f"{i} / {n}")
+                elif value == "@sheet":
+                    canvas.setFont(BOLD, 11)
+                    canvas.drawString(x + pad, y0 + hb - 11 * mm, sheets[i - 1] if i <= n else "")
+                    lines = _wrap(frame.get("subtitle", ""), BASE, 7, cw - 2 * pad)
+                    canvas.setFont(BASE, 7)
+                    for j, ln in enumerate(lines):
+                        canvas.drawString(x + pad, y0 + hb - 16 * mm - j * 3.2 * mm, ln)
+                else:
+                    lines = []
+                    for part in str(value).split("\n"):
+                        lines += _wrap(part, BASE, 8.5, cw - 2 * pad)
+                    canvas.setFont(BASE, 8.5)
+                    for j, ln in enumerate(lines):
+                        canvas.drawString(x + pad, y0 + hb - 10.5 * mm - j * 3.8 * mm, ln)
+                x += cw
         else:
             canvas.setFont(BASE, 7)
             canvas.setFillColor(_c("#606060"))

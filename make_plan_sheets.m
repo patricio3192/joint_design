@@ -6,7 +6,11 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
 %
 %   make_plan_sheets(DB, M, default_joint(), 'reports', opts)
 %
-% opts.project, opts.subtitle   title strip text
+% opts.titleblock  {label, value; ...} for the title block on every sheet;
+%                  values '@sheet' (sheet title + opts.subtitle) and '@page'
+%                  (sheet number) are filled per sheet; opts.tbwidths gives
+%                  the column widths as fractions
+% opts.project, opts.subtitle   used when no title block is given
 % opts.beam, opts.column        section names for the notes
 % opts.stab   stability plates on the cap for C beams, [t L depth clear] mm
 % opts.gap    beam end to column face shown on the drawings, mm (<=)
@@ -148,8 +152,8 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
   sheets = {'Planta general y cuadro de uniones', 'Collarines y detalles de uniones'};
   for s = 3:nsheet, sheets{end+1} = sprintf('Plantas de uniones (%d de %d)', s - 2, nsheet - 2); end
   doc = struct('title', 'Uniones - planos', 'page', 'A2L', 'fs', 1.35, 'blocks', {B}, ...
-               'frame', struct('project', opts.project, 'subtitle', opts.subtitle, ...
-                               'sheetword', 'Lámina', 'sheets', {sheets}));
+               'frame', struct('fields', {title_fields(opts)}, 'widths', tb_widths(opts), ...
+                               'h', 26, 'subtitle', opts.subtitle, 'sheets', {sheets}));
   base = fullfile(outdir, 'planos_uniones');
   fid = fopen([base '.json'], 'w');
   if fid < 0, error('Cannot write %s.json', base); end
@@ -160,6 +164,29 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
   fprintf('%s', out);
   if st ~= 0, error('PDF generation failed (see the message above).'); end
   file = [base '.pdf'];
+end
+
+% =====================================================================
+%  Title block
+% =====================================================================
+function F = title_fields(opts)
+  if isfield(opts, 'titleblock') && ~isempty(opts.titleblock)
+    T = opts.titleblock;
+  else
+    T = {'PROYECTO:', opts.project; 'CONTENIDO:', '@sheet'; 'LÁMINA:', '@page'};
+  end
+  F = cell(1, size(T, 1));
+  for i = 1:size(T, 1), F{i} = {T{i,1}, strrep(T{i,2}, '\n', char(10))}; end
+end
+
+function w = tb_widths(opts)
+  if isfield(opts, 'tbwidths') && ~isempty(opts.tbwidths)
+    w = opts.tbwidths / sum(opts.tbwidths);
+  elseif isfield(opts, 'titleblock') && ~isempty(opts.titleblock)
+    w = ones(1, size(opts.titleblock, 1)) / size(opts.titleblock, 1);
+  else
+    w = [0.4 0.45 0.15];
+  end
 end
 
 % =====================================================================

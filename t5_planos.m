@@ -21,7 +21,18 @@ J = default_joint();
 opts.gap  = 10;               % beam end to column face on the drawings, mm (<=)
 opts.proj = 10;               % column top above the upper collar, mm (for the fillet)
 opts.stab = [8 60 25 3];      % stability plates for C beams: t, length, depth, clearance (mm)
-% opts.project = 'Nombre del proyecto';
+% title block on every sheet: label, value ('\n' starts a new line);
+% '@sheet' = sheet title and contents, '@page' = sheet number
+opts.titleblock = {
+  'PROYECTO:',               'VIVIENDA EDGAR ORTEGA Y FAMILIA'
+  'PROPIETARIO:',            'SR. EDGAR ORTEGA'
+  'DISEÑO ARQUITECTÓNICO:',  'DAVID SAAVEDRA'
+  'DISEÑO ESTRUCTURAL:',     'ING. PATRICIO RODRIGUEZ\nSENESCYT: 1007-15-1429459'
+  'CONTENIDO:',              '@sheet'
+  'FECHA:',                  'SEPTIEMBRE 2026'
+  'LÁMINA:',                 '@page'
+};
+opts.tbwidths = [15 11 12 15 29 9 9];   % relative column widths
 
 % ======================================================================
 for k = 1:numel(DB.joints)
