@@ -87,7 +87,7 @@ function J = default_joint()
   J.nl.s=50;  J.nl.Lev=25;                % pitch, vertical edge distance
   J.nl.ea=40;                             % weld line to bolt line
   J.nl.Leh=30;                            % bolt line to plate free edge
-  J.nl.gap=10;                            % beam end to column wall
+  J.nl.gap=12;                            % beam end to column wall (max of the 5-12 mm range)
   J.nl.leg=4;                             % fillet leg, each side of the plate
   J.nl.face=J.cl.B;                       % face it lands on, set by joint_config
   % NL connection type: 'angle' = seat angle (default), 'tab' = shear tab.
@@ -97,7 +97,7 @@ function J = default_joint()
   % walls, which take the reaction in their plane.  Checks L1..L7.
   J.nl.type='angle';
   J.nl.ang=[75 75 6];                     % seat angle: vertical leg, outstanding leg, thickness
-  J.nl.leg_a=5;                           % fillet, angle ends to the column wall
+  J.nl.leg_a=4;                           % fillet, angle ends to the column wall (4 mm wall: no larger)
   J.nl.leg_f=4;                           % fillet, beam flange edges to the angle
   J.nl.La=[];                             % angle length; [] = face - 2(1.5 t) - 2 leg_a
 

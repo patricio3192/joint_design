@@ -18,9 +18,14 @@ S  = load(fullfile(here, 'joint_db', 'etabs_model.mat'));  M = S.M;
 
 % ---- EDIT ---------------------------------------------------------------
 J = default_joint();
-opts.gap  = 10;               % beam end to column face on the drawings, mm (<=)
+opts.gap  = [5 12];           % beam end to column face, mm: min (clear of the collar fillet), max
 opts.proj = 10;               % column top above the upper collar, mm (for the fillet)
 opts.stab = [8 60 25 3];      % stability plates for C beams: t, length, depth, clearance (mm)
+opts.stab_leg = 5;            % their fillet to the upper collar, mm (min. for an 8 mm plate)
+opts.hole_r = 6;              % collar opening corner radius drawn, mm (<= tube outside corner radius)
+% beams not in the model, drawn in detail 1: {Y (m), from line, to line}
+opts.extra = {4.33 - 0.20, 'A', 'F', ...  % 20 cm south of line 3, below the collars
+  'Vigas a 20 cm al sur del eje 3: a nivel inferior, bajo los collarines; no interfieren con ellos.'};
 % title block on every sheet: label, value ('\n' starts a new line);
 % '@sheet' = sheet title and contents, '@page' = sheet number
 opts.titleblock = {

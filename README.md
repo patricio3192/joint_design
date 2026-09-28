@@ -154,3 +154,5 @@ lettered grid lines) are not drawn.
 - Manual: add the new collar tags (T1a, T3b as block shear, T3c, T3d, T12,
   T13, S9c, S10, S11, shear tab P1-P11, seat angle L1-L7, beam to beam
   V1-V6, U in T3) and the joint classes to diaphragm_joint_manual.md.
+- Manual section 1 says the shelf is welded to the column on both faces;
+  the checks and drawings use one face (J.wl.n_shf = 1). Align the text.
