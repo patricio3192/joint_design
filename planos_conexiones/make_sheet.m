@@ -404,8 +404,17 @@ function it = dr_c4_front(P)
   end, end
   it{end+1} = d_text(0, -P.bm.h - 80, 'columna', 'label', 'middle');
   it{end+1} = d_text(-310, 30, 'VCS', 'label', 'middle');  it{end+1} = d_text(310, 30, 'VCS', 'label', 'middle');
-  it{end+1} = d_text(440, -60, sprintf('Estribos Ø10 del nudo\ncada 75 aprox.;\n± 20 para acomodar\nlas barras longitudinales'), 'tie', 'start');
-  it{end+1} = d_text(440, -330, 'P2 (después)', 'small', 'start');
+  % anchor rows from the top of the beams: dashed axes out to a chain on the right
+  xr = 480;
+  for v = -[ep.yT ep.yS], it{end+1} = d_line(ep.g/2, v, xr + 10, v, 'cut'); end
+  it{end+1} = d_line(420, 0, xr + 10, 0, 'cut');
+  it{end+1} = d_dim(xr, 0, xr, -ep.yT, 0, sprintf('%g', ep.yT), 'before');
+  it{end+1} = d_dim(xr, -ep.yT, xr, -ep.yS, 0, sprintf('%g', ep.yS - ep.yT));
+  it{end+1} = d_dim(xr + 70, 0, xr + 70, -ep.yS, 0, sprintf('%g', ep.yS));
+  it{end+1} = d_text(xr + 100, -ep.yT - 5, 'A1 (fila superior)', 'anc', 'start');
+  it{end+1} = d_text(xr + 100, -ep.yS - 5, 'A1 (fila inferior)', 'anc', 'start');
+  it{end+1} = d_text(xr + 100, 10, 'cara superior de las vigas', 'small', 'start');
+  it{end+1} = d_text(440, -300, 'P2 (después)', 'small', 'start');
   % plate and bastón dimensions below the column, with the axes dashed down to them
   vd = -480 - 50;
   for x = [-1 1]*ep.g/2, it{end+1} = d_line(x, -ep.yS, x, vd, 'cut'); end
