@@ -48,6 +48,7 @@ J.SHAPE.update({
     "r_rodS":  ("#0b5345", 0.5, "#45b39d", 0.85, None),   # rods of the steel column, solid
     "r_oval":   ("#e8603c", 1.1, None, 0, (5, 3)),       # dashed tomato oval around a beam with bastones
     "r_oval_l": ("#e8603c", 0.6, None, 0, None),           # its leader
+    "r_tubei": ("#555555", 0.4, "#f4f4f4", 1.00, None),     # inside of the sleeve
     "r_tube":  ("#555555", 0.5, "#ffffff", 0.90, None),     # sleeve (PVC tube) for the A2 rods
     "ipe160":  ("#3c7a3c", 0.6, "#a9dfa3", 0.95, None),    # IPE 160 edge beams in the location plan
     "lead":    ("#222222", 1.0, None, 0, None),             # leader of a note that must be seen

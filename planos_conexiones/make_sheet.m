@@ -25,11 +25,14 @@ function file = make_sheet(outdir, opts)
          'D4X y D3. VCS 3Ø12 + 3Ø12. **Bastones Ø12 contra el estribo, debajo de las esquinas, a 80 de arriba (en D4X: a 98).**')}});
 
   sl = P.sl;  Am = pi*sl.dm^2/4;  As = Am*1000/sl.sm;
-  c1{end+1} = blk_h(2, '5. Losa');
-  c1{end+1} = blk_draw(dr_deck(P), 60, 'DETALLE 5.1 - LOSA: NOVALOSA 55 + 5 CM DE HORMIGÓN (GENÉRICO)', ...
+  c1{end+1} = blk_h(2, '5. Losa y tubos de las anclas A2');
+  c1{end+1} = blk_row([0.44 0.56], { ...
+      {blk_draw(dr_deck(P), 69, 'DETALLE 5.1 - LOSA: NOVALOSA 55 + 5 CM DE HORMIGÓN (GENÉRICO)', ...
       sprintf(['Placa según el fabricante. Nivel terminado: %g sobre las vigas. ' ...
                'Malla 4.5-15, lisa o corrugada, fy ≥ 490 MPa. Cumple la cuantía mínima: %.0f mm2/m, se piden %.0f. ' ...
-               'Traslapo de la malla: 300 (2 cuadros de la malla).'], sl.hd + sl.tc, As, 0.0018*sl.tc*1000));
+               'Traslapo de la malla: 300 (2 cuadros de la malla).'], sl.hd + sl.tc, As, 0.0018*sl.tc*1000))}, ...
+      {blk_draw(dr_tube(P), 69, 'DETALLE 5.2 - TUBO Y ANCLA A2 (CORTE POR LA VIGA)', ...
+         'Fila superior: tubo apoyado en las barras superiores, varilla en la parte alta del tubo. Fila inferior: tubo 2.5 más alto, varilla apoyada en el fondo. Ver notas 18 y 19.')}});
 
   % ---- column 2: C4 and sandwich ---------------------------------------------------------
   c2{end+1} = blk_h(2, '2. Unión placa extremo - columna (C4; igual en B4, D4X, D4Y, D3)');
@@ -713,6 +716,45 @@ function it = d_weld(xt, yt, xe, ye, dr, side, sz, len, all, field, tail, s, gro
 end
 
 % =====================================================================
+%  5.2 Sleeve and rod A2, section through the concrete beam (view along the rods):
+%  x along the concrete beam (0 = IPE axis), v up (0 = top of the beam)
+% =====================================================================
+function it = dr_tube(P)
+  sw = P.sw;  tb = P.tube;  r = P.rod;  ri = tb.D/2 - tb.t;  xs = 46;  X = 70;  it = {};
+  vb = -170;  vg1 = -72;  vg2 = -125;                                       % bottom of the view, break
+  it{end+1} = d_poly([-X 0; X 0; X vg1; -X vg1 - 3], 'r_conc');
+  it{end+1} = d_poly([-X vg2 + 3; X vg2; X vb; -X vb], 'r_conc');
+  for v = [vg1 vg2], it{end+1} = d_line(-X - 6, v + 1.5, X + 6, v - 1.5, 'cut'); end
+  it{end+1} = d_path([-X -tb.top - 6; X -tb.top - 6], 12, 'r_bm1');      % top bars (top at 50)
+  for x = [-1 1]*xs                                                         % stirrups, between them the tubes
+    it{end+1} = d_path([x -40; x vg1 + 2], 10, 'r_tieS');  it{end+1} = d_path([x vg2 - 2; x vb], 10, 'r_tieS');
+  end
+  vt = [-(tb.top - tb.D/2), -sw.yS + (2*ri - r.d)/2];
+  for s = [-1 1], for k = 1:2
+    x = s*sw.g/2;
+    it{end+1} = d_circle(x, vt(k), tb.D/2, 'r_tube');
+    it{end+1} = d_circle(x, vt(k), ri, 'r_tubei');
+    it{end+1} = d_circle(x, -[sw.yT sw.yS](k), r.d/2, 'r_anc');
+  end, end
+  % dimensions from the top of the beam
+  it{end+1} = d_dim(-X, 0, -X, -sw.yT, 18, sprintf('%g', sw.yT), 'before');
+  it{end+1} = d_dim(-X, 0, -X, -tb.top, 40, sprintf('%g', tb.top), 'before');
+  it{end+1} = d_dim(X, 0, X, -sw.yS, -18, sprintf('%g', sw.yS));
+  it{end+1} = d_dim(-sw.g/2, 0, sw.g/2, 0, 12, sprintf('%g', sw.g));
+  % labels
+  xl = X + 30;  a = 7;
+  T = {[xl, -15], [sw.g/2 + tb.D/2, vt(1) + 3], sprintf('tubo Ø %g mm,\npared ≤ %g mm', tb.D, 2), 'small';
+       [xl, -50], [sw.g/2, -sw.yT], 'A2 arriba en el tubo', 'anc';
+       [xl, -80], [X - 8, -tb.top - 6], 'barras superiores', 'small';
+       [xl, -150], [sw.g/2 + tb.D/2, vt(2)], sprintf('A2 apoyada\nen el fondo'), 'anc';
+       [xl, 15], [xs + 4, -42], 'estribo', 'tie'};
+  for k = 1:size(T, 1)
+    q = T{k,1};  it{end+1} = d_text(q(1) + 4, q(2) - 3, T{k,3}, T{k,4}, 'start');
+    it = [it, d_arrow(q(1), q(2), T{k,2}(1), T{k,2}(2), a)];
+  end
+end
+
+% =====================================================================
 %  4.6 Slab on steel deck, section across the ribs: x along, v up (0 = top of the beams)
 % =====================================================================
 function it = dr_deck(P)
@@ -991,9 +1033,10 @@ function it = d_text(x, y, txt, s, a)
   it = struct('t', 'text', 'p', [x y], 'txt', txt, 's', s, 'a', a);
 end
 
-function it = d_arrow(x0, y0, x1, y1)
-  % leader with a filled arrowhead at (x1, y1)
-  u = [x1 - x0, y1 - y0];  u = u/norm(u);  n = [-u(2) u(1)];  p = [x1 y1];  a = 22;  w = 7;
+function it = d_arrow(x0, y0, x1, y1, a)
+  % leader with a filled arrowhead at (x1, y1); a = head length in drawing units (default 22)
+  if nargin < 5, a = 22; end
+  u = [x1 - x0, y1 - y0];  u = u/norm(u);  n = [-u(2) u(1)];  p = [x1 y1];  w = a*7/22;
   it = {d_line(x0, y0, x1 - u(1)*a, y1 - u(2)*a, 'lead'), d_poly([p; p - a*u + w*n; p - a*u - w*n], 'leadf')};
 end
 
