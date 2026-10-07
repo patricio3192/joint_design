@@ -717,7 +717,7 @@ function it = dr_deck(P)
   for x = [0 X], it{end+1} = d_line(x, -P.ip6.h, x, H, 'edge'); end
   % labels
   xl = X + 40;
-  T = {[xl, H + 60], [X - 70, H - 8], 'hormigón fc 240', 'small';
+  T = {[xl, H + 60], [X - 70, H - 8], 'hormigón fc 210', 'small';
        [xl, H + 5], [X - 40, vm + 2], sprintf('malla %g-%g', sl.dm, sl.sm/10), 'bsm';
        [xl, -10], [X - p + a + sp/2 + 4, sl.hd/2], sprintf('Novalosa 55, e = %g mm', sl.e), 'code';
        [xl, -90], [X - 30, -P.ip6.h/2], 'viga de acero', 'small'};
@@ -850,7 +850,7 @@ end
 function N = notes(P)
   N = {
     'Medidas en mm. Cotas desde la cara superior de las vigas (= cara superior de las IPE).'
-    'Hormigón fc = 240 kg/cm2 (las conexiones se verificaron con 210). Acero de refuerzo fy = 4200 kg/cm2; malla electrosoldada fy ≥ 490 MPa.'
+    'Hormigón: vigas y columnas fc = 240 kg/cm2; losa fc = 210 kg/cm2 (las conexiones se verificaron con 210). Acero de refuerzo fy = 4200 kg/cm2; malla electrosoldada fy ≥ 490 MPa.'
     'Recubrimiento libre 40 a los estribos en vigas y columnas, y 40 sobre los ganchos Ø16 en la cara superior de la columna.'
     '**Anclajes A1 y A2: varilla roscada ASTM A193 B7 con certificado del proveedor.** Tuercas hexagonales pesadas ASTM A194 2H y arandelas endurecidas ASTM F436 (no usar tuercas ni arandelas comunes). Apretar a mano (sin torque).'
     '**Colocar A1 y A2 antes de fundir, con una plantilla de acero perforada igual a la placa** (agujeros Ø18). Proteger las roscas con cinta.'
