@@ -1,0 +1,54 @@
+ETABS results given by the user (2026-10-05), DEAD load case only. Live load: scale by qL/qD = 2.0/2.5 = 0.8
+(user). Units kN, kN m, m. Sign as given by ETABS.
+
+AXIS F: north-south line halfway between grids B and C (x = 2.39 m from B).
+  Two IPE 160 pieces, one each side of VCS (grid 4):
+    north piece: from the IPE 200 (shear connection) to VCS
+    south piece: cantilever from VCS to the border beam IPE 160 at the slab edge (shear connection)
+  Stations (m):        0 (IPE 200)   1.45 (VCS, north side)   1.45 (VCS, south side)   2.72 (border beam)
+  The VCS station is repeated: one value each side of VCS (two members).
+  Shear  V (kN):        -3.52          -6.33                     5.20                     3.00
+  Moment M (kN m):       0             -7.11                    -5.20                     0
+
+GRID 4, VCS 30x35 between B and C (stiffness modifier 0.35 for bending only)
+  Stations (m):        0 (grid B)    2.4 (axis F, west)        2.4 (axis F, east)       4.8 (grid C)
+  Shear  V (kN):       -16.40          -5.30                     6.25                    17.37
+  Moment M (kN m):     -11.56          11.72                    11.72                   -13.70
+  Torsion T (kN m):     -1.05          -1.05                     0.86                     0.86
+
+IPE 240 cantilever at C4 (with axis F in the model)
+  Shear V = 7 kN;  Moment M = -6.1 kN m          (before axis F, edge cantilever at the face: M = 8.85, V = 9.52)
+
+IPE 200 north of grid 4, at the contact with axis F: not given. User: smaller than before; that beam was
+designed already.
+
+-------------------------------------------------------------------------------------------------------
+RUN 2 (user, 2026-10-05): same model with the TORSION stiffness modifier of VCS = 0.1 (bending 0.35). DEAD only.
+
+AXIS F         Stations (m):  0 (IPE 200)   1.45 (VCS, north)   1.45 (VCS, south)   2.72 (border beam)
+  Shear  V (kN):               -3.00          -5.81               5.52                3.32
+  Moment M (kN m):              0             -6.36              -5.62                0
+
+GRID 4, VCS    Stations (m):  0 (grid B)    2.4 (F, west)       2.4 (F, east)       4.8 (grid C)
+  Shear  V (kN):              -16.40          -5.18               6.13               17.30
+  Moment M (kN m):            -11.44          11.60              11.72              -13.60
+  Torsion T (kN m):            -0              0                  0                   0
+
+IPE 240 at C4  Stations (m):  0.2 (column face)   1.27 (tip)
+  Shear  V (kN):                6.58               4.30
+  Moment M (kN m):             -5.72               -
+
+User: "ninguna variacion" (IPE 200 at the contact point not given; user: less than before, already designed).
+Note: the F moments either side of VCS still differ (6.36 / 5.62) with zero VCS torsion: the continuous slab
+over VCS takes the difference.
+
+-------------------------------------------------------------------------------------------------------
+RUN 3 (user, 2026-10-05): axis F as IPE 200 (both pieces). DEAD only. Moment at VCS: north -7.61, south -6.56 kN m.
+GRID 4, VCS    Stations (m):  0 (grid B)    2.4 (F, west)       2.4 (F, east)       4.8 (grid C)
+  Shear  V (kN):              -17.14          -6.03               7.00               18.11
+  Moment M (kN m):            -12.24          12.68              12.67              -14.36
+  Torsion T (kN m):            -0.53           0.53               0                   0
+IPE 200 (north of grid 4) at the contact with F: shear 2 kN (dead; user).
+IPE 240 at C4  Stations (m):  0.2 (column face)   1.27 (tip)
+  Shear  V (kN):                6.10               4.02
+  Moment M (kN m):             -5.34               0

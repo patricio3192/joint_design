@@ -1,0 +1,71 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Border beam</title>
+<style>body{background:#fff;font-family:Helvetica,Arial,sans-serif;max-width:1150px;margin:24px auto;padding:0 16px;color:#111;line-height:1.45}h1{font-size:23px}h2{font-size:18px;margin-top:30px;border-bottom:1px solid #ccc}.calc{font-size:14px}.calc li{margin:5px 0}.ok{color:#1e6b32;font-weight:bold}.ng{color:#b03a2e;font-weight:bold}.note{font-size:13px;color:#444}.hl{background:#fdf2d0}.tw{overflow-x:auto}table{border-collapse:collapse;font-size:13px;margin:10px 0}td,th{border:1px solid #ccc;padding:3px 6px;text-align:right}th:first-child,td:first-child{text-align:left}</style></head><body>
+<h1>Border beam at the slab edge: IPE 160, A36, simply supported between cantilever tips</h1>
+<p>2026-10-03, design proposal (not in the drawings). Catalog: IPAC Nacional 2023 (every IPE and every rectangular tube with H &ge; 100). AISC 360-16 LRFD; vibration per AISC Design Guide 11, 2nd ed.</p>
+<h2>1. Layout and loads (assumptions to confirm)</h2><div class="calc"><ol>
+<li><b>Where.</b> Along the slab edge, between the tips of the IPE 240 cantilevers: south edge B9&ndash;C9&ndash;D9 (spans 4780), east edge E4&ndash;E3 (span 4330). Each span pinned at both ends (shear tab on the cantilever tip).</li>
+<li><b>Deck.</b> Spans from the grid-4 beam (south strip) or the grid-D beam (east strip) to the border beam, 1270 mm. Simple span: the border beam takes half, 635 mm of floor.</li>
+<li><b>Loads.</b> q<sub>D</sub> = 2.5, q<sub>L</sub> = 2 kN/m&sup2; (as the cantilevers) + self-weight + <b>railing 0.3 kN/m</b> (assumed: steel tube railing with posts, about 30 kg/m; no data). Its posts are anchored into the slab concrete, so the horizontal push on the railing goes into the slab, not into the beam. 1.2D + E<sub>v</sub> + L with E<sub>v</sub> = 0.579 D (NEC, as the cantilevers), 1.2D + 1.6L, 1.4D.</li>
+<li><b>Corner E9.</b> Two pinned pieces cannot meet at E9 (no column there). Proposal: the east border beam runs in one piece E3&ndash;E4&ndash;E9 (4330 + 1270 = 5600, one 6 m bar) and cantilevers 1270 past the tip of CX; the short south piece D9&ndash;E9 is pinned to the tip of CY and to the end of that cantilever. Its moment there is small (section 5).</li>
+<li><b>Top flange braced by the deck</b> (deck screwed or welded to it at every rib before the pour). The deck rests on one side of the beam; once it is fixed, it also holds the beam against twisting.</li>
+</ol></div>
+<h2>2. Candidates (span 4780)</h2>
+<p class="note">D/C of strength and deflection; f<sub>n</sub> of the edge strip with the cantilever tips moving (second value: anchor connection twice as flexible); deflection under 1 kN at midspan; DG11 acceleration (limit 0.5%); extra moment on the edge cantilever from the beam's own weight.</p>
+<div class="tw"><table><tr><th>Section</th><th>kg/m</th><th>M</th><th>V</th><th>L/360 (L)</th><th>L/240 (D+L)</th><th>f<sub>n</sub> Hz</th><th>mm/kN</th><th>a/g DG11</th><th>&Delta;M<sub>u</sub> cantilever</th><th>all</th></tr>
+<tr><td>IPE 120</td><td>10.4</td><td>1.01</td><td>0.15</td><td>1.02</td><td>1.75</td><td>8.3 / 7.4</td><td>0.53</td><td>6%</td><td>0.97 kN m</td><td><span class="ng">no</span></td></tr>
+<tr><td>IPE 140</td><td>12.9</td><td>0.70</td><td>0.12</td><td>0.60</td><td>1.04</td><td>9.0 / 7.9</td><td>0.41</td><td>13%</td><td>1.21 kN m</td><td><span class="ng">no</span></td></tr>
+<tr class="hl"><td>IPE 160</td><td>15.8</td><td>0.51</td><td>0.10</td><td>0.37</td><td>0.65</td><td>9.7 / 8.3</td><td>0.32</td><td>14%</td><td>1.48 kN m</td><td><span class="ok">ok</span></td></tr>
+<tr><td>IPE 180</td><td>18.8</td><td>0.38</td><td>0.08</td><td>0.25</td><td>0.43</td><td>10.2 / 8.6</td><td>0.27</td><td>15%</td><td>1.76 kN m</td><td><span class="ok">ok</span></td></tr>
+<tr><td>IPE 200</td><td>22.4</td><td>0.29</td><td>0.07</td><td>0.17</td><td>0.30</td><td>10.6 / 8.8</td><td>0.23</td><td>15%</td><td>2.09 kN m</td><td><span class="ok">ok</span></td></tr>
+<tr><td>IPE 240</td><td>30.7</td><td>0.18</td><td>0.06</td><td>0.08</td><td>0.15</td><td>11.2 / 9.0</td><td>0.17</td><td>11%</td><td>2.87 kN m</td><td><span class="ok">ok</span></td></tr>
+<tr><td>tubo 60x120x5</td><td>12.8</td><td>0.96</td><td>0.08</td><td>1.13</td><td>1.95</td><td>8.6 / 7.5</td><td>0.47</td><td>5%</td><td>1.20 kN m</td><td><span class="ng">no</span></td></tr>
+<tr><td>tubo 75x175x3</td><td>11.3</td><td>0.76</td><td>0.09</td><td>0.58</td><td>1.00</td><td>9.3 / 8.1</td><td>0.38</td><td>14%</td><td>1.06 kN m</td><td><span class="ng">no</span></td></tr>
+<tr><td>tubo 70x200x3</td><td>12.2</td><td>0.63</td><td>0.08</td><td>0.43</td><td>0.75</td><td>9.8 / 8.4</td><td>0.32</td><td>15%</td><td>1.14 kN m</td><td><span class="ok">ok</span></td></tr>
+<tr><td>tubo 100x150x4</td><td>14.9</td><td>0.63</td><td>0.08</td><td>0.55</td><td>0.95</td><td>9.4 / 8.1</td><td>0.36</td><td>14%</td><td>1.39 kN m</td><td><span class="ok">ok</span></td></tr>
+<tr><td>tubo 100x200x3</td><td>13.7</td><td>0.54</td><td>0.08</td><td>0.35</td><td>0.61</td><td>10.0 / 8.5</td><td>0.30</td><td>15%</td><td>1.28 kN m</td><td><span class="ok">ok</span></td></tr>
+</table></div>
+<p>Lightest that pass everything: <b>IPE 160</b> (15.8 kg/m) and <b>tubo 70x200x3</b> (12.2 kg/m). With the railing, the dead + live deflection (L/240) decides the size.</p>
+<p><b>Proposal: IPE 160</b> (15.8 kg/m): the lightest IPE that passes; f<sub>n</sub> = 9.7 Hz (8.3 Hz if the anchor connection is twice as flexible as computed). Flange 82 wide for the deck and the edge form. The tube tubo 70x200x3 is lighter but its 3 mm wall is thin for the end connections and for a slab edge exposed to weather. The last column is the beam's own weight on the edge cantilever, for comparison only: your ETABS model already has a border beam.</p>
+<h2>3. IPE 160: strength and deflection</h2><div class="calc"><ol>
+<li>w<sub>D</sub> = 2.5 &times; 0.635 + 0.15 (self-weight) = 2.04 kN/m; w<sub>L</sub> = 2 &times; 0.635 = 1.27 kN/m; w<sub>u</sub> = max(1.4D, 1.2D + 1.6L, 1.779D + L) = <b>4.90 kN/m</b>.</li>
+<li>M<sub>u</sub> = w<sub>u</sub> L&sup2;/8 = 4.90 &times; 4.78&sup2;/8 = <b>14.0 kN m</b>; compact, top flange braced: &phi;M<sub>n</sub> = 0.9 F<sub>y</sub> Z<sub>x</sub> = 0.9 &times; 248 &times; 124.0 cm&sup3; = 27.7 kN m; <span class="ok">D/C 0.51</span> (F2.1).</li>
+<li>V<sub>u</sub> = 11.7 kN; &phi;V<sub>n</sub> = 119.0 kN; <span class="ok">D/C 0.10</span> (G2.1).</li>
+<li>Deflection, bare steel (I = 869 cm&#8308;): live 5.0 mm (L/360 = 13.3), dead + live 13.0 mm (L/240 = 19.9); <span class="ok">D/C 0.37 / 0.65</span>.</li>
+<li>During the pour (deck fixed, wet concrete 2.0 kN/m&sup2; + 1.0 construction load) the moment is below the one above.</li>
+</ol></div>
+<h2>4. IPE 160: vibration (DG11)</h2><div class="calc"><ol>
+<li><b>Weight for vibration</b> (actual, not design; DG11 3.3): q<sub>D</sub> + 0.29 kPa (residence, Table 3-1): w = 1.93 kN/m on the beam.</li>
+<li><b>Composite stiffness</b> (DG11 3.2: the deck fixed to the beam is enough): concrete above the deck 55 mm, width min(635, 0.2L) = 635 mm, E<sub>c</sub> = 4700&radic;f'<sub>c</sub> = 21329 MPa, dynamic n = E<sub>s</sub>/(1.35 E<sub>c</sub>) = 6.95: I<sub>t</sub> = 4788 cm&#8308; (bare 869).</li>
+<li><b>Beam</b>: &Delta;<sub>j</sub> = 5wL&#8308;/(384 E I<sub>t</sub>) = 1.58 mm, f<sub>j</sub> = 0.18&radic;(g/&Delta;) = 14.2 Hz.</li>
+<li><b>Supports</b>: each cantilever tip carries a whole span of the strip (10.6 kN). Tip flexibility 0.170 mm/kN from the IPE 240 (0.052) and the stretch of the 2 A1 rods over their lever arm (0.118): &Delta;<sub>g</sub> = 1.81 mm.</li>
+<li><b>Edge strip</b> (DG11 eq. 3-4): f<sub>n</sub> = 0.18&radic;(g/(&Delta;<sub>j</sub> + &Delta;<sub>g</sub>)) = <b>9.7 Hz</b> &ge; 9 Hz: walking cannot drive it into resonance (DG11 2.2.1). With the connection twice as flexible: 8.3 Hz.</li>
+<li><b>Point stiffness</b>: 1 kN at midspan moves it 0.32 mm (beam + half the tip movement), against 1 mm, the usual limit for residential floors above 8 Hz (EN 1995-1-1 7.3.3 uses 1 to 1.5 mm).</li>
+<li><b>DG11 acceleration</b> (eq. 2-10, 9 to 15 Hz): free edge, C<sub>j</sub> = 1, panel width limited to 2/3 of the 1270 strip = 847 mm, W = 14.2 kN; &beta; = 0.02: a/g = <b>14%</b> against 0.5%. Every section in the table gives 5 to 19%, IPE 240 included: the border beam does not control it. A footstep moves a strip that weighs about 1.2 t; DG11's limit is calibrated on office bays of 100 to 400 kN, and its two equations (below and above 9 Hz) do not even agree for a panel this light. What changes it is mass and damping at the edge (a wall or cladding fixed to the edge, partitions), not a deeper beam. For a light floor of this size the realistic targets are the two above.</li>
+</ol></div>
+<h2>5. Effect on the cantilevers (the anchorage)</h2><div class="calc">
+<p>Your ETABS model already has the border beam and the deck spanning to it, so the design moments stay; what is new is the railing, which reaches each cantilever tip as a point load: &Delta;M<sub>u</sub> = 1.779 &times; 0.3 kN/m &times; (beam length on the tip) &times; 1.12 m. Beam length on each tip: E a whole span (4780), C1 half a span + 150, CX and CY half a span + the 1270 corner piece (envelope).</p>
+<div class="tw"><table><tr><th>Type</th><th>Design M<sub>u</sub></th><th>+ railing</th><th>Total</th><th>Largest M<sub>u</sub> the joint takes</th><th>Governing D/C now</th><th>With the railing</th></tr>
+<tr><td>E</td><td>22.1</td><td>2.86</td><td>24.9</td><td>29.0</td><td>0.76</td><td>0.86</td></tr>
+<tr><td>C1</td><td>12.1</td><td>1.52</td><td>13.7</td><td>21.8</td><td>0.56</td><td>0.63</td></tr>
+<tr><td>CX</td><td>17.2</td><td>2.05</td><td>19.3</td><td>26.2</td><td>0.66</td><td>0.73</td></tr>
+<tr><td>CY</td><td>17.2</td><td>2.19</td><td>19.4</td><td>20.0</td><td>0.86</td><td>0.97</td></tr>
+</table></div>
+<p>E is the tight one: 0.86 of what the joint takes. Each 0.1 kN/m of railing adds 0.95 kN m at E: a railing heavier than about 0.72 kN/m (glass, masonry) does not fit. The governing check is the top anchors under tension + shear (section 8b of anchorage_check).</p></div>
+<h2>6. Corner piece and connections</h2><div class="calc"><ol>
+<li>East beam overhang E4&ndash;E9 (1270): it carries the end of the south piece D9&ndash;E9, P<sub>u</sub> = w<sub>u</sub> &times; 1270/2 = 3.1 kN, and little floor (the corner deck spans north-south): M<sub>u</sub> = 4.2 kN m at E4, bottom flange in compression over 1270. Lateral-torsional buckling (F2.2, C<sub>b</sub> = 1): L<sub>p</sub> = 920, L<sub>r</sub> = 3573, &phi;M<sub>n</sub> = 26.3 kN m; <span class="ok">D/C 0.16</span>.</li>
+</ol></div>
+<h2>6b. Connection to the cantilever tips</h2><div class="calc"><ol>
+<li><b>Detail</b> (user 2026-10-04): a tip plate PL 10x150x240 A36 welded across the end of each IPE 240 (fillets 5 all around). The IPE 160 web is bolted flat to it; its inner half-flanges, top and bottom, are cut flush with the web over the plate plus 10 each side (they would hit the cantilever). Bolts M16 A325 (or 8.8) in holes &#216;18, columns at 35 on each side of the cantilever web, rows at z = -50 and -110. Where the beam passes a tip (B9, E3, E4) it takes all 4 bolts, centred on the web; where two beams end at a tip (C9, D9) each takes the 2 on its side, 10 mm apart at the ends.</li>
+<li><b>Reaction</b> per beam end (1.2D + E<sub>v</sub> + L, railing included): R<sub>u</sub> = 11.7 kN.</li>
+<li><b>Bolts</b> (J3.6): &phi;R<sub>n</sub> = 0.75 &times; 372 &times; 201 = 56.1 kN per bolt; 2 bolts: 112.2 kN against 11.7: <span class="ok">D/C 0.10</span>.</li>
+<li><b>Bearing on the web</b> of the IPE 160, t = 5 (J3.10(a)): 0.75 &times; 2.4 &times; 16 &times; 5 &times; 400 = 57.6 kN per bolt; 2 bolts: <span class="ok">D/C 0.10</span>.</li>
+<li><b>Coped end</b>: shear on the whole web (G2.1) 1.0 &times; 0.6 &times; 248 &times; 160 &times; 5 = 119 kN: <span class="ok">D/C 0.10</span>. Bending where the cut ends, 50 from the bolts: M = 0.59 kN m against 0.9 F<sub>y</sub> Z (Z without the inner half-flanges = 81 cm&sup3;) = 18.0 kN m: <span class="ok">D/C 0.03</span>.</li>
+<li><b>Tip plate welds</b> (J2.4, E70): web fillets 5 both sides, 190.4 long: &phi;R<sub>n</sub> = 0.75 &times; 0.6 &times; 483 &times; 0.707 &times; 5 &times; 2 &times; 190.4 = 293 kN against 2 R<sub>u</sub> = 23.4 kN: <span class="ok">D/C 0.08</span> (the flange fillets are extra).</li>
+<li><b>Torsion on the cantilevers</b> (what the anchorage calc assumes: 0.25 V<sub>u</sub> b/2, i.e. V<sub>u</sub> at 15 mm): B9, E3, E4: bolt group centred on the web, none. C9 (E): live load on one span only, 3.0 kN at 35 mm = 0.11 kN m against 0.59 assumed. D9 (CY): span C&ndash;D 11.7 kN and corner piece 3.1 kN on either side, (11.7 &minus; 3.1) &times; 35 = 0.30 kN m against 0.46 assumed. Both within.</li>
+<li><b>Corner E9</b>: the corner piece D9&ndash;E9 frames into the web of the east beam: shear tab PL 8x90x120 welded to that web, 2 bolts; the piece's end coped top and bottom (17 deep, 51 long). Reaction 3.1 kN: a fraction of the checks above.</li>
+</ol></div>
+<h2>7. To confirm</h2><div class="calc"><ol>
+<li>The railing: 0.3 kN/m assumed; its real weight before it is bought (section 5).</li>
+<li>Accepted by the user (2026-10-03): deck north-south in the south strip and east-west in the east strip; the corner scheme; ETABS already has the border beam.</li>
+</ol></div>
+</body></html>

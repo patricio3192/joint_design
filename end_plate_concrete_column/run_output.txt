@@ -1,0 +1,149 @@
+==============================================================
+  LIMIT STATES - IPE 240 END PLATE ON CONCRETE COLUMN
+  (AISC 360-16 / DG 39 / DG 1 / ACI 318-19)
+==============================================================
+  fc = 20.6 MPa, fy = 411.9 MPa, hef = 309 mm, tp = 12, ext = 20, g = 80
+
+--- 2. GEOMETRY AND CLASHES (clear distances, mm) ---
+  parallel  baston    ( -82,  80) - VCM top 1 ( -94,  56): clear  14.8
+  parallel  baston    ( -82,  80) - VCM top 2 ( -94,  80): clear   0.0
+  parallel  baston    (  82,  80) - VCM top 1 (  94,  56): clear  14.8
+  parallel  baston    (  82,  80) - VCM top 2 (  94,  80): clear   0.0
+  crossing  baston    y=  80 - VCS top  y=  68: clear   0.0
+  crossing  baston    y=  80 - VCS top  y=  68: clear   0.0
+  plan      baston    x= -82 - steel-column anchor x= 100: clear   6.0
+  plan      baston    x=  82 - steel-column anchor x= 100: clear   6.0
+  head plates 50 x 50: x from 15 to 65 (column mid bar to x = 8); z from 309 to 321
+  VCS back top bar outer face z = 300 -> clear to head plate 9
+  rod length = 411 mm (tip at z = 345, through 30 grout + 12 plate + washer + nut)
+
+--- 3. DG 39 TABLE 5-1 TESTED RANGE (+/-10%), two-bolt flush ---
+  pfi  =   32.2 mm   range   30.0 -   62.9 mm   OK
+  g    =   80.0 mm   range   51.4 -  125.7 mm   OK
+  d    =  240.0 mm   range  182.9 -  670.6 mm   OK
+  bp   =  140.0 mm   range  114.3 -  391.2 mm   OK
+  tf   =    9.8 mm   range    4.3 -   21.0 mm   OK
+
+--- 4. COMPRESSION SIDE (DG 1 Sec. 3.4, Pr = 0; ACI 22.8.3.2) ---
+  fp = 0.65*0.85*fc*sqrt(A2/A1) = 22.76 MPa (sqrt(A2/A1) = 2.00); grout >= 2fc assumed (DG 1 Sec. 3.1)
+  Bearing solution exists (D^2 >= 2Mu/(fp bp))   D =  7596.00  C = 47524.00 mm2  ratio =  0.16  OK     [DG1 Eq. 3.4.4]
+  Y = 18.2 mm, C = 57.9 kN, arm = D - Y/2 = 208.9 mm (DG 39 h1 = 193.1 mm)
+  m = 26.0 mm -> t = 11.16 mm (Eq. 3.3.15a-1);  n = 22.0 mm -> t = 9.89 mm
+  Plate, compression side (m, n strips)          D =    11.16  C =    12.00 mm   ratio =  0.93  OK     [DG1 3.3.14a-1/15a-1]
+  Info, t required vs ext:  ext 10 ->  9.89   ext 15 ->  9.89   ext 20 -> 11.16   ext 25 -> 12.61   ext 30 -> 13.85   
+
+--- 5. ROD TENSION (arm = 193.1 mm, T per rod = 31.3 kN) ---
+  Rod rupture, no prying: 2*phi*Pt*h1 (thick plate) D =    12.10  C =    37.56 kNm  ratio =  0.32  OK     [DG39 Tab.5-2; J3-1]
+  Rod tension, real arm                          D =    31.33  C =    97.26 kN   ratio =  0.32  OK     [AISC J3-1, Table J3.2]
+  Anchor steel in tension phi*Nsa                D =    31.33  C =   101.05 kN   ratio =  0.31  OK     [ACI 17.6.1.2, T.17.5.3(a)]
+
+--- 6. END PLATE, TENSION SIDE (DG 39), s = 52.9 mm, Yp = 1086.1 mm ---
+  End-plate yielding phi*Mpl                     D =    12.10  C =    35.19 kNm  ratio =  0.34  OK     [DG39 Tab.5-2]
+  Plate thickness, thick plate (no prying)       D =     8.25  C =    12.00 mm   ratio =  0.69  OK     [DG39 Eq. 5-4a, 5-1]
+
+--- 7. ROD SHEAR (V per rod = 7.0 kN) ---
+  Rod shear (AISC, Fnv = 0.450Fu)                D =     7.05  C =    58.36 kN   ratio =  0.12  OK     [AISC J3-1, Table J3.2]
+  Anchor steel in shear, grout pad x0.80         D =     7.05  C =    42.04 kN   ratio =  0.17  OK     [ACI 17.7.1.2b, 17.7.1.2.1]
+  Bearing / tearout at plate hole                D =     7.05  C =   138.24 kN   ratio =  0.05  OK     [AISC J3-6a, J3-6c]
+  Info, friction (DG 1 Sec. 3.5.1, mu = 0.40): phi*mu*C = 17.4 kN vs Vu = 14.1 kN (not counted)
+
+--- 8. TENSION ANCHORS IN CONCRETE (hef = 309 mm) ---
+  Pullout of the head plate                      D =    31.33  C =   265.13 kN   ratio =  0.12  OK     [ACI 17.6.3.2.2a, T.17.5.3(c)]
+  Side-face blowout: hef = 309 <= 2.5ca1 = 368 mm -> not applicable (17.6.4.1)
+  Info, plain-concrete breakout: 3 edges < 1.5hef -> hef' = 107 mm (17.6.2.1.2);
+        phi*Ncbg = 40.9 kN vs 2T = 62.7 kN -> replaced by anchor reinforcement (17.5.2.1(a))
+  Anchor reinforcement, 2 bastones               D =    62.66  C =    69.87 kN   ratio =  0.90  OK     [ACI 17.5.2.1(a), 17.5.3]
+  Baston within 0.5hef of the rod                D =    56.64  C =   154.50 mm   ratio =  0.37  OK     [ACI R17.5.2.1]
+  Info: with the edge-reduced hef' = 107 mm the limit would be 53.3 mm (PENDIENTE).
+  baston at (82, 80): r = 56.6 mm, crosses the breakout surface at z = 271 mm
+  (psi_r = 1.0: hook spacing 164 >= 6db; psi_o = 1.0: inside the core, side cover 112 >= 65; psi_c = 0.80)
+  Baston hook side: ldh <= z_c - z_hook          D =   150.00  C =   205.24 mm   ratio =  0.73  OK     [ACI 25.4.3.1, T.25.4.3.2]
+  Straight side: ld = 1011 mm (Table 25.4.2.3, other cases, psi_t = 1.3) -> bar end at z >= 1283 mm,
+  i.e. 883 mm past the column back face into the VCM; baston straight length >= 1217 mm from the hook face.
+
+--- 9. SHEAR ANCHORS IN CONCRETE ---
+  Pryout, shear row (Ncpg = Ncbg)                D =    14.10  C =   103.35 kN   ratio =  0.14  OK     [ACI 17.7.3.1b, T.17.5.3(c)]
+  (hef' = 202 mm). Breakout in shear 17.7.2: no free edge below (column continues,
+  cold joint at the beam soffit ignored, agreed) -> not applicable.
+  Interaction 17.8: tension rods carry no shear, shear rods no tension (DG 39) -> not applicable.
+
+--- 10. HEAD PLATES 50x50x12 A36 (washer OD 30) ---
+  Head plate bending (full-width cantilever)     D =    34.07  C =   405.00 kN*mm ratio =  0.08  OK     [DG1-type strip, J4 (assumed)]
+
+--- 11. SPACING AND EDGE DISTANCES ---
+  AISC min spacing, gage (2 2/3 d)               D =    42.67  C =    80.00 mm   ratio =  0.53  OK     [AISC J3.3]
+  AISC min spacing, rows (2 2/3 d)               D =    42.67  C =   156.00 mm   ratio =  0.27  OK     [AISC J3.3]
+  AISC min edge, plate side                      D =    22.00  C =    30.00 mm   ratio =  0.73  OK     [AISC Table J3.4M]
+  AISC min edge, plate top                       D =    22.00  C =    42.00 mm   ratio =  0.52  OK     [AISC Table J3.4M]
+  AISC min edge, plate bottom                    D =    22.00  C =    62.00 mm   ratio =  0.35  OK     [AISC Table J3.4M]
+  ACI min spacing 4da (not torqued)              D =    64.00  C =    80.00 mm   ratio =  0.80  OK     [ACI Table 17.9.2(a)]
+  ACI min edge = cover (column top, sides)       D =    40.00  C =   139.00 mm   ratio =  0.29  OK     [ACI Table 17.9.2(a)]
+
+--- 12. IPE 240 SHEAR ---
+  Shear yielding (phi = 1.0, Cv1 = 1.0)          D =    14.10  C =   223.20 kN   ratio =  0.06  OK     [AISC G2-1, G2.1(a)]
+  Member flexure / LTB of the cantilever: from the frame model (PENDIENTE).
+
+--- 13. WELDS (E70XX, FEXX = 482 MPa) ---
+  CJP top flange, base metal                     D =   176.40  C =   264.60 kN   ratio =  0.67  OK     [Table J2.5, J4-1; DG39 3-38a]
+  Bottom flange fillet min size                  D =     5.00  C =     6.00 mm   ratio =  0.83  OK     [AISC Table J2.4]
+  Bottom flange fillet max size (t-2)            D =     6.00  C =     7.80 mm   ratio =  0.77  OK     [AISC J2.2b]
+  Bottom flange fillet (designed for Ru)         D =   176.40  C =   281.27 kN   ratio =  0.63  OK     [AISC J2-4, J2-5]
+  Web tension yielding near tension rods         D =    52.56  C =   257.52 kN   ratio =  0.20  OK     [DG39 3-40; J4-1]
+  Web weld, tension region                       D =   171.68  C =   509.55 kN   ratio =  0.34  OK     [DG39 3-41a; J2-4, J2-5]
+  Web weld, shear region                         D =    14.10  C =    65.88 kN   ratio =  0.21  OK     [J2-4 (theta = 0)]
+  Web shear rupture at weld                      D =    14.10  C =    39.95 kN   ratio =  0.35  OK     [AISC J4-4]
+
+--- 14. JOINT (ACI Ch. 15, ordinary frame) ---
+  Aj = 160000 mm2; T(VCM top) = 119.0 kN (d = 284), T(VCS top) = 123.6 kN (d = 282)
+  Joint shear, VCM / cantilever direction        D =   119.02  C =   680.71 kN   ratio =  0.17  OK     [ACI 15.4.2, T.15.4.2.3]
+  Joint shear, VCS direction                     D =   123.60  C =   680.71 kN   ratio =  0.18  OK     [ACI 15.4.2, T.15.4.2.3]
+  Hoop layers within the beam depth: 4 (>= 2 required) -> OK [ACI 15.3.1.3]
+  Joint hoop spacing (incl. to top/soffit)       D =   110.00  C =   200.00 mm   ratio =  0.55  OK     [ACI 15.3.1.4 (8 in.)]
+  Hoop levels must clear the rods (y = 42, 198) and bastones (y = 80) by >= 13 mm
+  Column bars phi16 end with standard hooks turned toward the column centre (15.3.3.2).
+
+--- 15. NOT APPLICABLE / NOT CHECKED HERE ---
+  Shear breakout (no edge below), tension-shear interaction (separate rows), prying
+  (thick plate by Eq. 5-4a). Beams VCM/VCS and column design, steel-column anchors
+  (uplift), IPE member flexure: outside this script (see PENDIENTE).
+
+==============================================================
+  SUMMARY (ratio = demand / capacity)
+==============================================================
+  Bearing solution exists (D^2 >= 2Mu/(fp bp))        0.16  OK
+  Plate, compression side (m, n strips)               0.93  OK
+  Rod rupture, no prying: 2*phi*Pt*h1 (thick plate)   0.32  OK
+  Rod tension, real arm                               0.32  OK
+  Anchor steel in tension phi*Nsa                     0.31  OK
+  End-plate yielding phi*Mpl                          0.34  OK
+  Plate thickness, thick plate (no prying)            0.69  OK
+  Rod shear (AISC, Fnv = 0.450Fu)                     0.12  OK
+  Anchor steel in shear, grout pad x0.80              0.17  OK
+  Bearing / tearout at plate hole                     0.05  OK
+  Pullout of the head plate                           0.12  OK
+  Anchor reinforcement, 2 bastones                    0.90  OK
+  Baston within 0.5hef of the rod                     0.37  OK
+  Baston hook side: ldh <= z_c - z_hook               0.73  OK
+  Pryout, shear row (Ncpg = Ncbg)                     0.14  OK
+  Head plate bending (full-width cantilever)          0.08  OK
+  AISC min spacing, gage (2 2/3 d)                    0.53  OK
+  AISC min spacing, rows (2 2/3 d)                    0.27  OK
+  AISC min edge, plate side                           0.73  OK
+  AISC min edge, plate top                            0.52  OK
+  AISC min edge, plate bottom                         0.35  OK
+  ACI min spacing 4da (not torqued)                   0.80  OK
+  ACI min edge = cover (column top, sides)            0.29  OK
+  Shear yielding (phi = 1.0, Cv1 = 1.0)               0.06  OK
+  CJP top flange, base metal                          0.67  OK
+  Bottom flange fillet min size                       0.83  OK
+  Bottom flange fillet max size (t-2)                 0.77  OK
+  Bottom flange fillet (designed for Ru)              0.63  OK
+  Web tension yielding near tension rods              0.20  OK
+  Web weld, tension region                            0.34  OK
+  Web weld, shear region                              0.21  OK
+  Web shear rupture at weld                           0.35  OK
+  Joint shear, VCM / cantilever direction             0.17  OK
+  Joint shear, VCS direction                          0.18  OK
+  Joint hoop spacing (incl. to top/soffit)            0.55  OK
+  Governing: Plate, compression side (m, n strips) (0.93)
+==============================================================

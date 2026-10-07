@@ -1,0 +1,28 @@
+FLUSH END PLATE study (ca_flush.m, 2026-10-05): A1 at v = +-35, z = -40 (CY -24); Mu E = 16.5 kN m (C1, CX, CY as now)
+T = [81.4 56.9 82.7 76.3] kN
+
+Check                                                                                            E     C1    CX    CY
+Anchors: Top anchor, steel in tension (5/8"-11 UNC ASTM A193 B7)                                  0.43  0.30  0.44  0.41  
+Anchors: Thread stripping of the rod inside the nut (14 high)                                     0.32  0.17  0.24  0.22  
+Anchors: Pullout at the back plate (per anchor)                                                   0.16  0.08  0.12  0.11  
+Anchors: Side-face blowout of the back plate towards the pedestal top (group)                     0.50  0.35  0.51  0.49  
+Concrete: Anchor reinforcement: top bars of the beam in line, steel                               0.46  0.80  0.77  0.71  
+Concrete: Anchor reinforcement: beam bars inside the breakout body (tolerances against)           0.76  0.88  0.92  0.93  
+Concrete: Anchor reinforcement within 0.5 h<sub>ef</sub> of the anchors                           0.33  0.44  0.44  0.46  
+End plate: Bearing side, strip below the bottom flange (m)                                        0.68  0.64  0.68  0.68  
+End plate: Bearing side, strip beyond the flange tips (n)                                         0.73  0.67  0.73  0.72  
+End plate: Fillet, tension flange to end plate (site)                                             0.25  0.14  0.19  0.19  
+End plate: Bearing stress on the concrete face (grout pad)                                        0.92  0.92  0.92  0.92  
+Joint: Top bars at the face: T + M/jd (upper bound, the cantilever counted twice)                 0.90  0.82  0.83  0.95  
+Back plate: PL 12x50x50 per anchor: bending through the hole (net, with shear)                    0.48  0.34  0.49  0.45  
+End plate: End plate PL 12 alone: strips to the top flange and the web                            1.32  0.93  1.34  1.47  info
+End plate: End plate PL 12 + extra plate PL 12 (A36): strips to the top flange and the web        0.67  0.47  0.68  0.69  
+End plate: Same, no prying (strict): 1.11 m                                                       0.74  0.52  0.75  0.77  
+
+Clearances (mm)
+    8.3  nut corner - top flange fillet toe
+   13.0  nut corner - web fillet toe
+   14.1  anchor - beam top bars of the crossing beam (-68, top -62)
+    4.0  back plate (v 10..60) - beam bar at v = 0
+   22.0  back plate - beam corner bar at v = 88
+   15.0  back plate top - z = 0 (under the beam top: no block above)

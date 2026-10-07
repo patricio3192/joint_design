@@ -1,0 +1,22 @@
+AXIS F: moment connection across VCS (f_conn.m, 2026-10-05). Mu = 18.3 / 14.5 kN m, Vu = 16.3 / 14.2 kN (north / south).
+Strap PL 12x70x584 A36 on both top flanges (proud 12 over z = 0); end plates PL 12x116x180 A36 bearing on the VCS faces;
+2 rods Ø16 through VCS at x = +-35, z = -120. Strap tension T = 113 / 89 kN.
+
+Check                                                                                       Demand  Capacity   D/C
+Strap PL 12x70: tension yield (gross)                                                        112.8     187.5  0.60  kN  T = M/162 mm (strap to bottom flange)
+Strap: tension rupture (no holes)                                                            112.8     252.0  0.45  kN  
+Strap to top flange: fillets 6, 2 x 120 + 70                                                 112.8     285.8  0.39  kN  site, flat position
+IPE 160 top flange in tension under the strap (gross)                                        119.9     135.4  0.89  kN  flange force M/(d - tf) before the strap takes it
+End plate bearing block on the VCS face (DG1): length Y below the bottom flange zone          42.7      67.4  0.63  mm  f_p = 22.8 MPa over b = 116; available from the plate bottom to 40 above the flange
+End plate bending beyond the flange tips (n strip, DG1 3.1.2)                                  7.2       8.0  0.90  kN m/m  n = (116 - 0.8 x 82)/2 = 25
+End plate bending below the bottom flange (m strip)                                            1.6       8.0  0.20  kN m/m  m = 12
+2 rods Ø16: shear (threads in the plane)                                                     16.3      74.6  0.22  kN  AISC J3.6, F_nv = 0.45 F_u
+Rods: bearing on the end plate PL 12                                                          16.3     276.5  0.06  kN  AISC J3.10
+Web to end plate: fillets 5 both sides                                                        16.3     195.5  0.08  kN  254 mm
+
+Clearances (mm)
+    12.7  Rod nut (M16, corner 13.9) - bottom flange fillet toe
+    13.6  Rod nut - web fillet toe
+    50.0  Rods in VCS (z = -120) - top bars (-56) and bottom bars (-294)
+    22.0  Rods (x = +-35) - VCS stirrups at x = +-70 (spacing 140 centred on F)
+    23.0  Rod to end plate edge (x); AISC J3.4M minimum 22 for M16

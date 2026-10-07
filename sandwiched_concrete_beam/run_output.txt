@@ -1,0 +1,190 @@
+==============================================================
+  LIMIT STATES - SANDWICH CONNECTION (AISC 360-16 / DG 39 / DG 1 / ACI 318-19)
+==============================================================
+
+--- 1. DG 39 TABLE 5-1 TESTED RANGE (+/-10%), two-bolt flush ---
+  pf (pfi)  =   33.5 mm   range   30.0 -   62.9 mm   OK
+  g         =   55.0 mm   range   51.4 -  125.7 mm   OK
+  d         =  200.0 mm   range  182.9 -  670.6 mm   OK
+  bp        =  140.0 mm   range  114.3 -  391.2 mm   OK
+  tf        =    8.5 mm   range    4.3 -   21.0 mm   OK
+
+--- 2. COMPRESSION SIDE (DG 1 Sec. 3.4 + ACI 22.8.3.2) ---
+  h1 (DG 39, to flange centre) = 153.8 mm;  D (to plate bottom edge) = 178.0 mm
+  fp(max) = phi*0.85*fc*sqrt(A2/A1) = 0.65*0.85*21*2.00 = 23.20 MPa  [ACI 22.8.3.2]
+  A1 (bounding rectangle) = 11134 mm2, A2 = 135812 mm2, sqrt(A2/A1) = 3.49 (cap 2)
+  Strict strips: c = 26.4 mm (DG 1 Eq. 3.3.14a-1 solved for length)
+  Pressure field from plate bottom up to y = 79.5 mm; web zone width = 58.4 mm
+  C = 163.2 kN at 34.0 mm from plate bottom -> real lever arm = 144.0 mm
+  Bearing: moment carried by compression zone    D =    23.50  C =    30.08 kNm  ratio =  0.78  OK     [DG1 3.4.1 / ACI 22.8.3.2]
+  Plate strip below flange (ext <= c)            D =    20.00  C =    26.42 mm   ratio =  0.76  OK     [DG1 Eq. 3.3.14a-1]
+  Plate strip beyond flange tip ((bp-bf)/2 <= c) D =    20.00  C =    26.42 mm   ratio =  0.76  OK     [DG1 Eq. 3.3.14a-1]
+  FLAG: real lever arm (144.0 mm) < DG 39 h1 (153.8 mm): the flange-centre
+        assumption is NOT conservative here; bolts are also checked with the real arm.
+  Info, DG 1 literal (uniform fp over bp x Y, Eq. 3.4.3 with Pr = 0):
+    Y = 46.8 mm, arm = 154.6 mm, T per bolt = 76.0 kN
+    t req: m = 25.0 mm -> 11.3 mm (Eq. 3.3.14a/15a); n = 30.0 mm -> 13.6 mm;
+           strip above flange 18.3 mm -> 8.3 mm (not a DG 1 check). tp = 12 mm
+
+--- 3. ROD TENSION (A193 B7: Fnt = 0.75Fu = 645 MPa) ---
+  Rod tension, DG 39 arm h1                      D =    76.42  C =    97.26 kN   ratio =  0.79  OK     [J3-1, Table J3.2; DG39 Tab.5-2]
+  Rod tension, real arm (strict strips)          D =    81.60  C =    97.26 kN   ratio =  0.84  OK     [J3-1, Table J3.2]
+
+--- 4. END PLATE, TENSION SIDE (DG 39) ---
+  s = 43.9 mm, Yp = 999.2 mm
+  End-plate yielding phi*Mpl (Table 5-2)         D =    23.50  C =    32.37 kNm  ratio =  0.73  OK     [DG39 Tab.5-2]
+  Plate thickness, thick plate Eq. 5-4a          D =    11.99  C =    12.00 mm   ratio =  1.00  OK     [DG39 Eq.5-4a, 5-1]
+  Info: Eq. 5-5a (thin plate, needs prying check) t_req = 11.43 mm
+  NOTE: both DG 39 paths reported; see PENDIENTE.txt item 2.
+
+--- 5. ROD SHEAR AND PLATE BEARING ---
+  Rod shear (Fnv = 0.450Fu)                      D =    10.75  C =    58.36 kN   ratio =  0.18  OK     [J3-1, Table J3.2]
+  Bearing / tearout at plate hole                D =    10.75  C =   138.24 kN   ratio =  0.08  OK     [J3-6a, J3-6c]
+
+--- 6. CONCRETE BREAKOUT IN SHEAR (ACI 17.7.2), ca1 = 200 mm ---
+  Vb = min(47.2, 48.0) = 47.2 kN (le = 128 mm)
+  Model B: AVc = 655 x 300 = 196500 mm2, AVco = 180000 mm2, psi_h = 1.00
+  Breakout, model B (both faces, one body)       D =    31.00  C =    36.03 kN   ratio =  0.86  OK     [ACI 17.7.2.1b]
+  Info, model A (one face, ha = bc/2): phi*Vcbg = 25.5 kN vs Vu = 21.5 kN
+
+--- 7. SHEAR-ROW POSITION SWEEP (dist from top of IPE) ---
+      dist      ca1    y_field    phiVcbg_B feasible
+        90      260       75.2         45.9       no
+       100      250       75.2         44.3       no
+       110      240       75.2         42.6       no
+       120      230       75.2         41.0       no
+       130      220       75.2         39.3       no
+       140      210       76.2         37.7       no
+       150      200       79.5         36.0      yes
+       160      190       80.8         35.3      yes
+  Highest feasible shear row: dist_bot = 150 mm (input uses 150 mm)
+
+--- 8. SPACING AND EDGE DISTANCES ---
+  AISC min spacing, gage (2 2/3 d)               D =    42.67  C =    55.00 mm   ratio =  0.78  OK     [AISC J3.3]
+  AISC min spacing, rows (2 2/3 d)               D =    42.67  C =   108.00 mm   ratio =  0.40  OK     [AISC J3.3]
+  AISC min edge, plate side                      D =    22.00  C =    42.50 mm   ratio =  0.52  OK     [AISC Table J3.4M]
+  AISC min edge, plate top                       D =    22.00  C =    42.00 mm   ratio =  0.52  OK     [AISC Table J3.4M]
+  AISC min edge, plate bottom                    D =    22.00  C =    70.00 mm   ratio =  0.31  OK     [AISC Table J3.4M]
+  ACI Table 17.9.2(a): min spacing 4da (not torqued) = 64 mm; gage = 55 mm, rows = 108 mm
+  -> gage below ACI minimum; WAIVED per ACI 17.9.1 by supplementary reinforcement
+     (2 stirrups, one each side of the rods). ACI gives no sizing rule: engineering judgment.
+  ACI min edge (not torqued) = specified cover 40 mm; top rod clear cover = 34 mm
+  -> slab cast on top: the beam top is not a free edge, requirement met.
+  Rods run parallel to the stirrup legs: place them between stirrups.
+
+--- 9. IPE 200: FLEXURE AND SHEAR ---
+  bf/2tf = 5.88 <= 0.38sqrt(E/Fy) = 10.75; h/tw = 28.4 <= 3.76sqrt(E/Fy) = 106.3 (Table B4.1b, compact)
+  Lb = 2400 mm: Lp = 1115, Lr = 4100 mm, phiMp = 49.7 kNm, eq. F2-2 (Lp < Lb <= Lr)
+  Flexure LTB, Lb = 2.4 m, Cb = 1                D =    23.50  C =    41.47 kNm  ratio =  0.57  OK     [AISC F2-1..F2-6]
+  Lb = 4800 mm: Lp = 1115, Lr = 4100 mm, phiMp = 49.7 kNm, eq. F2-3/F2-4 (Lb > Lr)
+  Flexure LTB, Lb = 4.8 m, Cb = 1                D =    23.50  C =    25.29 kNm  ratio =  0.93  OK     [AISC F2-1..F2-6]
+  Shear yielding                                 D =    21.50  C =   168.00 kN   ratio =  0.13  OK     [AISC G2-1, G2-2]
+
+--- 10. WELDS (E70XX, FEXX = 482 MPa) ---
+  Flange weld demand Ru = max(Mu/(d-tf), 0.60Fy bf tf) = max(122.7, 127.5) = 127.5 kN
+  Top flange CJP groove weld, E70XX matching filler
+  CJP top flange, base metal (flange yielding)   D =   127.50  C =   191.25 kN   ratio =  0.67  OK     [Table J2.5, J4-1]
+  Bottom flange fillet min size                  D =     5.00  C =     6.00 mm   ratio =  0.83  OK     [AISC Table J2.4]
+  Bottom flange fillet max size (t-2)            D =     6.00  C =     6.50 mm   ratio =  0.92  OK     [AISC J2.2b]
+  Bottom flange fillet (designed for Ru)         D =   127.50  C =   235.17 kN   ratio =  0.54  OK     [AISC J2-4, J2-5]
+  (bottom flange is in compression; Ru used in case of moment reversal; ext = 20 mm >= w)
+  Web tension yielding near tension rods         D =   122.72  C =   230.58 kN   ratio =  0.53  OK     [DG39 3-40; J4-1]
+  Web weld, tension region                       D =   153.72  C =   505.13 kN   ratio =  0.30  OK     [DG39 3-41a; J2-4, J2-5]
+  FLAG: DG 39 tension length pfi + 6 in. = 186 mm covers the whole web of this
+        shallow beam; no weld is left for shear. Lower half of the web (91.5 mm)
+        checked for tension + shear together (resultant at angle theta, J2-5).
+  Web weld, tension + shear (lower half)         D =   436.12  C =  1354.86 N/mm ratio =  0.32  OK     [J2-4, J2-5 (deviation)]
+  Web shear rupture at weld (lower half)         D =    21.50  C =    92.23 kN   ratio =  0.23  OK     [AISC J4-4]
+
+--- 11. CONCRETE BEAM 300x350, 3+3 phi12, stirrups phi10 @ 110 mm (joint zone) ---
+  N1 left: Vu = 34.0 kN, Mu = 20.00 kNm, Tu = 4.55 kNm; phiTth = 2.42, phiTcr = 9.62 kNm -> torsion REQUIRED
+  N1 left section limit (V+T)                    D =     0.93  C =     2.85 MPa  ratio =  0.33  OK     [ACI 22.7.7.1a / 22.5.1.2]
+  N1 left stirrups (Av+2At)/s                    D =     0.32  C =     1.43 mm2/mm ratio =  0.22  OK     [ACI 22.5.8.5.3, 22.7.6.1a]
+  N1 left stirrups minimum                       D =     0.25  C =     1.43 mm2/mm ratio =  0.18  OK     [ACI 9.6.4.2 / 9.6.3.4]
+  N1 left stirrup spacing                        D =   110.00  C =   117.50 mm   ratio =  0.94  OK     [ACI 9.7.6.3.3, T.9.7.6.2.2]
+  N1 left long. tension face (As+Al/2)           D =   262.73  C =   339.29 mm2  ratio =  0.77  OK     [ACI 22.2, 22.7.6.1b, 9.6.4.3]
+  N1 left long. compression face (Al/2)          D =    74.58  C =   339.29 mm2  ratio =  0.22  OK     [ACI 22.7.6.1b, 9.6.4.3]
+  N1 right: Vu = -7.0 kN, Mu = 21.00 kNm, Tu = 0.33 kNm; phiTth = 2.42, phiTcr = 9.62 kNm -> torsion neglected (22.7.1.1)
+  N1 right section limit (V+T)                   D =     0.08  C =     2.85 MPa  ratio =  0.03  OK     [ACI 22.7.7.1a / 22.5.1.2]
+  N1 right stirrups (Av+2At)/s                   D =     0.00  C =     1.43 mm2/mm ratio =  0.00  OK     [ACI 22.5.8.5.3, 22.7.6.1a]
+  N1 right stirrups minimum                      D =     0.25  C =     1.43 mm2/mm ratio =  0.18  OK     [ACI 9.6.4.2 / 9.6.3.4]
+  N1 right stirrup spacing                       D =   110.00  C =   147.00 mm   ratio =  0.75  OK     [ACI 9.7.6.3.3, T.9.7.6.2.2]
+  N1 right long. tension face (As+Al/2)          D =   197.81  C =   339.29 mm2  ratio =  0.58  OK     [ACI 22.2, 22.7.6.1b, 9.6.4.3]
+  N1 right long. compression face (Al/2)         D =     0.00  C =   339.29 mm2  ratio =  0.00  OK     [ACI 22.7.6.1b, 9.6.4.3]
+  N2 left: Vu = -7.6 kN, Mu = 17.18 kNm, Tu = 0.33 kNm; phiTth = 2.42, phiTcr = 9.62 kNm -> torsion neglected (22.7.1.1)
+  N2 left section limit (V+T)                    D =     0.09  C =     2.85 MPa  ratio =  0.03  OK     [ACI 22.7.7.1a / 22.5.1.2]
+  N2 left stirrups (Av+2At)/s                    D =     0.00  C =     1.43 mm2/mm ratio =  0.00  OK     [ACI 22.5.8.5.3, 22.7.6.1a]
+  N2 left stirrups minimum                       D =     0.25  C =     1.43 mm2/mm ratio =  0.18  OK     [ACI 9.6.4.2 / 9.6.3.4]
+  N2 left stirrup spacing                        D =   110.00  C =   147.00 mm   ratio =  0.75  OK     [ACI 9.7.6.3.3, T.9.7.6.2.2]
+  N2 left long. tension face (As+Al/2)           D =   161.03  C =   339.29 mm2  ratio =  0.47  OK     [ACI 22.2, 22.7.6.1b, 9.6.4.3]
+  N2 left long. compression face (Al/2)          D =     0.00  C =   339.29 mm2  ratio =  0.00  OK     [ACI 22.7.6.1b, 9.6.4.3]
+  N2 right: Vu = -30.9 kN, Mu = 17.18 kNm, Tu = -7.72 kNm; phiTth = 2.42, phiTcr = 9.62 kNm -> torsion REQUIRED
+  N2 right section limit (V+T)                   D =     1.47  C =     2.85 MPa  ratio =  0.52  OK     [ACI 22.7.7.1a / 22.5.1.2]
+  N2 right stirrups (Av+2At)/s                   D =     0.54  C =     1.43 mm2/mm ratio =  0.38  OK     [ACI 22.5.8.5.3, 22.7.6.1a]
+  N2 right stirrups minimum                      D =     0.25  C =     1.43 mm2/mm ratio =  0.18  OK     [ACI 9.6.4.2 / 9.6.3.4]
+  N2 right stirrup spacing                       D =   110.00  C =   117.50 mm   ratio =  0.94  OK     [ACI 9.7.6.3.3, T.9.7.6.2.2]
+  N2 right long. tension face (As+Al/2)          D =   287.58  C =   339.29 mm2  ratio =  0.85  OK     [ACI 22.2, 22.7.6.1b, 9.6.4.3]
+  N2 right long. compression face (Al/2)         D =   126.54  C =   339.29 mm2  ratio =  0.37  OK     [ACI 22.7.6.1b, 9.6.4.3]
+  Torsion bars: row gap 238 mm <= 300 (9.7.5.1); db = 12 mm >= max(0.042s, 10) (9.7.5.2).
+  With s = 140 mm (current): ph/8 = 117.5 mm -> NOT OK. Torsion stirrups must extend
+  (bt + d) beyond where the model torsion exceeds phiTth (9.7.6.3.2).
+
+--- 12. NOT APPLICABLE ---
+  Concrete breakout in tension (17.6.2), pullout (17.6.3),
+  side-face blowout (17.6.4), pryout (17.7.3).
+
+==============================================================
+  SUMMARY (ratio = demand / capacity)
+==============================================================
+  Bearing: moment carried by compression zone         0.78  OK
+  Plate strip below flange (ext <= c)                 0.76  OK
+  Plate strip beyond flange tip ((bp-bf)/2 <= c)      0.76  OK
+  Rod tension, DG 39 arm h1                           0.79  OK
+  Rod tension, real arm (strict strips)               0.84  OK
+  End-plate yielding phi*Mpl (Table 5-2)              0.73  OK
+  Plate thickness, thick plate Eq. 5-4a               1.00  OK
+  Rod shear (Fnv = 0.450Fu)                           0.18  OK
+  Bearing / tearout at plate hole                     0.08  OK
+  Breakout, model B (both faces, one body)            0.86  OK
+  AISC min spacing, gage (2 2/3 d)                    0.78  OK
+  AISC min spacing, rows (2 2/3 d)                    0.40  OK
+  AISC min edge, plate side                           0.52  OK
+  AISC min edge, plate top                            0.52  OK
+  AISC min edge, plate bottom                         0.31  OK
+  Flexure LTB, Lb = 2.4 m, Cb = 1                     0.57  OK
+  Flexure LTB, Lb = 4.8 m, Cb = 1                     0.93  OK
+  Shear yielding                                      0.13  OK
+  CJP top flange, base metal (flange yielding)        0.67  OK
+  Bottom flange fillet min size                       0.83  OK
+  Bottom flange fillet max size (t-2)                 0.92  OK
+  Bottom flange fillet (designed for Ru)              0.54  OK
+  Web tension yielding near tension rods              0.53  OK
+  Web weld, tension region                            0.30  OK
+  Web weld, tension + shear (lower half)              0.32  OK
+  Web shear rupture at weld (lower half)              0.23  OK
+  N1 left section limit (V+T)                         0.33  OK
+  N1 left stirrups (Av+2At)/s                         0.22  OK
+  N1 left stirrups minimum                            0.18  OK
+  N1 left stirrup spacing                             0.94  OK
+  N1 left long. tension face (As+Al/2)                0.77  OK
+  N1 left long. compression face (Al/2)               0.22  OK
+  N1 right section limit (V+T)                        0.03  OK
+  N1 right stirrups (Av+2At)/s                        0.00  OK
+  N1 right stirrups minimum                           0.18  OK
+  N1 right stirrup spacing                            0.75  OK
+  N1 right long. tension face (As+Al/2)               0.58  OK
+  N1 right long. compression face (Al/2)              0.00  OK
+  N2 left section limit (V+T)                         0.03  OK
+  N2 left stirrups (Av+2At)/s                         0.00  OK
+  N2 left stirrups minimum                            0.18  OK
+  N2 left stirrup spacing                             0.75  OK
+  N2 left long. tension face (As+Al/2)                0.47  OK
+  N2 left long. compression face (Al/2)               0.00  OK
+  N2 right section limit (V+T)                        0.52  OK
+  N2 right stirrups (Av+2At)/s                        0.38  OK
+  N2 right stirrups minimum                           0.18  OK
+  N2 right stirrup spacing                            0.94  OK
+  N2 right long. tension face (As+Al/2)               0.85  OK
+  N2 right long. compression face (Al/2)              0.37  OK
+  Governing: Plate thickness, thick plate Eq. 5-4a (1.00)
+==============================================================

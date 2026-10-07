@@ -1,0 +1,28 @@
+AXIS F checks (f_calc.m, 2026-10-05). Dead results from etabs_F.txt; live = 0.8 dead.
+Factor on the dead results: 1.2D+1.6L = 2.48, 1.2D+Ev+L = 2.58 (Ev = 0.579 D): used 2.58.
+
+Check                                                                                          Demand Capacity    D/C
+F north IPE 160: flexure at VCS (Lb 1.45, Cb 1) [run 1 (VCS torsion x1.0)]                       18.3     25.5   0.72  kN m
+F north IPE 160: shear [run 1 (VCS torsion x1.0)]                                                16.3    119.0   0.14  kN
+F south IPE 160 cantilever: flexure at VCS (Lb 1.27, Cb 1) [run 1 (VCS torsion x1.0)]            13.4     26.3   0.51  kN m
+F south IPE 160 cantilever: shear [run 1 (VCS torsion x1.0)]                                     13.4    119.0   0.11  kN
+VCS: negative moment at the column faces (B, C) [run 1 (VCS torsion x1.0)]                       26.4     36.0   0.73  kN m
+VCS: positive moment at axis F [run 1 (VCS torsion x1.0)]                                        30.2     36.0   0.84  kN m
+VCS: shear [run 1 (VCS torsion x1.0)]                                                            44.8    154.9   0.29  kN
+VCS: torsion against the threshold (22.7.4.1a) [run 1 (VCS torsion x1.0)]                         2.7      2.4   1.13  kN m
+IPE 200 at axis F: upward point load from F (live on the cantilever only) [run 1 (VCS torsion x1.0)]     10.5        -      -  kN
+IPE 200 if the uplift alone acted: bottom flange in compression, Lb 4.78 [run 1 (VCS torsion x1.0)]     12.5     25.4   0.49  kN m
+Shear connection F tip - border beam IPE 160 [run 1 (VCS torsion x1.0)]                           7.7        -      -  kN
+C4 IPE 240 with axis F: moment at the face (factored) [run 1 (VCS torsion x1.0)]                 15.7        -      -  kN m
+F north IPE 160: flexure at VCS (Lb 1.45, Cb 1) [run 2 (VCS torsion x0.1)]                       16.4     25.5   0.64  kN m
+F north IPE 160: shear [run 2 (VCS torsion x0.1)]                                                15.0    119.0   0.13  kN
+F south IPE 160 cantilever: flexure at VCS (Lb 1.27, Cb 1) [run 2 (VCS torsion x0.1)]            14.5     26.3   0.55  kN m
+F south IPE 160 cantilever: shear [run 2 (VCS torsion x0.1)]                                     14.2    119.0   0.12  kN
+VCS: negative moment at the column faces (B, C) [run 2 (VCS torsion x0.1)]                       26.1     36.0   0.73  kN m
+VCS: positive moment at axis F [run 2 (VCS torsion x0.1)]                                        30.2     36.0   0.84  kN m
+VCS: shear [run 2 (VCS torsion x0.1)]                                                            44.6    154.9   0.29  kN
+VCS: torsion against the threshold (22.7.4.1a) [run 2 (VCS torsion x0.1)]                         0.0      2.4   0.00  kN m
+IPE 200 at axis F: upward point load from F (live on the cantilever only) [run 2 (VCS torsion x0.1)]      9.2        -      -  kN
+IPE 200 if the uplift alone acted: bottom flange in compression, Lb 4.78 [run 2 (VCS torsion x0.1)]     11.0     25.4   0.43  kN m
+Shear connection F tip - border beam IPE 160 [run 2 (VCS torsion x0.1)]                           8.6        -      -  kN
+C4 IPE 240 with axis F: moment at the face (factored) [run 2 (VCS torsion x0.1)]                 14.7        -      -  kN m

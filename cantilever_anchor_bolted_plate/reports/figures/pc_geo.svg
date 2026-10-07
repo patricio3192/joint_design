@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 984 408" width="984" height="408" font-family="Helvetica, Arial, sans-serif">
+<rect width="984" height="408" fill="#ffffff"/>
+<rect x="432.0" y="60.0" width="384.0" height="276.0" fill="#dbe4ed" stroke="#1f3347" stroke-width="0.6"/>
+<rect x="480.0" y="264.0" width="288.0" height="23.5" fill="none" stroke="#8a8a8a" stroke-width="0.8" stroke-dasharray="6 4"/>
+<rect x="609.6" y="60.0" width="28.8" height="204.0" fill="none" stroke="#8a8a8a" stroke-width="0.8" stroke-dasharray="6 4"/>
+<rect x="616.6" y="287.5" width="14.9" height="48.5" fill="none" stroke="#8a8a8a" stroke-width="0.8" stroke-dasharray="6 4"/>
+<polyline points="460.8,244.8 787.2,244.8 " fill="none" stroke="#111111" stroke-width="2.2"/>
+<polyline points="652.8,244.8 652.8,60.0 " fill="none" stroke="#111111" stroke-width="2.2"/>
+<polyline points="595.2,244.8 595.2,60.0 " fill="none" stroke="#111111" stroke-width="2.2"/>
+<circle cx="540.0" cy="194.4" r="21.6" fill="#ffffff" stroke="#142433" stroke-width="0.8"/>
+<circle cx="540.0" cy="194.4" r="3.0" fill="#ffffff" stroke="#111111" stroke-width="1.6"/>
+<circle cx="708.0" cy="194.4" r="21.6" fill="#ffffff" stroke="#142433" stroke-width="0.8"/>
+<circle cx="708.0" cy="194.4" r="3.0" fill="#ffffff" stroke="#111111" stroke-width="1.6"/>
+<polyline points="624.0,38.4 708.0,38.4 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="621.5,40.9 626.5,35.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="705.5,40.9 710.5,35.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="666.0" y="34.9" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 666.0 34.9)">vT = 35</text>
+<polyline points="708.0,38.4 816.0,38.4 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="705.5,40.9 710.5,35.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="813.5,40.9 818.5,35.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="762.0" y="34.9" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 762.0 34.9)">45</text>
+<polyline points="624.0,4.8 816.0,4.8 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="621.5,7.3 626.5,2.3 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="813.5,7.3 818.5,2.3 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="720.0" y="1.3" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 720.0 1.3)">B/2 = 80</text>
+<polyline points="837.6,264.0 837.6,194.4 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="840.1,266.5 835.1,261.5 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="840.1,196.9 835.1,191.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="834.1" y="229.2" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-90.0 834.1 229.2)">pf = 29</text>
+<polyline points="837.6,194.4 837.6,60.0 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="840.1,196.9 835.1,191.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="840.1,62.5 835.1,57.5 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="834.1" y="127.2" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-90.0 834.1 127.2)">56</text>
+<polyline points="880.8,264.0 880.8,244.8 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="883.3,266.5 878.3,261.5 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="883.3,247.3 878.3,242.3 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="877.3" y="254.4" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-90.0 877.3 254.4)">w = 8</text>
+<polyline points="624.0,314.4 652.8,314.4 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="621.5,316.9 626.5,311.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="650.3,316.9 655.3,311.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="638.4" y="310.9" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 638.4 310.9)">t_rib/2 + w = 6 + 6</text>
+<polyline points="624.0,362.4 787.2,362.4 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="621.5,364.9 626.5,359.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="784.7,364.9 789.7,359.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="705.6" y="358.9" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 705.6 358.9)">bf/2 + w = 60 + 8</text>
+<polyline points="528.0,244.8 300.0,192.0 " fill="none" stroke="#222222" stroke-width="0.6"/>
+<circle cx="528.0" cy="244.8" r="2" fill="#222222"/>
+<text x="296.0" y="196.0" font-size="11.5" text-anchor="end" fill="#111111">support 1: toe of the flange fillet</text>
+<text x="296.0" y="209.0" font-size="11.5" text-anchor="end" fill="#111111">(z = 8, |v| &#8804; 68)</text>
+<polyline points="595.2,168.0 300.0,84.0 " fill="none" stroke="#222222" stroke-width="0.6"/>
+<circle cx="595.2" cy="168.0" r="2" fill="#222222"/>
+<text x="296.0" y="88.0" font-size="11.5" text-anchor="end" fill="#111111">support 2: toe of the rib fillet</text>
+<text x="296.0" y="101.0" font-size="11.5" text-anchor="end" fill="#111111">(|v| = 12, z = 8 to 85)</text>
+<text x="12.0" y="14.4" font-size="11.5" text-anchor="start" fill="#111111"><tspan font-weight="bold">2a. End plate extension, column side: the supports</tspan></text>
+<text x="12.0" y="396.0" font-size="11.5" text-anchor="start" fill="#111111">dashed: flange, web and rib (on the beam side); thick lines: the two supports</text>
+</svg>

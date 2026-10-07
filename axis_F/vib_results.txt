@@ -1,0 +1,12 @@
+EDGE VIBRATION, bay B-C, without / with axis F (f_vib.m, 2026-10-05): HAND ESTIMATE, assumed stiffnesses
+Weight 3.0 kPa (D 2.5 + live 0.5); DG11 fn = 0.18 sqrt(g/Delta); walking ap/g = 0.29 exp(-0.35 fn)/(0.03 W).
+LOW: bare steel, concrete 0.35 Ig, joint S_j 5000 kN m/rad. HIGH: steel I x2 (slab acting), concrete 0.7 Ig x 1.35 E, S_j 20000.
+
+LOW
+  without F: Delta 15.3 mm (IPE 240 tips 6.0 + border beam 9.2) -> fn 4.6 Hz, ap/g 7.8 %, 1 kN at mid-edge: 0.64 kN/mm
+  with F:    Delta 8.6 mm (F tip 8.4, IPE 240 tips 2.5, border beam 0.2) -> fn 6.1 Hz, ap/g 4.6 %, 1 kN at the F tip: 0.86 kN/mm
+HIGH
+  without F: Delta 6.6 mm (IPE 240 tips 2.0 + border beam 4.6) -> fn 6.9 Hz, ap/g 2.1 %, 1 kN at mid-edge: 1.36 kN/mm
+  with F:    Delta 4.1 mm (F tip 4.0, IPE 240 tips 0.8, border beam 0.1) -> fn 8.8 Hz, ap/g 1.1 %, 1 kN at the F tip: 1.85 kN/mm
+
+Criteria (residential): fn >= 9 Hz and about 1 kN/mm, or ap/g <= 0.5 % if fn < 9 Hz.

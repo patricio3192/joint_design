@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1092 610" width="1092" height="610" font-family="Helvetica, Arial, sans-serif">
+<rect width="1092" height="610" fill="#ffffff"/>
+<rect x="310.5" y="115.0" width="460.0" height="460.0" fill="#ece9e2" stroke="#6b6b6b" stroke-width="1"/>
+<rect x="770.5" y="172.5" width="149.5" height="345.0" fill="#ece9e2" stroke="#6b6b6b" stroke-width="1"/>
+<rect x="362.2" y="166.8" width="356.5" height="356.5" fill="none" stroke="#7d3c98" stroke-width="3" rx="6"/>
+<circle cx="377.2" cy="508.3" r="9.2" fill="#9a6b00" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="377.2" cy="345.0" r="9.2" fill="#9a6b00" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="377.2" cy="181.7" r="9.2" fill="#9a6b00" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="540.5" cy="508.3" r="9.2" fill="#9a6b00" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="540.5" cy="181.7" r="9.2" fill="#9a6b00" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="703.8" cy="508.3" r="9.2" fill="#9a6b00" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="703.8" cy="345.0" r="9.2" fill="#9a6b00" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="703.8" cy="181.7" r="9.2" fill="#9a6b00" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="425.5" cy="460.0" r="6.9" fill="#117a65" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="425.5" cy="230.0" r="6.9" fill="#117a65" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="655.5" cy="460.0" r="6.9" fill="#117a65" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="655.5" cy="230.0" r="6.9" fill="#117a65" stroke="#ffffff" stroke-width="0.8"/>
+<rect x="262.2" y="253.0" width="13.8" height="184.0" fill="#34506b" stroke="#142433" stroke-width="0.8"/>
+<rect x="276.0" y="253.0" width="34.5" height="184.0" fill="#b9b2a0" fill-opacity="0.75" stroke="#6b6b6b" stroke-width="0.6"/>
+<rect x="172.5" y="276.0" width="89.7" height="138.0" fill="#a9bdd1" stroke="#1f3347" stroke-width="1"/>
+<polyline points="218.5,385.2 762.4,385.2 " fill="none" stroke="#c0392b" stroke-opacity="1.00" stroke-width="18.3" stroke-linejoin="round"/>
+<rect x="713.0" y="371.4" width="16.1" height="27.6" fill="#7b241c" stroke="#ffffff" stroke-width="0.8"/>
+<rect x="746.3" y="371.4" width="16.1" height="27.6" fill="#7b241c" stroke="#ffffff" stroke-width="0.8"/>
+<polyline points="218.5,304.8 762.4,304.8 " fill="none" stroke="#c0392b" stroke-opacity="1.00" stroke-width="18.3" stroke-linejoin="round"/>
+<rect x="713.0" y="290.9" width="16.1" height="27.6" fill="#7b241c" stroke="#ffffff" stroke-width="0.8"/>
+<rect x="746.3" y="290.9" width="16.1" height="27.6" fill="#7b241c" stroke="#ffffff" stroke-width="0.8"/>
+<rect x="729.1" y="276.0" width="13.8" height="138.0" fill="#34506b" stroke="#142433" stroke-width="0.8"/>
+<polyline points="310.5,102.3 729.1,102.3 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="308.0,104.8 313.0,99.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="726.6,104.8 731.6,99.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="519.8" y="98.8" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 519.8 98.8)">364 (bearing face)</text>
+<polyline points="729.1,102.3 742.9,102.3 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="726.6,104.8 731.6,99.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="740.4,104.8 745.4,99.9 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="736.0" y="98.8" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 736.0 98.8)">12</text>
+<polyline points="310.5,70.1 770.5,70.1 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="308.0,72.6 313.0,67.7 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="768.0,72.6 773.0,67.7 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="540.5" y="66.6" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 540.5 66.6)">400</text>
+<polyline points="310.5,37.9 762.4,37.9 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="308.0,40.4 313.0,35.5 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="760.0,40.4 764.9,35.5 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="536.5" y="34.4" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 536.5 34.4)">393 (end of the bar)</text>
+<polyline points="724.5,587.6 729.1,587.6 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="722.0,590.1 727.0,585.2 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="726.6,590.1 731.6,585.2 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="726.8" y="584.1" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 726.8 584.1)">4</text>
+<polyline points="713.0,587.6 724.5,587.6 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="710.5,590.1 715.5,585.2 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="722.0,590.1 727.0,585.2 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="718.8" y="584.1" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 718.8 584.1)">10</text>
+<polyline points="286.3,385.2 286.3,304.8 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="288.8,387.7 283.9,382.8 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="288.8,307.2 283.9,302.3 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="282.8" y="345.0" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-90.0 282.8 345.0)">s = 70</text>
+<polyline points="599.1,345.0 599.1,304.8 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="601.6,347.5 596.7,342.5 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="601.6,307.2 596.7,302.3 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="595.6" y="324.9" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-90.0 595.6 324.9)">35</text>
+<polyline points="599.1,304.8 599.1,230.0 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="601.6,307.2 596.7,302.3 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="601.6,232.5 596.7,227.5 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="595.6" y="267.4" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-90.0 595.6 267.4)">65</text>
+<polyline points="240.3,414.0 240.3,276.0 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="242.8,416.5 237.9,411.5 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="242.8,278.5 237.9,273.5 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="236.8" y="345.0" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-90.0 236.8 345.0)">back plate 120</text>
+<polyline points="736.0,281.8 828.0,149.5 " fill="none" stroke="#222222" stroke-width="0.6"/>
+<circle cx="736.0" cy="281.8" r="2" fill="#222222"/>
+<text x="832.0" y="153.5" font-size="11.5" text-anchor="start" fill="#111111">back plate PL 12x45x120 A36</text>
+<text x="832.0" y="166.5" font-size="11.5" text-anchor="start" fill="#111111">behind the far column bars and far ties</text>
+<polyline points="718.8,488.7 828.0,517.5 " fill="none" stroke="#222222" stroke-width="0.6"/>
+<circle cx="718.8" cy="488.7" r="2" fill="#222222"/>
+<text x="832.0" y="529.5" font-size="11.5" text-anchor="start" fill="#111111">far ties: outer face at u = 360</text>
+<polyline points="703.8,345.0 828.0,563.5 " fill="none" stroke="#222222" stroke-width="0.6"/>
+<circle cx="703.8" cy="345.0" r="2" fill="#222222"/>
+<text x="832.0" y="575.5" font-size="11.5" text-anchor="start" fill="#111111">far mid-face bar: 13 clear to the nut corners</text>
+<polyline points="377.2,345.0 241.5,483.0 " fill="none" stroke="#222222" stroke-width="0.6"/>
+<circle cx="377.2" cy="345.0" r="2" fill="#222222"/>
+<text x="237.5" y="495.0" font-size="11.5" text-anchor="end" fill="#111111">front mid-face bar: 19 clear to the anchors</text>
+<text x="11.5" y="11.5" font-size="11.5" text-anchor="start" fill="#111111"><tspan font-weight="bold">A. Plan at the top anchors, z = +29 (type E)</tspan></text>
+</svg>

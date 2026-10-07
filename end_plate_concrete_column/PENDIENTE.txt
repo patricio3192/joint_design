@@ -1,0 +1,49 @@
+OPEN ITEMS - end_plate_column.m  (2026-10-07)
+=============================================
+
+1. Rod material. A193 B7 Fu = 860 / Fy = 720 MPa assumed (ASTM Table 2). Get
+   the supplier's mill certificate (Cuenca). Ratios on the rods are low (0.32).
+
+2. Rod holes. The plate is set after casting. Standard 18 mm holes need a
+   steel template at casting (2 mm tolerance). DG 1 Table 2.3 recommends much
+   larger holes for anchor rods; then plate washers welded on site are needed
+   and the shear check changes (DG 1 Sec. 3.5.3: slip, use only 2 rods).
+   Friction alone (info): phi mu C = 17.4 kN > Vu = 14.1 kN. Decide.
+
+3. 0.5 hef rule for anchor reinforcement (ACI R17.5.2.1). The script uses the
+   real hef = 309 -> 154 mm; bastones are at 56.6 mm. With the edge-reduced
+   hef' = 107 mm (17.6.2.1.2) the limit would be 53.3 mm. ACI does not say
+   which. Moving the bastones to x = +/-76 gives 52.3 mm (no longer touching
+   the VCM corner pair). Engineering judgment.
+
+4. Bastones, straight leg. ld = 1011 mm with "other cases" (Table 25.4.2.3,
+   psi_t = 1.3) because each baston touches a VCM bar. If clear spacing >= db,
+   cover >= db and stirrups >= minimum hold, ld = 675 mm (flag ld_good). Check
+   that the VCM has the length past the column back face (883 or 545 mm).
+   Bastones carry 0.90 of their capacity: no margin for a larger Mu.
+
+5. Head plates. Square plates are outside ACI headed-anchor testing (agreed).
+   Bending checked as a DG 1-type cantilever from the washer (method to
+   confirm). One plate for both rods of a row is also acceptable if checked.
+
+6. Grout. Non-shrink, >= 2 f'c (DG 1 Sec. 3.1): >= 42 MPa. Bearing uses the
+   concrete f'c.
+
+7. Steel column above: 4 phi12 anchors (uplift possible). Embedment depth and
+   uplift force unknown; not designed here. Only their plan position (x = +/-100,
+   z = 100 / 300) is in the clash table. The column axial load is not counted.
+
+8. IPE 240 cantilever flexure / LTB: from the frame model (not in the script).
+
+9. Other load combinations (gravity, reversal) to check at the end. The script
+   assumes top in tension and no reversal.
+
+10. Joint shear taken as the beam top-bar tension alone (cantilever tension and
+    column shear not subtracted): conservative, ratio 0.18. VCM, VCS and the
+    column themselves are not designed here.
+
+11. f'c = 210 kg/cm2 used; 240 is possible (more margin on bearing and ld).
+
+12. Plate thickness: 12 mm governs on the compression side (DG 1, 0.93) with
+    ext = 20. A 10 mm plate works with ext <= about 15 (t req 9.89 from the n
+    strip, ratio 0.99): possible if 15 is enough for the 6 mm fillet.

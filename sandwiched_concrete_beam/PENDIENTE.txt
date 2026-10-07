@@ -1,0 +1,49 @@
+PENDING ITEMS - sandwiched_connection.m   (updated 2026-10-06)
+=======================================
+
+1. Threaded rod material (ASTM A193 B7)
+   - Fu = 860 MPa (125 ksi), Fy = 720 MPa are taken from ASTM A193/A193M Table 2,
+     grade B7, d <= 2.5 in. The standard is NOT in 02 NORMATIVAS.
+   - AISC 360-16 Sec. A3.4 approves A193 for threaded rods; Table J3.2
+     (threaded parts) gives Fnt = 0.75 Fu, Fnv = 0.450 Fu (threads included).
+   - TO DO: obtain the supplier's mill certificate (certificado de calidad) in
+     Cuenca stating ASTM A193 B7. Generic "varilla roscada" (A307 / grade 2,
+     Fu ~ 414 MPa) would roughly halve the rod strengths.
+
+2. End-plate design procedure (AISC DG 39, Sec. 5.1.1 / 5.1.2, pp. 55-56)
+   - The script reports both Eq. 5-5a (thin) and Eq. 5-4a (thick, gamma_r = 0.80).
+   - Eq. 5-4a: 11.99 mm vs 12 mm (ratio 1.00): no margin on the tension side.
+   - TO DO (future): follow one DG 39 path consistently:
+       thick: Eq. 5-4a + bolt rupture without prying (Table 5-2, phi Mnp)
+       thin : Eq. 5-5a + bolt rupture with prying (Eq. 5-6a, Eq. 3-27/3-28).
+
+3. Stirrups in the concrete beam (ACI 318-19)
+   - Torsion is required at N1 left (4.55 kNm) and N2 right (7.72 kNm):
+     Tu > phi*Tth = 2.42 kNm.
+   - Spacing must be <= ph/8 = 117.5 mm (9.7.6.3.3) wherever Tu > phi*Tth.
+     The current 140 mm does not comply; the script uses 110 mm.
+   - TO DO: from the model torsion diagram, find where Tu > 2.42 kNm and
+     extend the 110 mm spacing (bt + d) = 300 + 294 = 594 mm beyond that
+     point (9.7.6.3.2). Same extension for the longitudinal bars (9.7.5.3).
+   - Two extra stirrups, one each side of the rod pair (splitting, item 4c).
+     Rods run parallel to the stirrup legs: place them between stirrups.
+
+4. Engineering judgment (not code provisions) used in the script:
+   a. Breakout with rods loaded from both faces (model B, one concrete body).
+   b. Strict-strip bearing model (lower bound, idea from EN 1993-1-8 6.2.5,
+      not in 02 NORMATIVAS).
+   c. ACI 17.9.1 splitting waiver with 2 stirrups next to the rods (no ACI
+      sizing rule).
+   d. Web weld: DG 39 tension length pfi + 6 in covers the whole web of the
+      IPE 200; tension + shear checked together on the lower half (J2-5).
+   e. Shear row kept with its whole hole inside the compression field so the
+      shear rods take no tension (avoids J3.7). A compatibility model with
+      tension in those rods + J3.7 could allow a higher row (more ca1).
+   f. ACI 9.6.4.3(a) evaluated with the PROVIDED At/s (agreed 2026-10-06).
+
+5. Top flange CJP (agreed 2026-10-06): joint detail (bevel, backing or
+   back-gouge) to be a prequalified CJP joint chosen by the fabricator
+   (AWS D1.1), E70XX. The plate is flush on top, so the flange is beveled.
+
+6. Optional (curiosity): yield-line mechanism for the compression panel,
+   reported only as information (strips govern).

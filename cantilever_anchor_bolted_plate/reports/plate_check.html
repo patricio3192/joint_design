@@ -1,0 +1,165 @@
+<!doctype html><html><head><meta charset="utf-8"><title>End plate check</title>
+<style>body{background:#fff;font-family:Helvetica,Arial,sans-serif;max-width:1250px;margin:24px auto;padding:0 16px;color:#111;line-height:1.45}h1{font-size:23px}h2{font-size:18px;margin-top:30px;border-bottom:1px solid #ccc}.row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start;margin:12px 0}@media (max-width:900px){.row{grid-template-columns:1fr}}.row img{width:100%;border:1px solid #ddd}.calc{font-size:14px}.calc ol{padding-left:20px;margin:0}.calc li{margin:5px 0}.res{font-weight:bold}.ok{color:#1e6b32}.note{font-size:13px;color:#444}.tw{overflow-x:auto}table{border-collapse:collapse;font-size:13px;margin:10px 0}td,th{border:1px solid #ccc;padding:3px 6px;text-align:right}th:first-child,td:first-child{text-align:left}</style></head><body>
+<h1>End plate check: PL 12x160x350 A36 + extra plate PL 12 A36, rib PL 12</h1>
+<p>2026-10-02, review page. Type E (edge) is written out step by step; the table at the end gives the same steps for the four types. Every length in the steps is drawn with a dimension line in the diagram next to it. Units: mm, kN, MPa; plate moments in kN m per m of width (= N mm/mm &divide; 1000).</p>
+<p><b>Method.</b> Strips, a lower bound: each strip is a cantilever carrying a share of an anchor force to a <i>welded</i> support, and its width counts only where it lands on that support. If every strip stays below &phi;m<sub>p</sub>, the plate is safe whatever the real distribution. Yield lines are not used.</p>
+<h2>1. Forces on the plate</h2><div class="row"><div><img src="figures/pc_forces.png" alt="forces"></div><div class="calc"><ol>
+<li>Design moment at the column face, from your ETABS cases: M<sub>u</sub> = (1.2 + E<sub>v</sub>) M<sub>D</sub> + M<sub>L</sub> = (1.2 + 0.579)(8.85) + 6.34 = <b>22.08 kN m</b>.</li>
+<li>Bearing stress, AISC DG1 3.1.1 with &radic;(A<sub>2</sub>/A<sub>1</sub>) = 1: f<sub>p</sub> = 0.65 &times; 0.85 &times; f'<sub>c</sub> = 0.65 &times; 0.85 &times; 20.59 = <b>11.38 MPa</b>; per mm of height q = f<sub>p</sub> B = 11.38 &times; 160 = 1821 N/mm.</li>
+<li>Anchors to the bottom edge: f + N/2 = pf + d + 25 = 29 + 240 + 25 = <b>294 mm</b>.</li>
+<li>Bearing length (DG1 Eq. 3.4.3, P = 0): Y = (f + N/2) &minus; &radic;[(f + N/2)&sup2; &minus; 2 M<sub>u</sub>/q] = 294 &minus; &radic;[294&sup2; &minus; 2 &times; 22.08&times;10<sup>6</sup>/1821] = <b>44.6 mm</b>.</li>
+<li>Pull on the two top anchors: T = q Y = 1821 &times; 44.6 = <b>81.3 kN</b>; per anchor T<sub>a</sub> = <b>40.6 kN</b>. Lever arm = 294 &minus; Y/2 = 271.7 mm.</li>
+<li>Plate capacity per unit width: &phi;m<sub>p</sub> = 0.9 F<sub>y</sub> t&sup2;/4 = 0.9 &times; 248 &times; 12&sup2;/4 = <b>8.04 kN m/m</b> (end plate and extra plate alike).</li>
+</ol><p class="note">The bearing block at full f<sub>p</sub> at the bottom edge assumes a stiff plate. Check 4 shows the plate can deliver it.</p></div></div>
+<h2>2. Tension side: the plate around each top anchor</h2>
+<div class="row"><div><img src="figures/pc_geo.png" alt="supports"></div><div class="calc">
+<p>The end plate is held in two places only, both on the beam side: the fillet of the top flange (support 1) and the fillet of the rib (support 2). A strip can only end on one of them. Lengths are measured to the <b>toe</b> of each fillet:</p><ul>
+<li>support 1 at z = w = 8, over |v| &le; b<sub>f</sub>/2 + w = 68;</li>
+<li>support 2 at |v| = t<sub>rib</sub>/2 + w<sub>rib</sub> = 6 + 6 = 12, from z = 8 to the plate top 85.</li></ul>
+<p>Anchor: v<sub>T</sub> = 35, pf = 29.</p></div></div>
+<div class="row"><div><img src="figures/pc_ten1.png" alt="end plate strips"></div><div class="calc"><p><b>End plate (plate 1)</b></p><ol>
+<li>Strip 1, to the flange: span x<sub>1</sub> = pf &minus; w = 29 &minus; 8 = <b>21</b>; width 2x<sub>1</sub> = 42 centred on the anchor (v = 14 to 56), all on support 1 (12 to 68): b<sub>1</sub> = <b>42</b>.</li>
+<li>Strip 2, to the rib: span x<sub>2</sub> = v<sub>T</sub> &minus; 12 = 35 &minus; 12 = <b>23</b>; width 2x<sub>2</sub> = 46 (z = 6 to 52), cut to the rib between z = 8 and 85: b<sub>2</sub> = <b>44</b>.</li>
+<li>A force F in a strip gives at its support m = F x/b per unit width: strip 1, x<sub>1</sub>/b<sub>1</sub> = 0.5000; strip 2, x<sub>2</sub>/b<sub>2</sub> = 0.5227 (per kN, in kN m/m).</li>
+<li>Share &alpha; to strip 1 so both strips have the same moment: &alpha; = (x<sub>2</sub>/b<sub>2</sub>)/(x<sub>1</sub>/b<sub>1</sub> + x<sub>2</sub>/b<sub>2</sub>) = <b>0.511</b>; then m = 0.2556 per kN carried by plate 1.</li>
+</ol></div></div>
+<div class="row"><div><img src="figures/pc_ten2.png" alt="extra plate strips"></div><div class="calc"><p><b>Extra plate (plate 2)</b>, 12 mm, two pieces with a 24 mm gap over the rib, fillets 6 on the bottom and inner edges only (the outer and top edges are flush with the end plate)</p><ol>
+<li>It gets its share by contact: the nut pushes plate 1 onto it around the anchor (compression, so no weld is needed there).</li>
+<li>Its supports are its own edge welds, which sit right over support 1 (bottom edge, z = 0) and support 2 (inner edge, over the rib).</li>
+<li>Strip A, to the bottom edge: y<sub>1</sub> = pf &minus; 0 = <b>29</b>; width 2y<sub>1</sub> = 58 (v = 6 to 64), cut to the piece (12 to 80): <b>52</b>.</li>
+<li>Strip B, to the inner edge: y<sub>2</sub> = v<sub>T</sub> &minus; gap/2 = 35 &minus; 12 = <b>23</b>; width 2y<sub>2</sub> = 46 (z = 6 to 52), cut to the piece (0 to 85): <b>46</b>.</li>
+<li>Same split: m = 0.2636 per kN carried by plate 2.</li>
+</ol></div></div>
+<div class="calc" style="border:1px solid #bbb;padding:8px 14px"><p><b>Result, type E</b></p><ol>
+<li>Share between the plates so that both reach the same ratio: plate 1 takes &beta; = <b>0.51</b> of T<sub>a</sub>, plate 2 the rest (20.0 kN).</li>
+<li>Moment in each plate: m = &beta; &times; 0.2556 &times; T<sub>a</sub> = 0.51 &times; 0.2556 &times; 40.6 = <b>5.27 kN m/m</b>.</li>
+<li class="res ok">D/C = 5.27 / 8.04 = 0.66</li>
+<li class="res ok">Extra strict, plate stays elastic (DG16 thick-plate idea applied to the strips): 1.11 m / &phi;m<sub>p</sub> = 0.73</li>
+<li>Where strip 1 and strip 2 cross (near the corner of the two supports) both moments are equal and of the same sign; that is within the yield criterion of the plate (square or von Mises).</li>
+<li>Without the extra plate (&beta; = 1): 0.26 &times; 40.6 = 10.39 kN m/m, D/C 1.29; it is needed.</li>
+</ol></div>
+<h2>3. Prying</h2><div class="row"><div><img src="figures/pc_pry.png" alt="prying"></div><div class="calc"><ol>
+<li>AISC Manual Part 9: b' = b &minus; d<sub>b</sub>/2 = 29 &minus; 7.9375 = 21.0625; p = 72.5.</li>
+<li>Thickness with no prying: t<sub>min</sub> = &radic;[4 T<sub>a</sub> b'/(&phi; p F<sub>u</sub>)] = &radic;[4 &times; 40643 &times; 21.0625/(0.9 &times; 72.5 &times; 400)] = <b>11.5 mm</b>.</li>
+<li>Two plates, not composite: t<sub>eff</sub> = &radic;(12&sup2; + 12&sup2;) = 17.0 mm (same plastic capacity).</li>
+<li class="res ok">D/C = 11.5 / 17.0 = 0.67. The strict check of step 2 gives 0.73.</li>
+</ol></div></div>
+<h2>4. Bearing side, below the bottom flange</h2><div class="row"><div><img src="figures/pc_brg.png" alt="bearing"></div><div class="calc"><ol>
+<li>Strip below the flange (DG1 3.1.2): m = 25 + 0.025 d = 25 + 6 = <b>31</b> (from the plate bottom to the 0.95 d line).</li>
+<li>Strips beyond the flange tips: n = (B &minus; 0.8 b<sub>f</sub>)/2 = (160 &minus; 96)/2 = <b>32</b>.</li>
+<li>Y = 44.6 &ge; m and &ge; n: the whole strip is loaded at f<sub>p</sub> (DG1 Eq. 3.3.14 form): M = f<sub>p</sub> &times; length&sup2;/2.</li>
+<li>m strip: 11.38 &times; 31&sup2;/2 = 5.47 kN m/m; <span class="res ok">D/C 0.68</span>.</li>
+<li>n strips: 11.38 &times; 32&sup2;/2 = 5.83 kN m/m; <span class="res ok">D/C 0.73</span> (governs).</li>
+<li>Strict: DG1 itself would use the full allowed pressure on this face, f<sub>p</sub> = 0.65 &times; 0.85 f'<sub>c</sub> &radic;(A<sub>2</sub>/A<sub>1</sub>) = 12.35 MPa (&radic;(A<sub>2</sub>/A<sub>1</sub>) = 1.09). Then Y = 40.8 and the strips: m 5.94 kN m/m, n 6.32 kN m/m; <span class="ok">D/C 0.74 / 0.79</span>.</li>
+<li>Only plate 1 here: the extra plate is at the top.</li>
+</ol></div></div>
+<h2>5. Welds that act as supports</h2><div class="tw"><table><tr><th>Weld</th><th>E</th><th>C1</th><th>CX</th><th>CY</th><th>Type E</th></tr>
+<tr><td>Rib-to-end-plate fillets (strip reaction of both anchors)</td><td>0.16</td><td>0.08</td><td>0.12</td><td>0.13</td><td style="text-align:left">R = 2 (1 - 0.51)(0.51) T<sub>a</sub> = 20.2 kN; &phi;R = 0.75 (0.6)(483)(0.707)(6)(2 x 70) = 129 kN</td></tr>
+<tr><td>Rib-to-flange fillets</td><td>0.08</td><td>0.04</td><td>0.06</td><td>0.07</td><td style="text-align:left">rib 147 long on the flange (h<sub>st</sub>/tan 30&deg;): &phi;R = 244 kN</td></tr>
+<tr><td>Extra plate: edge welds on the flange and rib lines (one piece)</td><td>0.14</td><td>0.08</td><td>0.11</td><td>0.10</td><td style="text-align:left">pull in the extra plate (1 - 0.51) T<sub>a</sub> = 20.0 kN; fillet 6 over 153 mm: &phi;R = 141 kN</td></tr>
+<tr><td>Fillet, tension flange to end plate (site)</td><td>0.33</td><td>0.18</td><td>0.26</td><td>0.26</td><td style="text-align:left">F<sub>f</sub> = M<sub>u</sub>/(h - t<sub>f</sub>); &phi;R = 0.75 (0.6)(483)(0.707)(8)(234) = 287 kN, no 1.5 factor</td></tr>
+</table></div><p class="note">All welds are taken as site welds; the strength is the same (AISC J2.4, E70, no directional factor).</p>
+<h2>6. The four types</h2><div class="tw"><table><tr><th></th>
+<th>E</th>
+<th>C1</th>
+<th>CX</th>
+<th>CY</th>
+</tr>
+<tr><td>M<sub>u</sub> (kN m)</td>
+<td>22.08</td>
+<td>12.13</td>
+<td>17.20</td>
+<td>17.20</td>
+</tr>
+<tr><td>pf = anchor over the flange</td>
+<td>29</td>
+<td>29</td>
+<td>29</td>
+<td>45</td>
+</tr>
+<tr><td>plate top over the flange</td>
+<td>85</td>
+<td>85</td>
+<td>85</td>
+<td>85</td>
+</tr>
+<tr><td>Y (mm)</td>
+<td>44.6</td>
+<td>23.6</td>
+<td>34.1</td>
+<td>32.1</td>
+</tr>
+<tr><td>T<sub>a</sub> (kN)</td>
+<td>40.6</td>
+<td>21.5</td>
+<td>31.1</td>
+<td>29.3</td>
+</tr>
+<tr><td>x<sub>1</sub> / b<sub>1</sub></td>
+<td>21 / 42</td>
+<td>21 / 42</td>
+<td>21 / 42</td>
+<td>37 / 56</td>
+</tr>
+<tr><td>x<sub>2</sub> / b<sub>2</sub></td>
+<td>23 / 44</td>
+<td>23 / 44</td>
+<td>23 / 44</td>
+<td>23 / 46</td>
+</tr>
+<tr><td>y<sub>1</sub> / b (extra plate)</td>
+<td>29 / 52</td>
+<td>29 / 52</td>
+<td>29 / 52</td>
+<td>45 / 68</td>
+</tr>
+<tr><td>y<sub>2</sub> / b (extra plate)</td>
+<td>23 / 46</td>
+<td>23 / 46</td>
+<td>23 / 46</td>
+<td>23 / 46</td>
+</tr>
+<tr><td>&beta; (share of plate 1)</td>
+<td>0.51</td>
+<td>0.51</td>
+<td>0.51</td>
+<td>0.50</td>
+</tr>
+<tr><td>m (kN m/m)</td>
+<td>5.27</td>
+<td>2.79</td>
+<td>4.03</td>
+<td>4.16</td>
+</tr>
+<tr><td>D/C tension side</td>
+<td>0.66</td>
+<td>0.35</td>
+<td>0.50</td>
+<td>0.52</td>
+</tr>
+<tr><td>D/C strict (1.11 m)</td>
+<td>0.73</td>
+<td>0.39</td>
+<td>0.56</td>
+<td>0.58</td>
+</tr>
+<tr><td>D/C bearing, m strip</td>
+<td>0.68</td>
+<td>0.64</td>
+<td>0.68</td>
+<td>0.68</td>
+</tr>
+<tr><td>D/C bearing, n strips</td>
+<td>0.73</td>
+<td>0.68</td>
+<td>0.73</td>
+<td>0.73</td>
+</tr>
+<tr><td>D/C bearing, strict (f<sub>p,max</sub>)</td>
+<td>0.79</td>
+<td>0.71</td>
+<td>0.79</td>
+<td>0.78</td>
+</tr>
+</table></div><p class="note">CY: its anchors sit at 45, so x<sub>1</sub> = 37 and strip 1 would be 74 wide; it is cut to the flange and the rib (12 to 68): b<sub>1</sub> = 56. Its extra plate pieces are 68x85.</p>
+</body></html>

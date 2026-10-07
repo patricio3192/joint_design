@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nudo C4 en 3D</title>
+<style>
+:root{--bg:#f4f2ee;--fg:#222;--panel:rgba(255,255,255,.92);--line:#ccc}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1d1f22;--fg:#e8e6e1;--panel:rgba(40,42,46,.92);--line:#555}}
+:root[data-theme="dark"]{--bg:#1d1f22;--fg:#e8e6e1;--panel:rgba(40,42,46,.92);--line:#555}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Helvetica,Arial,sans-serif}
+#v{position:fixed;inset:0}
+#p{position:fixed;top:12px;left:12px;max-width:min(360px,calc(100vw - 48px));background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.5}
+#p h1{font-size:15px;margin:0 0 6px}#p label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.sw{display:inline-block;width:14px;height:8px;border-radius:2px}
+#p small{display:block;margin-top:6px;opacity:.75}
+button{margin-top:6px;font:inherit;padding:3px 8px;border:1px solid var(--line);border-radius:5px;background:transparent;color:var(--fg);cursor:pointer}
+</style></head><body>
+<div id="v"></div>
+<div id="p"><h1>Nudo C4: todo el refuerzo</h1><div id="g"></div>
+<button id="all">Todo</button> <button id="iso">Vista inicial</button>
+<small>Arrastrar: girar. Rueda: zoom. Botón derecho: mover. Medidas en mm; u hacia dentro de la columna desde la cara del voladizo,
+z desde la cara superior de las vigas. Bastones cortados en el borde del dibujo.</small></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const D = /*DATA*/[];
+const el = document.getElementById('v');
+const R = new THREE.WebGLRenderer({antialias:true, alpha:true});
+R.setPixelRatio(Math.min(devicePixelRatio, 2)); el.appendChild(R.domElement);
+const S = new THREE.Scene(), C = new THREE.PerspectiveCamera(35, 1, 5, 20000);
+S.add(new THREE.HemisphereLight(0xffffff, 0x666666, 0.9));
+const L = new THREE.DirectionalLight(0xffffff, 0.6); L.position.set(-800, 1500, -600); S.add(L);
+// model axes: x = u, y = z (up), z = v
+const P = p => new THREE.Vector3(p[0], p[2], p[1]);
+const groups = {};
+for (const e of D) {
+  let m;
+  if (e.k === 'tube') {
+    const path = new THREE.CurvePath();
+    for (let i = 0; i < e.p.length - 1; i++) path.add(new THREE.LineCurve3(P(e.p[i]), P(e.p[i+1])));
+    const g = new THREE.TubeGeometry(path, Math.max(2, (e.p.length - 1) * 2), e.d / 2, 10, false);
+    m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({color: e.c, roughness: .55, metalness: .25}));
+  } else {
+    const a = P(e.p[0]), b = P(e.p[1]);
+    const g = new THREE.BoxGeometry(Math.abs(b.x - a.x), Math.abs(b.y - a.y), Math.abs(b.z - a.z));
+    m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({color: e.c, transparent: e.o < 1, opacity: e.o, depthWrite: e.o >= 1, roughness: .8}));
+    m.position.set((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2);
+    if (e.o < 1) { const ed = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({color: 0x888888, transparent: true, opacity: .5})); m.add(ed); }
+  }
+  (groups[e.g] = groups[e.g] || {c: e.c, m: []}).m.push(m); S.add(m);
+}
+const box = document.getElementById('g');
+for (const [name, G] of Object.entries(groups)) {
+  const l = document.createElement('label');
+  l.innerHTML = `<input type="checkbox" checked> <span class="sw" style="background:${G.c}"></span> ${name}`;
+  l.querySelector('input').onchange = ev => G.m.forEach(m => m.visible = ev.target.checked);
+  box.appendChild(l);
+}
+document.getElementById('all').onclick = () => box.querySelectorAll('input').forEach(i => { i.checked = true; i.onchange({target: i}); });
+const O = new THREE.OrbitControls(C, R.domElement);
+const home = () => { C.position.set(-900, 650, -1100); O.target.set(250, -120, 0); O.update(); };
+document.getElementById('iso').onclick = home; home();
+const fit = () => { const w = el.clientWidth, h = el.clientHeight; R.setSize(w, h); C.aspect = w / h; C.updateProjectionMatrix(); };
+addEventListener('resize', fit); fit();
+(function loop(){ requestAnimationFrame(loop); O.update(); R.render(S, C); })();
+</script></body></html>

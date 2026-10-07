@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yield-line analysis</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+  --plate: #ecebe5; --plate2: #dedcd3; --plate3: #cfcdc2; --sec: #b9b7ad;
+  --note: #eef4fc; --noteb: #2a78d6; --warn: #fdf1e8; --warnb: #eb6834;
+  --good: #006300; --bad: #d03b3b; --code: #f1f0eb;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --plate: #2a2a27; --plate2: #34342f; --plate3: #3f3f39; --sec: #5a5952;
+    --note: #14202f; --noteb: #3987e5; --warn: #2b1a10; --warnb: #d95926;
+    --good: #0ca30c; --bad: #e66767; --code: #232321;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+  --plate: #2a2a27; --plate2: #34342f; --plate3: #3f3f39; --sec: #5a5952;
+  --note: #14202f; --noteb: #3987e5; --warn: #2b1a10; --warnb: #d95926;
+  --good: #0ca30c; --bad: #e66767; --code: #232321;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 40px; }
+nav.toc { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding: 28px 0; font-size: 14px; }
+nav.toc b { display: block; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+nav.toc a { display: block; color: var(--ink2); text-decoration: none; padding: 3px 0 3px 10px; border-left: 2px solid var(--grid); }
+nav.toc a:hover { color: var(--ink); border-left-color: var(--s1); }
+main { padding: 28px 0 80px; min-width: 0; max-width: 860px; }
+header.top { padding: 34px 0 6px; border-bottom: 1px solid var(--grid); margin-bottom: 8px; }
+header.top h1 { font-size: 34px; line-height: 1.15; margin: 0 0 8px; letter-spacing: -.01em; }
+header.top p { margin: 0 0 6px; color: var(--ink2); }
+h2 { font-size: 24px; margin: 52px 0 10px; padding-top: 10px; border-top: 1px solid var(--grid); }
+h3 { font-size: 18px; margin: 30px 0 8px; }
+p, li { max-width: 72ch; }
+a { color: var(--s1); }
+code, .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: .9em; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+.eq { font-family: "Cambria Math", Cambria, "STIX Two Text", Georgia, serif; font-size: 17px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--s1); border-radius: 6px; padding: 9px 14px; margin: 10px 0; overflow-x: auto; }
+.eq .r { float: right; font-family: system-ui, sans-serif; font-size: 12.5px; color: var(--muted); margin-left: 14px; }
+.eq.big { font-size: 20px; text-align: center; border-left-color: var(--ink); }
+.callout { background: var(--note); border-left: 4px solid var(--noteb); border-radius: 6px; padding: 12px 16px; margin: 18px 0; }
+.callout.warn { background: var(--warn); border-left-color: var(--warnb); }
+.callout > b:first-child { display: block; margin-bottom: 4px; }
+.steps { counter-reset: st; list-style: none; padding-left: 0; }
+.steps > li { counter-increment: st; position: relative; padding-left: 38px; margin: 10px 0; }
+.steps > li::before { content: counter(st); position: absolute; left: 0; top: 1px; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600; display: grid; place-items: center; }
+figure { margin: 18px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+figcaption { font-size: 14px; color: var(--ink2); margin-top: 6px; }
+table.t { border-collapse: collapse; width: 100%; font-size: 14.5px; margin: 12px 0; }
+table.t th, table.t td { border-bottom: 1px solid var(--grid); padding: 6px 8px; text-align: left; vertical-align: top; }
+table.t th { color: var(--ink2); font-weight: 600; }
+table.t td.n, table.t th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.tw { overflow-x: auto; }
+.ok { color: var(--good); font-weight: 600; }
+.ref { font-size: 13px; color: var(--muted); }
+details { margin: 12px 0; }
+details > summary { cursor: pointer; color: var(--ink2); font-weight: 600; }
+details.deep { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; }
+.key { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13.5px; color: var(--ink2); margin: 10px 0; }
+.key span { display: inline-flex; align-items: center; gap: 6px; }
+/* drawings */
+svg.dg { width: 100%; height: auto; display: block; }
+.dg text { font: 13px system-ui, sans-serif; fill: var(--ink); }
+.dg .sm { font-size: 11.5px; fill: var(--ink2); }
+.dg .ti { font-weight: 600; }
+.dg .pl { fill: var(--plate); stroke: var(--ink2); stroke-width: 1; }
+.dg .pl2 { fill: var(--plate2); stroke: var(--ink2); stroke-width: 1; }
+.dg .pl3 { fill: var(--plate3); stroke: var(--ink2); stroke-width: 1; }
+.dg .sec { fill: var(--sec); stroke: var(--ink2); stroke-width: .8; }
+.dg .pos { stroke: var(--s1); stroke-width: 2.6; fill: none; stroke-linecap: round; }
+.dg .neg { stroke: var(--s2); stroke-width: 2.6; fill: none; stroke-dasharray: 8 5; }
+.dg .ax { stroke: var(--muted); stroke-width: 1.3; fill: none; stroke-dasharray: 12 3 2 3; }
+.dg .fix { fill: url(#hF); }
+.dg .ssu { fill: url(#hS); }
+.dg .ink { stroke: var(--ink); stroke-width: 1.8; fill: none; stroke-linejoin: round; }
+.dg .thk { stroke: var(--ink2); stroke-width: 8; fill: none; stroke-linejoin: round; stroke-linecap: butt; }
+.dg .thin { stroke: var(--ink2); stroke-width: 1; fill: none; }
+.dg .dot { stroke: var(--muted); stroke-width: 1; fill: none; stroke-dasharray: 2 3; }
+.dg .arr { stroke: var(--ink); stroke-width: 1.4; fill: none; marker-end: url(#ah); }
+.dg .dim { stroke: var(--ink2); stroke-width: .9; fill: none; marker-start: url(#da); marker-end: url(#da); }
+.dg .hp { fill: var(--s1); stroke: var(--surface); stroke-width: 2; }
+.dg .hn { fill: var(--s2); stroke: var(--surface); stroke-width: 2; }
+.dg .bolt { fill: var(--ink2); stroke: var(--surface); stroke-width: 1.5; }
+.dg .bad { stroke: var(--bad); stroke-width: 2; fill: none; }
+.dg .hl1 { fill: var(--s1); opacity: .16; }
+.dg .hl2 { fill: var(--s2); opacity: .28; }
+.dg .bk { fill: none; stroke: var(--ink2); stroke-width: 1.1; stroke-dasharray: 5 3; }
+.mk { fill: var(--ink); }
+.mk2 { fill: var(--ink2); }
+.hatch { stroke: var(--ink2); stroke-width: 1; }
+/* charts */
+.chart { position: relative; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart text { font: 12.5px system-ui, sans-serif; fill: var(--muted); }
+.chart .lab { fill: var(--ink2); font-size: 12.5px; }
+.chart .tt { fill: var(--ink2); font-size: 13px; }
+.chart .cg { stroke: var(--grid); stroke-width: 1; }
+.chart .cb { stroke: var(--axis); stroke-width: 1; }
+.chart .cl { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .band { opacity: .16; }
+.chart .env { fill: none; stroke: var(--ink); stroke-opacity: .16; stroke-width: 9; stroke-linejoin: round; stroke-linecap: round; }
+.chart .mkp { stroke: var(--surface); stroke-width: 2; }
+.chart .cx { stroke: var(--muted); stroke-width: 1; }
+.chart .hit { fill: transparent; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,.12); border-radius: 6px; padding: 6px 9px; font-size: 13px; line-height: 1.45; white-space: nowrap; display: none; z-index: 5; }
+.tip i.sw, .lg i.sw { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.lg { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--ink2); margin: 2px 0 4px; }
+.chart details table { font-size: 13px; }
+/* calculators */
+.calc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 16px 0; }
+.calc h4 { margin: 0 0 8px; font-size: 15px; }
+.calc .in { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.calc label { font-size: 13px; color: var(--ink2); display: flex; flex-direction: column; }
+.calc input { width: 92px; font: 14px system-ui, sans-serif; padding: 4px 6px; border: 1px solid var(--axis); border-radius: 5px; background: var(--bg); color: var(--ink); }
+.calc .out { margin-top: 10px; font-size: 14.5px; }
+.calc .out td { padding: 2px 10px 2px 0; }
+.calc .out td.n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+@media (max-width: 980px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  nav.toc { position: static; max-height: none; padding: 14px 0 0; columns: 2; }
+  nav.toc b { column-span: all; }
+}
+@media (max-width: 560px) {
+  header.top h1 { font-size: 27px; }
+  .eq { font-size: 15.5px; }
+  nav.toc { columns: 1; }
+}
+@media print {
+  nav.toc, .calc { display: none; }
+  .wrap { display: block; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+
+<!-- shared drawing defs: hatches and arrowheads -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="hF" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="hatch" x1="0" y1="0" x2="0" y2="5"/></pattern>
+    <pattern id="hS" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="hatch" x1="0" y1="0" x2="0" y2="9"/></pattern>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="da" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk2" d="M0,1 L10,5 L0,9 z"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <b>Contents</b>
+  <a href="#s0">0. Start here</a>
+  <a href="#s1">1. The idea</a>
+  <a href="#s2">2. Plastic moment of a plate</a>
+  <a href="#s3">3. Upper and lower bounds</a>
+  <a href="#s4">4. The work equation: recipe</a>
+  <a href="#s5">5. Strips (1-D)</a>
+  <a href="#s6">6. Plates under pressure</a>
+  <a href="#s7">7. Point loads: fans</a>
+  <a href="#s8">8. Load between two clamped edges</a>
+  <a href="#s9">9. T-stubs and prying</a>
+  <a href="#s10">10. End plates (DG 16, AISC 358)</a>
+  <a href="#s11">11. Back to V2</a>
+  <a href="#s12">12. Pitfalls checklist</a>
+  <a href="#s13">13. Formula sheet</a>
+  <a href="#s14">14. References</a>
+  <a href="#s15">15. How this page was checked</a>
+</nav>
+
+<main>
+<header class="top">
+  <h1>Yield-line analysis of steel plates</h1>
+  <p>A hand-calculation guide written for the plate checks of <code>cantilever_anchor_V2</code>. Units: N, mm, MPa. With F<sub>y</sub> in MPa and t in mm, the plastic moment per unit length m<sub>p</sub> comes out in N&middot;mm/mm, which is simply N. Multiply it by a length in mm to get N&middot;mm.</p>
+  <p class="ref">Every formula and number on this page was re-derived and checked by <code>yl_verify.m</code> (section 15). Code clauses were read in the PDFs of your <code>Bibliography4structures</code> folder; page numbers are given in section 14.</p>
+</header>
+
+<!-- ============================================================ 0 -->
+<h2 id="s0">0. Start here: where V2 stands</h2>
+<div class="callout">
+  <b>V2 does not use yield lines yet.</b>
+  Section 3 of the V2 report checks the 12 mm embed plate with <i>strips</i>. A strip is a beam cut out of the plate that carries a load alone, with the rest of the plate ignored. In plastic theory that is the <b>lower-bound (static)</b> method, which is always safe. Yield lines are the <b>upper-bound (kinematic)</b> method: you guess how the plate folds and get a load that is at or above the true one. This page teaches both, because you need both to judge a plate. Section 11 puts each V2 check in its place.
+</div>
+<p>How to read this page: sections 1&ndash;4 are the theory you need, sections 5&ndash;10 are worked examples from simple to code formulas, and every example is done with numbers you can follow on a hand calculator. The calculators in the grey boxes only exist to check your hand work.</p>
+<div class="key" aria-label="Drawing key">
+  <span><svg width="34" height="10"><line x1="2" y1="5" x2="32" y2="5" stroke="var(--s1)" stroke-width="2.6"/></svg>positive yield line (tension at the far face)</span>
+  <span><svg width="34" height="10"><line x1="2" y1="5" x2="32" y2="5" stroke="var(--s2)" stroke-width="2.6" stroke-dasharray="8 5"/></svg>negative yield line (tension at the near face)</span>
+  <span><svg width="34" height="10"><line x1="2" y1="5" x2="32" y2="5" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="12 3 2 3"/></svg>axis of rotation</span>
+  <span><svg width="26" height="12"><rect x="1" y="1" width="24" height="10" fill="url(#hF)" stroke="var(--ink2)" stroke-width=".8"/></svg>clamped edge</span>
+  <span><svg width="26" height="12"><rect x="1" y="1" width="24" height="10" fill="url(#hS)" stroke="var(--ink2)" stroke-width=".8"/></svg>simply supported edge</span>
+</div>
+
+<!-- ============================================================ 1 -->
+<h2 id="s1">1. The idea in one picture</h2>
+<p>Load a steel plate until it collapses. First it bends elastically. Then the most stressed points yield through the whole thickness, and the yielding spreads along <b>lines</b>. When enough lines have formed, the plate becomes a <b>mechanism</b>: flat, rigid pieces of plate turning about their supports and hinged to each other along the yield lines, like a sheet of paper folded along creases (Bruneau suggests trying exactly that).</p>
+<figure>
+<svg class="dg" viewBox="0 0 640 262" role="img" aria-label="Square plate at collapse: plan with diagonal yield lines, and oblique view of the folded plate">
+  <!-- plan -->
+  <rect class="ssu" x="30" y="22" width="200" height="8"/><rect class="ssu" x="30" y="222" width="200" height="8"/>
+  <rect class="ssu" x="22" y="30" width="8" height="192"/><rect class="ssu" x="230" y="30" width="8" height="192"/>
+  <rect class="pl" x="30" y="30" width="200" height="192"/>
+  <line class="pos" x1="30" y1="30" x2="230" y2="222"/><line class="pos" x1="230" y1="30" x2="30" y2="222"/>
+  <circle cx="130" cy="126" r="3" class="mk"/>
+  <text x="130" y="256" text-anchor="middle" class="sm">plan: four rigid triangles</text>
+  <!-- oblique view: X = 300 + x + 0.55 y, Y = 230 - 0.75 y + w (x, y 0..200, w = 35 at the centre) -->
+  <polygon class="pl2" points="410,80 610,80 455,190"/>
+  <polygon class="pl" points="300,230 410,80 455,190"/>
+  <polygon class="pl3" points="500,230 610,80 455,190"/>
+  <polygon class="pl2" points="300,230 500,230 455,190"/>
+  <line class="pos" x1="300" y1="230" x2="455" y2="190"/><line class="pos" x1="500" y1="230" x2="455" y2="190"/>
+  <line class="pos" x1="410" y1="80" x2="455" y2="190"/><line class="pos" x1="610" y1="80" x2="455" y2="190"/>
+  <polyline class="ink" points="300,230 500,230 610,80 410,80 300,230"/>
+  <line class="dot" x1="455" y1="155" x2="455" y2="190"/>
+  <circle cx="455" cy="155" r="2.5" class="mk2"/>
+  <text x="463" y="178">&delta;</text>
+  <g class="arr"><line x1="380" y1="18" x2="380" y2="140"/><line x1="440" y1="18" x2="440" y2="150"/><line x1="500" y1="18" x2="500" y2="150"/><line x1="560" y1="18" x2="560" y2="118"/></g>
+  <text x="630" y="12" class="sm" text-anchor="end">uniform load w</text>
+  <text x="455" y="256" text-anchor="middle" class="sm">at collapse: the triangles turn about the supported edges</text>
+</svg>
+<figcaption><b>Figure 1.</b> A simply supported square plate at collapse. The diagonals are positive yield lines; each triangle turns as a rigid body about its supported edge. The collapse load follows from energy alone (section 6.1): w = 24 m<sub>p</sub>/a&sup2;.</figcaption>
+</figure>
+<p>The assumptions, and why they are reasonable for steel plates:</p>
+<ul>
+  <li><b>Rigid-plastic material.</b> Elastic deflections are ignored; all rotation happens at the yield lines. At collapse the plastic rotations are much larger than the elastic ones (DG 16 &sect;2.2).</li>
+  <li><b>Along every yield line the bending moment is the plastic moment m<sub>p</sub> per unit length.</b> Steel has the same m<sub>p</sub> in both directions of bending, so positive and negative lines cost the same (Bruneau eq. 4.40).</li>
+  <li><b>Small displacements.</b> Membrane (stretching) action and strain hardening are ignored. Both make real plates stronger at large deflection (section 12).</li>
+  <li><b>Bending only.</b> Shear, punching and weld/bolt strength are separate checks.</li>
+</ul>
+
+<!-- ============================================================ 2 -->
+<h2 id="s2">2. Plastic moment of a plate, per unit length</h2>
+<p>Cut a strip of plate 1 mm wide and t thick. Elastic bending stops when the extreme fibre reaches F<sub>y</sub>. Fully plastic bending has F<sub>y</sub> over the whole half-thickness, in tension on one side and compression on the other.</p>
+<figure>
+<svg class="dg" viewBox="0 0 640 196" role="img" aria-label="Elastic and plastic stress blocks through the plate thickness">
+  <rect class="sec" x="70" y="40" width="30" height="110"/>
+  <line class="dim" x1="55" y1="40" x2="55" y2="150"/><text x="42" y="100">t</text>
+  <line class="thin" x1="170" y1="30" x2="170" y2="160"/>
+  <polygon class="hl1" points="170,40 230,40 170,95"/><polygon class="hl1" points="170,95 110,150 170,150"/>
+  <polyline class="ink" points="230,40 110,150"/>
+  <text x="234" y="44" class="sm">F<tspan baseline-shift="sub" font-size="9">y</tspan></text>
+  <text x="106" y="166" class="sm" text-anchor="end">F<tspan baseline-shift="sub" font-size="9">y</tspan></text>
+  <line class="dot" x1="100" y1="95" x2="240" y2="95"/>
+  <text x="150" y="190" text-anchor="middle">elastic limit: m<tspan baseline-shift="sub" font-size="10">y</tspan> = F<tspan baseline-shift="sub" font-size="10">y</tspan> t&sup2;/6</text>
+
+  <rect class="sec" x="390" y="40" width="30" height="110"/>
+  <line class="thin" x1="490" y1="30" x2="490" y2="160"/>
+  <rect class="hl1" x="490" y="40" width="60" height="55"/><rect class="hl1" x="430" y="95" width="60" height="55"/>
+  <polyline class="ink" points="490,40 550,40 550,95 430,95 430,150 490,150"/>
+  <line class="arr" x1="495" y1="67.5" x2="545" y2="67.5"/>
+  <line class="arr" x1="485" y1="118" x2="435" y2="118"/>
+  <text x="556" y="72" class="sm">F<tspan baseline-shift="sub" font-size="9">y</tspan> t/2</text>
+  <text x="460" y="143" class="sm" text-anchor="middle">F<tspan baseline-shift="sub" font-size="9">y</tspan> t/2</text>
+  <line class="dim" x1="600" y1="67.5" x2="600" y2="122.5"/><text x="606" y="99">t/2</text>
+  <text x="490" y="190" text-anchor="middle">fully plastic: m<tspan baseline-shift="sub" font-size="10">p</tspan> = (F<tspan baseline-shift="sub" font-size="10">y</tspan> t/2)(t/2) = F<tspan baseline-shift="sub" font-size="10">y</tspan> t&sup2;/4</text>
+</svg>
+<figcaption><b>Figure 2.</b> Stress through the thickness of a 1 mm wide strip. The plastic moment is the tension block times its lever arm.</figcaption>
+</figure>
+<div class="eq big">m<sub>p</sub> = F<sub>y</sub> t&sup2; / 4 &nbsp;&nbsp; [N&middot;mm/mm = N]</div>
+<p>The ratio m<sub>p</sub>/m<sub>y</sub> = Z/S = 1.5 for a rectangle. AISC 360-16 F11.1 (rectangular bars) gives M<sub>n</sub> = M<sub>p</sub> = F<sub>y</sub>Z &le; 1.6 F<sub>y</sub>S. Because 1.5 &lt; 1.6, the full plastic moment is allowed, with &phi;<sub>b</sub> = 0.90 (F1). AISC J10.10 sends transverse loads on plates to J4.5 (flexure) and, in its User Note, to yield-line theory.</p>
+<div class="eq">Example, 12 mm A36: m<sub>p</sub> = 248 &times; 12&sup2; / 4 = 248 &times; 144 / 4 = <b>8 928 N</b> (= 8.93 kN&middot;m per m); &nbsp; &phi;m<sub>p</sub> = 0.9 &times; 8 928 = <b>8 035 N</b></div>
+<div class="tw"><table class="t">
+<tr><th>t (mm)</th><th class="n">6</th><th class="n">8</th><th class="n">10</th><th class="n">12</th><th class="n">16</th><th class="n">20</th><th class="n">25</th></tr>
+<tr><td>m<sub>p</sub>, A36 (F<sub>y</sub> 248), N</td><td class="n">2 232</td><td class="n">3 968</td><td class="n">6 200</td><td class="n">8 928</td><td class="n">15 872</td><td class="n">24 800</td><td class="n">38 750</td></tr>
+<tr><td>m<sub>p</sub>, A572 Gr 50 (F<sub>y</sub> 345), N</td><td class="n">3 105</td><td class="n">5 520</td><td class="n">8 625</td><td class="n">12 420</td><td class="n">22 080</td><td class="n">34 500</td><td class="n">53 906</td></tr>
+</table></div>
+<div class="chart" id="cMp"></div>
+<p class="ref">Chart 1. m<sub>p</sub> grows with t&sup2;: doubling the thickness gives four times the bending strength. That is why a few millimetres matter so much in plate checks.</p>
+<details class="deep"><summary>Going deeper: why F<sub>y</sub> t&sup2;/4 and not more</summary>
+<p>Along a long straight yield line the plate cannot stretch along the line, so the steel there yields in plane strain. With the von Mises criterion the plane-strain yield stress is 2/&radic;3 = 1.155 F<sub>y</sub>, so a real steel hinge line carries up to 15 % more than F<sub>y</sub> t&sup2;/4. All design formulas (DG 16, AISC 358, AISC 360 Chapter K) use F<sub>y</sub> t&sup2;/4 and so does this page. A yield-line result is then exact for a slightly weaker idealized plate (Tresca). That margin is real, but it does not make a wrong mechanism safe.</p>
+</details>
+
+<!-- ============================================================ 3 -->
+<h2 id="s3">3. Upper and lower bounds: the three theorems</h2>
+<p>A collapse load is exact when three conditions hold at once (Bruneau &sect;4.3):</p>
+<ol>
+  <li><b>Equilibrium</b>: the internal moments balance the loads everywhere.</li>
+  <li><b>Yield</b>: nowhere does the moment exceed m<sub>p</sub>.</li>
+  <li><b>Mechanism</b>: enough yield lines form to let the plate move.</li>
+</ol>
+<p>Finding a solution that meets all three is hard. The two practical methods each give up one condition, and the theorems tell you which side of the truth you land on:</p>
+<div class="tw"><table class="t">
+<tr><th>Method</th><th>You satisfy</th><th>You skip</th><th>Result</th><th>Safe?</th></tr>
+<tr><td><b>Static (lower bound)</b>: strips, moment fields</td><td>equilibrium + yield</td><td>mechanism</td><td>load &le; true collapse load</td><td class="ok">always</td></tr>
+<tr><td><b>Kinematic (upper bound)</b>: yield lines</td><td>mechanism + work</td><td>yield everywhere</td><td>load &ge; true collapse load</td><td>only if the mechanism is the right one</td></tr>
+</table></div>
+<div class="callout">
+  <b>The three theorems (Bruneau &sect;4.3.1&ndash;4.3.3)</b>
+  <b>Upper bound:</b> a collapse load computed from an assumed mechanism is greater than or equal to the true collapse load.<br>
+  <b>Lower bound:</b> a load computed from a moment distribution that is in equilibrium and nowhere exceeds m<sub>p</sub> is less than or equal to the true collapse load.<br>
+  <b>Uniqueness:</b> the true collapse load is the one where the upper and lower bounds meet.
+</div>
+<p>What this means for design:</p>
+<ul>
+  <li><b>A passing lower bound is enough.</b> That is what V2 does with its strips.</li>
+  <li><b>An upper bound on its own can be unsafe.</b> You must find the <i>least</i> upper bound: try several patterns, optimise their free dimensions, and take the smallest result (DG 16 &sect;2.2: &ldquo;one must find the least upper bound&rdquo;). Or use a code formula whose pattern was confirmed by tests (sections 9 and 10).</li>
+  <li><b>Both together bracket the truth.</b> If the lower bound fails but the upper bound passes, you know where to look for reserve. Charts 2 and 3 show such a bracket.</li>
+</ul>
+
+<!-- ============================================================ 4 -->
+<h2 id="s4">4. The work equation: a recipe you can follow by hand</h2>
+<p>Give the mechanism a small virtual displacement. The work done by the loads must equal the work dissipated in the yield lines:</p>
+<div class="eq big">W<sub>E</sub> = W<sub>I</sub></div>
+<p><b>External work W<sub>E</sub></b>, from the loads moving with the plate:</p>
+<ul>
+  <li>point load P moving &delta;: &nbsp;W<sub>E</sub> = P &delta;</li>
+  <li>uniform pressure w: &nbsp;W<sub>E</sub> = w &times; (volume under the deflected plate)</li>
+  <li>line load q (N/mm): &nbsp;W<sub>E</sub> = q &times; (area under the deflection along the line)</li>
+</ul>
+<p><b>Internal work W<sub>I</sub></b>, from each yield line of length &ell; that opens by a relative rotation &theta;<sub>n</sub>:</p>
+<div class="eq">W<sub>I</sub> = &Sigma; m<sub>p</sub> &theta;<sub>n</sub> &ell; <span class="r">Bruneau &sect;4.6.1</span></div>
+<p><b>The projection shortcut.</b> Working out &theta;<sub>n</sub> for sloping lines is tedious. Instead, sum <i>region by region</i>: each rigid region turns by &theta; about its own axis, and its work is m<sub>p</sub> &theta; times the length of its yield lines <i>projected onto that axis</i>. This is Bruneau eq. 4.44, W<sub>I</sub> = m<sub>p</sub>(&ell;<sub>x</sub>&theta;<sub>x</sub> + &ell;<sub>y</sub>&theta;<sub>y</sub>), applied one region at a time:</p>
+<figure>
+<svg class="dg" viewBox="0 0 640 235" role="img" aria-label="Projection of the yield lines of a trapezoidal region onto its axis">
+<g transform="translate(-55,0)">
+  <rect class="ssu" x="110" y="190" width="420" height="8"/>
+  <polygon class="pl" points="120,190 520,190 420,70 220,70"/>
+  <line class="ax" x1="100" y1="190" x2="540" y2="190"/>
+  <line class="pos" x1="120" y1="190" x2="220" y2="70"/><line class="pos" x1="220" y1="70" x2="420" y2="70"/><line class="pos" x1="420" y1="70" x2="520" y2="190"/>
+  <line class="dot" x1="220" y1="70" x2="220" y2="214"/><line class="dot" x1="420" y1="70" x2="420" y2="214"/>
+  <line class="dot" x1="120" y1="190" x2="120" y2="214"/><line class="dot" x1="520" y1="190" x2="520" y2="214"/>
+  <line class="dim" x1="120" y1="212" x2="220" y2="212"/><line class="dim" x1="220" y1="212" x2="420" y2="212"/><line class="dim" x1="420" y1="212" x2="520" y2="212"/>
+  <text x="170" y="228" text-anchor="middle" class="sm">100</text><text x="320" y="228" text-anchor="middle" class="sm">200</text><text x="470" y="228" text-anchor="middle" class="sm">100</text>
+  <text x="320" y="140" text-anchor="middle">region turns &theta; about the axis</text>
+  <text x="320" y="60" text-anchor="middle" class="sm">yield lines on its other sides</text>
+  <text x="548" y="194" class="sm">axis = supported edge</text>
+</g>
+</svg>
+<figcaption><b>Figure 3.</b> W<sub>I</sub> of this region = m<sub>p</sub> &theta; (100 + 200 + 100) = m<sub>p</sub> &theta; &times; 400: the yield lines of a region bounded by its axis project onto the full axis length. If the edge is clamped, a negative line along the axis adds another m<sub>p</sub> &theta; &times; 400.</figcaption>
+</figure>
+<p>Each yield line between two moving regions is then counted twice, once from each side, which is right: it opens by the sum of the two rotations.</p>
+
+<h3>The recipe</h3>
+<ol class="steps">
+  <li>Draw the plate: supports (clamped, simply supported, point supports such as bolts), free edges, loads.</li>
+  <li>Choose a yield-line pattern that obeys the rules below. Leave its free dimensions as unknowns (x, e, &hellip;).</li>
+  <li>Set the largest deflection to &delta; = 1 (any value works; it cancels).</li>
+  <li>For each region find its axis and its rotation &theta; = &delta; / (distance from the axis to the point that moves &delta;).</li>
+  <li>W<sub>I</sub> = m<sub>p</sub> &Sigma; &theta; &times; (projected length of the region&rsquo;s yield lines). Add negative lines along clamped or continuous edges; none along simply supported or free edges.</li>
+  <li>W<sub>E</sub> from the loads.</li>
+  <li>Solve W<sub>E</sub> = W<sub>I</sub> for the load. If the pattern has a free dimension, find the minimum: set the derivative to zero, or tabulate a few values on the calculator.</li>
+  <li>Then do the checks yield lines leave out: shear, welds, bolts, stiffness (section 12).</li>
+</ol>
+
+<h3>Rules for a valid pattern</h3>
+<ol>
+  <li>Yield lines are straight. They end at a plate edge or at another yield line. (A curved line is the limit of many short straight ones: section 7.)</li>
+  <li>Each region turns about an axis. Axes lie along supported edges and pass over point supports such as bolts or columns.</li>
+  <li>The yield line between two regions passes through the intersection of their axes (or is parallel to both if they are parallel).</li>
+  <li><b>A moving region may touch the plate that does not move only along its own axis.</b> Anywhere else the deflection would jump and the plate would tear.</li>
+  <li>A clamped or continuous edge that is crossed by the mechanism carries a negative yield line. A simply supported or free edge carries none.</li>
+</ol>
+<div class="callout warn">
+  <b>Rule 4 is the trap.</b>
+  Patterns that look natural on paper often break it. The work equation still gives a number, and that number is too low: it is not a bound of anything. Figure 8 in section 8 shows a real example: without rule 4 you would get almost zero strength for a narrow load. <code>yl_work.m</code> checks rule 4 for every pattern on this page.
+</div>
+
+<!-- ============================================================ 5 -->
+<h2 id="s5">5. Strips (one-way bending): yield lines you already know</h2>
+<p>A strip of width b and span L is a beam. Its yield lines are the plastic hinges of beam theory. This is the case V2 uses.</p>
+<figure>
+<svg class="dg" viewBox="0 0 640 215" role="img" aria-label="Strip mechanisms: simply supported with uniform load, and clamped with a point load">
+  <line class="dot" x1="50" y1="80" x2="290" y2="80"/>
+  <polygon class="pl2" points="50,80 42,94 58,94"/><polygon class="pl2" points="290,80 282,94 298,94"/>
+  <polyline class="ink" points="50,80 170,118 290,80"/>
+  <circle class="hp" cx="170" cy="118" r="6"/>
+  <g class="arr"><line x1="75" y1="34" x2="75" y2="80"/><line x1="105" y1="34" x2="105" y2="89"/><line x1="135" y1="34" x2="135" y2="99"/><line x1="170" y1="34" x2="170" y2="106"/><line x1="205" y1="34" x2="205" y2="99"/><line x1="235" y1="34" x2="235" y2="89"/><line x1="265" y1="34" x2="265" y2="80"/></g>
+  <line class="thin" x1="70" y1="30" x2="270" y2="30"/>
+  <text x="78" y="102" class="sm">&theta;</text><text x="252" y="102" class="sm">&theta;</text><text x="180" y="132" class="sm">2&theta;</text>
+  <line class="dim" x1="185" y1="80" x2="185" y2="118"/><text x="190" y="103" class="sm">&delta;</text>
+  <line class="dim" x1="50" y1="158" x2="290" y2="158"/><text x="170" y="174" text-anchor="middle" class="sm">L</text>
+  <text x="170" y="202" text-anchor="middle">(a) simply supported, uniform: F = 8 m<tspan baseline-shift="sub" font-size="10">p</tspan> b/L</text>
+
+  <rect class="fix" x="348" y="48" width="12" height="62"/><rect class="fix" x="590" y="48" width="12" height="62"/>
+  <line class="dot" x1="360" y1="80" x2="590" y2="80"/>
+  <polyline class="ink" points="360,80 475,118 590,80"/>
+  <circle class="hn" cx="360" cy="80" r="6"/><circle class="hn" cx="590" cy="80" r="6"/><circle class="hp" cx="475" cy="118" r="6"/>
+  <line class="arr" x1="475" y1="26" x2="475" y2="108"/><text x="483" y="36">P</text>
+  <text x="375" y="104" class="sm">&theta;</text><text x="565" y="104" class="sm">&theta;</text><text x="485" y="132" class="sm">2&theta;</text>
+  <line class="dim" x1="360" y1="158" x2="590" y2="158"/><text x="475" y="174" text-anchor="middle" class="sm">L</text>
+  <text x="475" y="202" text-anchor="middle">(b) clamped, point load: P = 8 m<tspan baseline-shift="sub" font-size="10">p</tspan> b/L</text>
+</svg>
+<figcaption><b>Figure 4.</b> Side views of a strip of width b. Blue: positive hinge (yield line across the strip). Orange: negative hinge at a clamped end.</figcaption>
+</figure>
+<h3>5.1 Simply supported strip, uniform load (total F)</h3>
+<ol class="steps">
+  <li>One positive line across the strip at mid-span, length b. Each half turns &theta; = &delta;/(L/2) = 2&delta;/L about its support.</li>
+  <li>W<sub>I</sub> = m<sub>p</sub> &times; b &times; (opening 2&theta;) = m<sub>p</sub> b &times; 4&delta;/L.</li>
+  <li>The deflected shape is a triangle; the average deflection is &delta;/2, so W<sub>E</sub> = F &delta;/2.</li>
+  <li>F &delta;/2 = 4 m<sub>p</sub> b &delta;/L &rArr; <b>F = 8 m<sub>p</sub> b / L</b>. In beam terms: M<sub>p</sub> = F L/8 with M<sub>p</sub> = m<sub>p</sub> b. Same thing.</li>
+</ol>
+<h3>5.2 The other three strip cases</h3>
+<div class="tw"><table class="t">
+<tr><th>Strip</th><th>Yield lines (openings)</th><th>W<sub>I</sub> / (m<sub>p</sub> b &delta;/L)</th><th>W<sub>E</sub></th><th>Collapse load</th></tr>
+<tr><td>simply supported, uniform</td><td>mid (2&theta;)</td><td class="n">4</td><td>F&delta;/2</td><td><b>F = 8 m<sub>p</sub> b/L</b></td></tr>
+<tr><td>clamped, uniform</td><td>mid (2&theta;) + ends (&theta;, &theta;)</td><td class="n">8</td><td>F&delta;/2</td><td><b>F = 16 m<sub>p</sub> b/L</b> <span class="ref">Bruneau eq. 4.42</span></td></tr>
+<tr><td>simply supported, point load at mid-span</td><td>mid (2&theta;)</td><td class="n">4</td><td>P&delta;</td><td><b>P = 4 m<sub>p</sub> b/L</b></td></tr>
+<tr><td>clamped, point load at mid-span</td><td>mid + ends</td><td class="n">8</td><td>P&delta;</td><td><b>P = 8 m<sub>p</sub> b/L</b></td></tr>
+</table></div>
+<h3>5.3 The V2 numbers (report section 3b)</h3>
+<p>Over the 40 mm gap between the two platinas, the strip of plate behind the flange footprint (b = t<sub>f</sub> + 2w = 9.8 + 16 = 25.8 mm) carries the flange share sideways to the platinas.</p>
+<ol class="steps">
+  <li>Load on the strip: F = T<sub>flange</sub> &times; gap/b<sub>f</sub> = 82.73 &times; 40/120 = <b>27.58 kN</b>.</li>
+  <li>m<sub>p</sub> = 8 928 N (12 mm A36). Simply supported: F<sub>n</sub> = 8 &times; 8 928 &times; 25.8 / 40 = 46 067 N; &phi;F<sub>n</sub> = 0.9 &times; 46.07 = <b>41.46 kN</b>.</li>
+  <li>D/C = 27.58 / 41.46 = <b>0.67</b>. With clamped ends (16 instead of 8): &phi;F<sub>n</sub> = 82.92 kN, D/C = 0.33. These are the report values.</li>
+</ol>
+<p>So report step 3b <i>is</i> a yield-line calculation: one-dimensional, and exact for the strip on its own. For the whole plate it is a lower bound (section 11).</p>
+
+<!-- ============================================================ 6 -->
+<h2 id="s6">6. Plates under pressure: where two-way patterns start</h2>
+<h3>6.1 Simply supported square plate, uniform pressure w (Figure 1)</h3>
+<figure>
+<svg class="dg" viewBox="0 0 640 272" role="img" aria-label="Square plate plan with region numbers and section A-A">
+  <rect class="ssu" x="40" y="22" width="200" height="8"/><rect class="ssu" x="40" y="230" width="200" height="8"/>
+  <rect class="ssu" x="32" y="30" width="8" height="200"/><rect class="ssu" x="240" y="30" width="8" height="200"/>
+  <rect class="pl" x="40" y="30" width="200" height="200"/>
+  <line class="pos" x1="40" y1="30" x2="240" y2="230"/><line class="pos" x1="240" y1="30" x2="40" y2="230"/>
+  <line class="ax" x1="40" y1="226" x2="240" y2="226"/>
+  <text x="140" y="208" text-anchor="middle">1</text><text x="214" y="122" text-anchor="middle">2</text><text x="140" y="62" text-anchor="middle">3</text><text x="66" y="122" text-anchor="middle">4</text>
+  <line class="thin" x1="20" y1="130" x2="260" y2="130" stroke-dasharray="6 4"/><text x="12" y="134" class="sm">A</text><text x="263" y="134" class="sm">A</text>
+  <line class="dim" x1="40" y1="252" x2="240" y2="252"/><text x="140" y="268" text-anchor="middle" class="sm">a</text>
+  <text x="300" y="40" class="ti">Section A&ndash;A</text>
+  <line class="dot" x1="330" y1="90" x2="590" y2="90"/>
+  <polygon class="pl2" points="330,90 322,104 338,104"/><polygon class="pl2" points="590,90 582,104 598,104"/>
+  <polyline class="ink" points="330,90 460,135 590,90"/>
+  <circle class="hp" cx="460" cy="135" r="6"/>
+  <text x="352" y="112" class="sm">&theta;</text><text x="563" y="112" class="sm">&theta;</text>
+  <line class="dim" x1="475" y1="90" x2="475" y2="135"/><text x="480" y="117" class="sm">&delta;</text>
+  <line class="dim" x1="330" y1="160" x2="460" y2="160"/><text x="395" y="176" text-anchor="middle" class="sm">a/2</text>
+  <text x="460" y="215" text-anchor="middle">&theta; = &delta;/(a/2) = 2&delta;/a for every triangle</text>
+</svg>
+<figcaption><b>Figure 5.</b> Each triangle turns about its own supported edge (dash-dot: the axis of triangle 1). The diagonals are where neighbouring triangles meet.</figcaption>
+</figure>
+<ol class="steps">
+  <li>Each triangle: &theta; = 2&delta;/a. Its two half-diagonals project onto its edge with total length a.</li>
+  <li>W<sub>I</sub> = 4 triangles &times; m<sub>p</sub> (2&delta;/a) &times; a = <b>8 m<sub>p</sub> &delta;</b>. No lines along the edges: they are simply supported.</li>
+  <li>The deflected plate is a pyramid of height &delta;: volume = a&sup2;&delta;/3, so W<sub>E</sub> = w a&sup2; &delta;/3.</li>
+  <li>w a&sup2;&delta;/3 = 8 m<sub>p</sub>&delta; &rArr; <b>w = 24 m<sub>p</sub> / a&sup2;</b> <span class="ref">Bruneau eq. 4.48</span>. With clamped edges, negative lines along all four edges double W<sub>I</sub>: w = 48 m<sub>p</sub>/a&sup2;.</li>
+</ol>
+<div class="eq">a = 300 mm, t = 12 mm A36: &nbsp; w = 24 &times; 8 928 / 300&sup2; = <b>2.38 MPa</b> (2 380 kN/m&sup2;) &nbsp; <i>upper bound</i></div>
+<p><b>A lower bound for the same plate.</b> Take the moment field m<sub>x</sub> = m<sub>p</sub>(1 &minus; 4x&sup2;/a&sup2;), m<sub>y</sub> = m<sub>p</sub>(1 &minus; 4y&sup2;/a&sup2;), m<sub>xy</sub> = 0, with x, y measured from the centre. It is zero on the edges (simply supported), never exceeds m<sub>p</sub>, and satisfies the plate equilibrium equation</p>
+<div class="eq">&part;&sup2;m<sub>x</sub>/&part;x&sup2; + 2 &part;&sup2;m<sub>xy</sub>/&part;x&part;y + &part;&sup2;m<sub>y</sub>/&part;y&sup2; = &minus;w &nbsp;&rArr;&nbsp; &minus;8m<sub>p</sub>/a&sup2; + 0 &minus; 8m<sub>p</sub>/a&sup2; = &minus;w &nbsp;&rArr;&nbsp; <b>w = 16 m<sub>p</sub>/a&sup2;</b> = 1.59 MPa</div>
+<p>So the true collapse pressure is between 1.59 and 2.38 MPa. Neither number is the answer; together they are an honest statement of what you know.</p>
+<details class="deep"><summary>Going deeper: is 24 m<sub>p</sub>/a&sup2; exact? (corner levers)</summary>
+<p>Bruneau (Fig. 4.27, pp. 227&ndash;228) reports that letting the corners lever up, with a short negative line across each corner, lowers the result to about 22 m<sub>p</sub>/a&sup2;, about 9 % less. That figure comes from reinforced-concrete slab studies (Park &amp; Gamble), where the corners are usually weak in hogging or free to lift.</p>
+<p>With equal hogging and sagging strength and the corners held down, no hinge-line pattern can go below 24. The Prager field m<sub>xy</sub> = &minus;4m<sub>p</sub>xy/a&sup2; (with the same m<sub>x</sub>, m<sub>y</sub>) carries exactly 24 m<sub>p</sub>/a&sup2; and meets the square (Johansen) yield criterion of slab theory. But at the corners it has principal moments +m<sub>p</sub> and &minus;m<sub>p</sub>, which a steel plate cannot take: <code>yl_verify.m</code> finds 2.00 &times; the Tresca limit and 1.73 &times; the von Mises limit. So for a steel plate 24 is not proven exact. The safe statement stays the bracket 16 to 24.</p>
+<p>The lesson: even the textbook pattern of the simplest plate is not guaranteed to be the least upper bound. That is why codes use patterns confirmed by tests.</p>
+</details>
+
+<h3>6.2 Simply supported rectangle a &times; b (a the short side): a pattern with a free dimension</h3>
+<figure>
+<svg class="dg" viewBox="0 0 640 270" role="img" aria-label="Rectangular plate yield line pattern with ridge and parameter x">
+  <rect class="ssu" x="120" y="22" width="400" height="8"/><rect class="ssu" x="120" y="230" width="400" height="8"/>
+  <rect class="ssu" x="112" y="30" width="8" height="200"/><rect class="ssu" x="520" y="30" width="8" height="200"/>
+  <rect class="pl" x="120" y="30" width="400" height="200"/>
+  <line class="pos" x1="120" y1="230" x2="250" y2="130"/><line class="pos" x1="120" y1="30" x2="250" y2="130"/>
+  <line class="pos" x1="520" y1="230" x2="390" y2="130"/><line class="pos" x1="520" y1="30" x2="390" y2="130"/>
+  <line class="pos" x1="250" y1="130" x2="390" y2="130"/>
+  <text x="320" y="190" text-anchor="middle" class="sm">trapezoid: &theta; = &delta;/(a/2) = 2&delta;/a</text>
+  <text x="165" y="134" text-anchor="middle" class="sm">triangle:</text><text x="165" y="149" text-anchor="middle" class="sm">&theta; = &delta;/x</text>
+  <line class="dim" x1="120" y1="12" x2="520" y2="12"/><text x="320" y="9" text-anchor="middle" class="sm">b</text>
+  <line class="dim" x1="96" y1="30" x2="96" y2="230"/><text x="84" y="134" class="sm">a</text>
+  <line class="dim" x1="120" y1="254" x2="250" y2="254"/><text x="185" y="268" text-anchor="middle" class="sm">x</text>
+  <line class="dim" x1="390" y1="254" x2="520" y2="254"/><text x="455" y="268" text-anchor="middle" class="sm">x</text>
+  <line class="dot" x1="250" y1="240" x2="250" y2="254"/><line class="dot" x1="390" y1="240" x2="390" y2="254"/>
+</svg>
+<figcaption><b>Figure 6.</b> Ridge parallel to the long side; x is free. Bruneau Fig. 4.26.</figcaption>
+</figure>
+<ol class="steps">
+  <li>Trapezoids (2): &theta; = 2&delta;/a; their lines project onto the long edge with length b. Triangles (2): &theta; = &delta;/x; projection a.</li>
+  <li>W<sub>I</sub> = m<sub>p</sub>&delta; (2 &times; b &times; 2/a + 2 &times; a/x) = m<sub>p</sub>&delta; (4b/a + 2a/x).</li>
+  <li>Volume = a(3b &minus; 2x)&delta;/6 (a prism in the middle plus two pyramids), so W<sub>E</sub> = w a(3b &minus; 2x)&delta;/6.</li>
+  <li>Equate: <b>w(x) = 12 m<sub>p</sub> (2bx + a&sup2;) / [a&sup2; x (3b &minus; 2x)]</b> <span class="ref">Bruneau eq. 4.53</span></li>
+  <li>Minimise, dw/dx = 0: <b>x = (a/2b)(&minus;a + &radic;(a&sup2; + 3b&sup2;))</b> <span class="ref">eq. 4.54</span>. Putting it back gives a closed form you can use directly:</li>
+</ol>
+<div class="eq big">w<sub>u</sub> = 24 m<sub>p</sub> / [ a&sup2; ( &radic;(3 + (a/b)&sup2;) &minus; a/b )&sup2; ]</div>
+<p>For a square (a/b = 1) the bracket is (2 &minus; 1)&sup2; = 1 and w<sub>u</sub> = 24 m<sub>p</sub>/a&sup2; as in 6.1. A lower bound valid for steel is again the two-way field: <b>w<sub>l</sub> = 8 m<sub>p</sub>(1/a&sup2; + 1/b&sup2;)</b>.</p>
+<div class="eq">a = 200, b = 400, t = 12 A36 (m<sub>p</sub> = 8 928): &nbsp; a/b = 0.5; &radic;3.25 = 1.8028; (1.8028 &minus; 0.5)&sup2; = 1.6972<br>
+w<sub>u</sub> = 24 &times; 8 928 / (200&sup2; &times; 1.6972) = <b>3.16 MPa</b> at x = 0.25 (&minus;200 + &radic;520 000) = <b>130.3 mm</b><br>
+w<sub>l</sub> = 8 &times; 8 928 (1/200&sup2; + 1/400&sup2;) = <b>2.23 MPa</b>; &nbsp; one-way strip only: 8 &times; 8 928/200&sup2; = 1.79 MPa</div>
+<div class="chart" id="cRect"></div>
+<p class="ref">Chart 2. Each value of x is a different mechanism and each gives an upper bound. The least of them, 3.16 MPa at x = 130 mm, is the best upper bound this pattern can give. The true collapse pressure lies in the shaded band, above the best lower bound.</p>
+<div class="chart" id="cBracket"></div>
+<p class="ref">Chart 3. The bracket for any aspect ratio, in units of m<sub>p</sub>/a&sup2;. As b/a grows the plate becomes a one-way strip, both bounds tend to 8 and the answer becomes exact (uniqueness theorem). For a square the gap is widest.</p>
+<div class="calc" id="kRect">
+  <h4>Check your hand calculation: simply supported rectangle</h4>
+  <div class="in">
+    <label><span>a (mm)</span><input type="number" id="ra" value="200"></label>
+    <label><span>b (mm)</span><input type="number" id="rb" value="400"></label>
+    <label><span>t (mm)</span><input type="number" id="rt" value="12"></label>
+    <label><span>F<sub>y</sub> (MPa)</span><input type="number" id="rf" value="248"></label>
+  </div>
+  <div class="out" id="rOut"></div>
+</div>
+
+<!-- ============================================================ 7 -->
+<h2 id="s7">7. Point loads: fans, and why the circle wins</h2>
+<p>Push a plate at one point, far from its edges. The plate folds into a cone of triangles around the load. Take n triangles forming a regular polygon. Each triangle turns about its outer edge, which is a negative line (the plate outside does not move). Its positive lines run to the load.</p>
+<figure>
+<svg class="dg" viewBox="0 0 640 252" role="img" aria-label="Hexagonal fan and circular fan around a point load">
+  <rect class="pl" x="40" y="10" width="240" height="210" rx="4"/>
+  <polygon class="neg" points="250,115 205,193 115,193 70,115 115,37 205,37"/>
+  <g class="pos"><line x1="160" y1="115" x2="250" y2="115"/><line x1="160" y1="115" x2="205" y2="193"/><line x1="160" y1="115" x2="115" y2="193"/><line x1="160" y1="115" x2="70" y2="115"/><line x1="160" y1="115" x2="115" y2="37"/><line x1="160" y1="115" x2="205" y2="37"/></g>
+  <circle cx="160" cy="115" r="5" class="mk"/>
+  <text x="160" y="240" text-anchor="middle" class="sm">n = 6: P = 2 &times; 2n tan(&pi;/n) m<tspan baseline-shift="sub" font-size="9">p</tspan> = 13.86 m<tspan baseline-shift="sub" font-size="9">p</tspan></text>
+  <rect class="pl" x="340" y="10" width="240" height="210" rx="4"/>
+  <circle class="neg" cx="460" cy="115" r="90"/>
+  <g class="pos" id="fanlines"></g>
+  <circle cx="460" cy="115" r="5" class="mk"/>
+  <text x="460" y="240" text-anchor="middle" class="sm">circle: P = (2&pi; + 2&pi;) m<tspan baseline-shift="sub" font-size="9">p</tspan> = 4&pi; m<tspan baseline-shift="sub" font-size="9">p</tspan> = 12.57 m<tspan baseline-shift="sub" font-size="9">p</tspan></text>
+</svg>
+<figcaption><b>Figure 7.</b> Fan mechanisms around a point load in a continuous plate. Orange: negative boundary. Blue: positive radial lines.</figcaption>
+</figure>
+<ol class="steps">
+  <li>One triangle: edge length &ell;, distance h from the load. &theta; = &delta;/h. Its positive lines project onto its edge with length &ell;, and the negative edge adds another &ell;.</li>
+  <li>W<sub>I</sub> = &Sigma; 2 m<sub>p</sub> (&delta;/h) &ell;. For a regular n-gon, &ell;/h = 2 tan(&pi;/n), so W<sub>I</sub> = 2 &times; 2n tan(&pi;/n) m<sub>p</sub> &delta;. W<sub>E</sub> = P&delta;.</li>
+  <li><b>P = 4n tan(&pi;/n) m<sub>p</sub></b>. It falls as n grows and tends to 4&pi; m<sub>p</sub>: the circle is the least upper bound of this family.</li>
+</ol>
+<div class="chart" id="cFan"></div>
+<p class="ref">Chart 4. Positive part only, 2n tan(&pi;/n), against the number of triangles. It falls quickly to 2&pi;. The full fan with the negative boundary is twice these values.</p>
+<div class="eq big">continuous plate: P = 4&pi; m<sub>p</sub><br><span style="font-size:16px">simply supported circular plate, load at the centre: P = 2&pi; m<sub>p</sub></span></div>
+<p>Remarkably, the result <b>does not depend on the size of the fan</b> (as long as it fits in the plate). For a load spread over a small circle of radius c in a clamped circular plate of radius R, the cone mechanism gives P = 4&pi; m<sub>p</sub> / (1 &minus; 2c/3R).</p>
+<div class="eq">12 mm A36: 4&pi; &times; 8 928 = <b>112.2 kN</b>; &phi; = 0.9: 101.0 kN</div>
+<div class="callout warn"><b>Check shear too.</b> A point load really acts on a small patch, and yield lines ignore shear. The plate can punch through first: &phi;V<sub>n</sub> = 1.0 &times; 0.6 F<sub>y</sub> t &times; (perimeter of the loaded patch), AISC J4.2(a), with the perimeter taken around the weld toes. For a 12 mm A36 plate that is 1.79 kN per mm of perimeter: a 63 mm perimeter already gives about the same 112 kN.</div>
+<p>The fan is the reason the Eurocode T-stub uses a &ldquo;circular&rdquo; effective length &ell;<sub>eff</sub> = 2&pi;m around a bolt. That length gives a collapse load of exactly 4&pi; m<sub>p</sub> per bolt in mode 1 (section 9).</p>
+
+<!-- ============================================================ 8 -->
+<h2 id="s8">8. A load between two clamped edges: AISC&rsquo;s own figure, derived</h2>
+<p>AISC 360-16 Commentary Fig. C-J10.10 shows a plate welded to a column web and pulled out of plane, with its yield lines. The same situation covers a stiffener or lug welded to any plate held by two stiff parallel edges. Span L between the clamped edges; the attached plate is c long and b<sub>p</sub> wide (its thickness plus weld legs).</p>
+<figure>
+<svg class="dg" viewBox="0 0 640 305" role="img" aria-label="Inadmissible and admissible yield line patterns for a line load between two clamped edges">
+  <rect class="fix" x="38" y="20" width="12" height="260"/><rect class="fix" x="290" y="20" width="12" height="260"/>
+  <rect class="pl" x="50" y="20" width="240" height="260"/>
+  <line class="neg" x1="50" y1="70" x2="50" y2="230"/><line class="neg" x1="290" y1="70" x2="290" y2="230"/>
+  <line class="pos" x1="50" y1="70" x2="170" y2="110"/><line class="pos" x1="290" y1="70" x2="170" y2="110"/>
+  <line class="pos" x1="50" y1="230" x2="170" y2="190"/><line class="pos" x1="290" y1="230" x2="170" y2="190"/>
+  <line class="pos" x1="170" y1="110" x2="170" y2="190"/>
+  <rect x="166" y="110" width="8" height="80" class="sec"/>
+  <g class="bad"><path d="M98,74 l6,10 l6,-10"/><path d="M226,74 l6,10 l6,-10"/><path d="M98,226 l6,-10 l6,10"/><path d="M226,226 l6,-10 l6,10"/></g>
+  <text x="170" y="44" text-anchor="middle" class="ti">&#10007; not a mechanism</text>
+  <text x="170" y="298" text-anchor="middle" class="sm">sloping lines touch the still plate: w jumps (plate tears)</text>
+
+  <rect class="fix" x="358" y="20" width="12" height="260"/><rect class="fix" x="610" y="20" width="12" height="260"/>
+  <rect class="pl" x="370" y="20" width="240" height="260"/>
+  <line class="neg" x1="370" y1="70" x2="370" y2="230"/><line class="neg" x1="610" y1="70" x2="610" y2="230"/>
+  <line class="neg" x1="370" y1="70" x2="610" y2="70"/><line class="neg" x1="370" y1="230" x2="610" y2="230"/>
+  <line class="pos" x1="370" y1="70" x2="490" y2="110"/><line class="pos" x1="610" y1="70" x2="490" y2="110"/>
+  <line class="pos" x1="370" y1="230" x2="490" y2="190"/><line class="pos" x1="610" y1="230" x2="490" y2="190"/>
+  <line class="pos" x1="490" y1="110" x2="490" y2="190"/>
+  <rect x="486" y="110" width="8" height="80" class="sec"/>
+  <text x="430" y="154" text-anchor="middle" class="sm">turns about</text><text x="430" y="168" text-anchor="middle" class="sm">the edge</text>
+  <text x="490" y="62" text-anchor="middle" class="sm">end triangle turns about this line</text>
+  <line class="dim" x1="490" y1="72" x2="490" y2="108"/><text x="496" y="94" class="sm">e</text>
+  <line class="dim" x1="504" y1="110" x2="504" y2="190"/><text x="510" y="154" class="sm">c</text>
+  <line class="dim" x1="370" y1="258" x2="610" y2="258"/><text x="490" y="252" text-anchor="middle" class="sm">L</text>
+  <text x="490" y="44" text-anchor="middle" class="ti">&#10003; mechanism (Fig. C-J10.10)</text>
+  <text x="490" y="298" text-anchor="middle" class="sm">triangles turn about transverse negative lines</text>
+</svg>
+<figcaption><b>Figure 8.</b> Left: the trapezoids touch the still plate along sloping lines (rule 4 broken). Right: two extra regions turning about transverse lines make the pattern a mechanism.</figcaption>
+</figure>
+<p><b>Why the left pattern is wrong.</b> Each trapezoid turns about a clamped edge, so its deflection grows with the distance from that edge. Along its sloping boundary the deflection is not zero, but the plate beyond is still. The work equation ignores that and gives P = 8 m<sub>p</sub>(c + 2e)/L, which goes to zero for a short load as e &rarr; 0. That is nonsense, and <code>yl_work.m</code> flags a deflection jump equal to &delta;.</p>
+<h3>Derivation of the right pattern (b<sub>p</sub> first taken as 0)</h3>
+<ol class="steps">
+  <li>Side trapezoids (2): turn about the clamped edges, &theta; = &delta;/(L/2) = 2&delta;/L. Each has a negative edge line c + 2e long and positive lines projecting to c + 2e. Work: 2 &times; m<sub>p</sub>(2&delta;/L) &times; 2(c + 2e) = 8 m<sub>p</sub>&delta;(c + 2e)/L.</li>
+  <li>End triangles (2): turn about the transverse negative lines at distance e from the load ends, &theta; = &delta;/e. Each has a negative line L long and positive lines projecting to L. Work: 2 &times; m<sub>p</sub>(&delta;/e) &times; 2L = 4 m<sub>p</sub>&delta; L/e.</li>
+  <li>W<sub>E</sub> = P&delta;. So P(e) = m<sub>p</sub> [ 8c/L + 16e/L + 4L/e ].</li>
+  <li>dP/de = 16/L &minus; 4L/e&sup2; = 0 &rArr; <b>e = L/2</b>, and <b>P = m<sub>p</sub> (8c/L + 16)</b>.</li>
+</ol>
+<p>The 8c/L part is the strip of section 5 (clamped, b = c). The 16 m<sub>p</sub> is what the plate beyond the ends adds. With the attachment width b<sub>p</sub> kept and &beta; = b<sub>p</sub>/L, &eta; = c/L, the same steps give e = &radic;(L(L &minus; b<sub>p</sub>))/2 and</p>
+<div class="eq big">P<sub>n</sub> = F<sub>y</sub> t&sup2; [ 2&eta;/(1 &minus; &beta;) + 4/&radic;(1 &minus; &beta;) ]</div>
+<p>(using 4m<sub>p</sub> = F<sub>y</sub>t&sup2;). <b>This is exactly AISC 360-05 Eq. K2-13</b>, the chord-wall plastification of a rectangular HSS (in your AISC 13th ed. Manual, p. 16.1-132; also used in DG 24 Example 3.2 with its Fig. 3-4). Its Commentary calls it &ldquo;an analytical yield line solution for flexure of the connecting chord face&rdquo;. You have just derived a code equation by hand.</p>
+<p class="ref">In AISC 360-16 the rectangular-HSS T-connection equations were removed from Chapter K; J10.10 now points to yield-line theory for transverse forces on plates in general.</p>
+<div class="eq">HEB 240 web, t<sub>w</sub> = 10 mm, A36 (m<sub>p</sub> = 6 200 N); clear depth between root radii L = 240 &minus; 2(17 + 21) = 164 mm; attached plate c = 120 mm, b<sub>p</sub> = 10 + 2 &times; 6 = 22 mm<br>
+&eta; = 120/164 = 0.732; &nbsp; &beta; = 22/164 = 0.134; &nbsp; 1 &minus; &beta; = 0.866; &nbsp; &radic;0.866 = 0.931<br>
+P<sub>n</sub> = 248 &times; 10&sup2; &times; [2(0.732)/0.866 + 4/0.931] = 24 800 &times; (1.690 + 4.298) = 24 800 &times; 5.989 = <b>148.5 kN</b>; &nbsp; &phi; = 0.9: <b>133.7 kN</b> (e = 76.3 mm)</div>
+<div class="chart" id="cPatch"></div>
+<p class="ref">Chart 5. The same HEB 240 example: every value of e is an upper bound; the minimum at e = &radic;(L(L &minus; b<sub>p</sub>))/2 = 76.3 mm is the answer of the pattern.</p>
+<div class="callout warn"><b>Before using it on a real web.</b> A column web also carries axial stress, which leaves less of F<sub>y</sub> for bending; the HSS equations reduce the strength with Q<sub>f</sub> for that reason. The edges must really be clamped (thick flanges). And the 2005 Commentary says the equation &ldquo;serves to limit connection deformations and is known to be well below the ultimate connection strength&rdquo;, which is why it used &phi; = 1.00 there.</div>
+<div class="calc" id="kPatch">
+  <h4>Check your hand calculation: load between two clamped edges</h4>
+  <div class="in">
+    <label><span>L (mm)</span><input type="number" id="pL" value="164"></label>
+    <label><span>c (mm)</span><input type="number" id="pc" value="120"></label>
+    <label><span>b<sub>p</sub> (mm)</span><input type="number" id="pb" value="22"></label>
+    <label><span>t (mm)</span><input type="number" id="pt" value="10"></label>
+    <label><span>F<sub>y</sub> (MPa)</span><input type="number" id="pf" value="248"></label>
+  </div>
+  <div class="out" id="pOut"></div>
+</div>
+
+<!-- ============================================================ 9 -->
+<h2 id="s9">9. T-stubs and prying: bolted plates and anchor rods</h2>
+<p>A plate bolted down on both sides of a web that pulls it away (a T-stub flange, an end plate, a base plate in tension) folds along lines parallel to the web. Over an effective length &ell;<sub>eff</sub> of the T-stub, each hinge line carries M<sub>p</sub> = m<sub>p</sub> &ell;<sub>eff</sub>. Three mechanisms compete (Bruneau eqs. 4.55&ndash;4.56; DG 16 &sect;2.3; EN 1993-1-8 &sect;6.2.4):</p>
+<figure>
+<svg class="dg" viewBox="0 0 640 230" role="img" aria-label="T-stub failure modes 1, 2 and 3">
+  <g><rect class="fix" x="15" y="28" width="190" height="12"/>
+  <polyline class="thk" points="36,46 70,46 110,66 150,46 184,46"/>
+  <line class="ink" x1="110" y1="66" x2="110" y2="150" stroke-width="6"/>
+  <line class="arr" x1="110" y1="152" x2="110" y2="186"/><text x="117" y="180">F</text>
+  <line class="ink" x1="70" y1="20" x2="70" y2="56" stroke-width="3"/><line class="ink" x1="150" y1="20" x2="150" y2="56" stroke-width="3"/>
+  <circle class="hp" cx="110" cy="66" r="5.5"/><circle class="hp" cx="70" cy="46" r="5.5"/><circle class="hp" cx="150" cy="46" r="5.5"/>
+  <line class="arr" x1="36" y1="54" x2="36" y2="76"/><text x="26" y="90" class="sm">Q</text>
+  <line class="arr" x1="184" y1="54" x2="184" y2="76"/><text x="180" y="90" class="sm">Q</text>
+  <line class="dim" x1="70" y1="104" x2="110" y2="104"/><text x="90" y="100" text-anchor="middle" class="sm">m</text>
+  <line class="dim" x1="36" y1="104" x2="70" y2="104"/><text x="53" y="100" text-anchor="middle" class="sm">n</text>
+  <text x="110" y="208" text-anchor="middle" class="ti">Mode 1</text><text x="110" y="224" text-anchor="middle" class="sm">plate: 4 hinges</text></g>
+
+  <g><rect class="fix" x="225" y="28" width="190" height="12"/>
+  <polyline class="thk" points="246,46 320,80 394,46"/>
+  <line class="ink" x1="320" y1="80" x2="320" y2="150" stroke-width="6"/>
+  <line class="arr" x1="320" y1="152" x2="320" y2="186"/><text x="327" y="180">F</text>
+  <line class="ink" x1="280" y1="20" x2="280" y2="70" stroke-width="3"/><line class="ink" x1="360" y1="20" x2="360" y2="70" stroke-width="3"/>
+  <text x="266" y="16" class="sm">B</text><text x="364" y="16" class="sm">B</text>
+  <circle class="hp" cx="320" cy="80" r="5.5"/>
+  <line class="arr" x1="246" y1="54" x2="246" y2="76"/><text x="236" y="90" class="sm">Q</text>
+  <line class="arr" x1="394" y1="54" x2="394" y2="76"/><text x="390" y="90" class="sm">Q</text>
+  <text x="320" y="208" text-anchor="middle" class="ti">Mode 2</text><text x="320" y="224" text-anchor="middle" class="sm">2 hinges + bolts at strength</text></g>
+
+  <g><rect class="fix" x="435" y="28" width="190" height="12"/>
+  <polyline class="thk" points="456,68 604,68"/>
+  <line class="ink" x1="530" y1="68" x2="530" y2="150" stroke-width="6"/>
+  <line class="arr" x1="530" y1="152" x2="530" y2="186"/><text x="537" y="180">F</text>
+  <line class="ink" x1="490" y1="20" x2="490" y2="78" stroke-width="3"/><line class="ink" x1="570" y1="20" x2="570" y2="78" stroke-width="3"/>
+  <text x="476" y="16" class="sm">B</text><text x="574" y="16" class="sm">B</text>
+  <text x="530" y="208" text-anchor="middle" class="ti">Mode 3</text><text x="530" y="224" text-anchor="middle" class="sm">bolts only, no prying</text></g>
+</svg>
+<figcaption><b>Figure 9.</b> T-stub mechanisms. m: bolt to the hinge at the web; n: bolt to the prying force Q at the plate edge (n &le; 1.25 m in EN 1993-1-8). B: bolt strength, &Sigma;B for the two bolts.</figcaption>
+</figure>
+<p>Each mode is a mechanism, so each gives an upper bound; the T-stub capacity is the smallest. Derive them by virtual work, with the web moving down by &delta;:</p>
+<ol class="steps">
+  <li><b>Mode 1</b> (plate fails, bolts stay put): each half turns &theta; = &delta;/m, hinges at the web and at the bolt line. W<sub>I</sub> = 2 halves &times; 2 hinges &times; M<sub>p</sub>&theta; = 4M<sub>p</sub>&delta;/m. W<sub>E</sub> = F&delta; &rArr; <b>F<sub>1</sub> = 4M<sub>p</sub>/m</b>. The plate tips press on the support: prying Q = M<sub>p</sub>/n per bolt.</li>
+  <li><b>Mode 2</b> (hinge at the web, bolts stretch at strength B): each half turns rigidly about its tip by &theta; = &delta;/(m + n), so each bolt stretches &theta;n. W<sub>I</sub> = 2M<sub>p</sub>&theta; + &Sigma;B &times; &theta;n &rArr; <b>F<sub>2</sub> = (2M<sub>p</sub> + n &Sigma;B)/(m + n)</b>.</li>
+  <li><b>Mode 3</b> (plate rigid, bolts stretch): <b>F<sub>3</sub> = &Sigma;B</b>.</li>
+</ol>
+<div class="eq">Example: m = 35, n = 30 (&le; 1.25 &times; 35 = 43.8), &ell;<sub>eff</sub> = 150 mm, t = 12 A36; two &Oslash;16 rods, F<sub>u</sub> = 400 MPa<br>
+rod: &phi;r<sub>n</sub> = 0.75 &times; (0.75 &times; 400) &times; 201 = <b>45.2 kN</b> (AISC J3.6, Table J3.2: F<sub>nt</sub> = 0.75F<sub>u</sub>); &nbsp; &Sigma;B = 90.5 kN<br>
+&phi;M<sub>p</sub> = 0.9 &times; 8 928 &times; 150 = 1.205 kN&middot;m<br>
+F<sub>1</sub> = 4 &times; 1.205&times;10<sup>6</sup>/35 = 137.7 kN; &nbsp; F<sub>2</sub> = (2 &times; 1.205&times;10<sup>6</sup> + 30 &times; 90 480)/65 = <b>78.8 kN</b>; &nbsp; F<sub>3</sub> = 90.5 kN &nbsp; &rArr; mode 2 governs<br>
+prying per rod: Q = B &minus; F<sub>2</sub>/2 = 45.2 &minus; 39.4 = 5.8 kN</div>
+<div class="chart" id="cTstub"></div>
+<p class="ref">Chart 6. Design strength of the example T-stub against plate thickness. Thin plates fail by mode 1 (up to 7.7 mm), then mode 2 up to 13.8 mm; beyond that the rods govern and a thicker plate buys nothing.</p>
+<h3>How AISC writes the same thing</h3>
+<p>AISC Manual Part 9 (as presented in Segui &sect;7.8, eqs. 7.9&ndash;7.20) uses the same two-hinge model with a ratio &alpha; = (moment at the bolt line)/(moment at the stem). Setting &alpha; = 0 (no prying) in Segui eq. 7.18 gives the plate thickness at which the bolts reach full strength:</p>
+<div class="eq">t = &radic;( 4 B b&prime; / (&phi; p F<sub>u</sub>) ), &nbsp; b&prime; = b &minus; d/2 <span class="r">Segui eq. 7.18 with &alpha; = 0</span></div>
+<p>This is the mode 2/3 boundary above (M<sub>p</sub> = mB per bolt), rewritten with two calibrations from tests: the bolt force is moved d/2 towards the stem (b&prime; instead of m), and F<sub>u</sub> replaces F<sub>y</sub> because tests showed the F<sub>y</sub> model too conservative (Segui p. 423, citing Kulak, Fisher &amp; Struik; Thornton 1992). Same mechanism, different calibration:</p>
+<div class="eq">AISC: &radic;(4 &times; 45 240 &times; 27 / (0.9 &times; 150 &times; 400)) = <b>9.5 mm</b><br>plastic theory with m and F<sub>y</sub>: &radic;(4 &times; 35 &times; 45 240 / (0.9 &times; 248 &times; 150)) = <b>13.8 mm</b></div>
+<p>Use the method of the code you design to, and don&rsquo;t mix the calibrations. For anchor rods pulling a base plate, AISC DG 1 also uses yield-line ideas (its &lambda;n&prime; = &lambda;&radic;(d b<sub>f</sub>)/4 is a &ldquo;yield-line theory cantilever distance&rdquo;, DG 1 &sect;3.1.2).</p>
+<p><b>Effective length.</b> &ell;<sub>eff</sub> is where the yield-line patterns come in: straight lines across the whole T-stub length, or local patterns around each bolt. EN 1993-1-8 Table 6.4 gives, for a bolt row away from the ends, &ell;<sub>eff</sub> = min(2&pi;m circular, 4m + 1.25e non-circular), with e the edge distance across the T-stub. The circular one is the fan of section 7: mode 1 per bolt = 2M<sub>p</sub>/m = 2 &times; m<sub>p</sub> &times; 2&pi;m / m = 4&pi; m<sub>p</sub>.</p>
+<div class="calc" id="kT">
+  <h4>Check your hand calculation: T-stub</h4>
+  <div class="in">
+    <label><span>m (mm)</span><input type="number" id="tm" value="35"></label>
+    <label><span>n (mm)</span><input type="number" id="tn" value="30"></label>
+    <label><span>&ell;<sub>eff</sub> (mm)</span><input type="number" id="tl" value="150"></label>
+    <label><span>t (mm)</span><input type="number" id="tt" value="12"></label>
+    <label><span>F<sub>y</sub> (MPa)</span><input type="number" id="tf" value="248"></label>
+    <label><span>&phi;B per bolt (kN)</span><input type="number" id="tb" value="45.24"></label>
+  </div>
+  <div class="out" id="tOut"></div>
+</div>
+
+<!-- ============================================================ 10 -->
+<h2 id="s10">10. End plates: code formulas built on yield lines</h2>
+<p>AISC Design Guide 16 and AISC 358 give each end-plate configuration as a yield-line pattern summed up in one parameter Y (mm). The plate strength is then</p>
+<div class="eq big">&phi;M<sub>pl</sub> = &phi;<sub>b</sub> F<sub>py</sub> t<sub>p</sub>&sup2; Y, &nbsp; &phi;<sub>b</sub> = 0.90 <span class="r">DG 16 Table 3-2</span></div>
+<p>Because 4m<sub>p</sub> = F<sub>y</sub>t&sup2;, the parameter is just Y = W<sub>I</sub>/(4m<sub>p</sub>&theta;) for a rotation &theta; of the beam end about its compression flange.</p>
+<figure>
+<svg class="dg" viewBox="0 0 640 444" role="img" aria-label="Flush end plate, two bolts per row: yield line pattern">
+  <rect class="pl" x="160" y="40" width="210" height="360"/>
+  <rect class="sec" x="175" y="40" width="180" height="14.7"/>
+  <rect class="sec" x="260.3" y="54.7" width="9.3" height="330.6"/>
+  <rect class="sec" x="175" y="385.3" width="180" height="14.7"/>
+  <line class="pos" x1="160" y1="54.7" x2="370" y2="54.7"/>
+  <line class="pos" x1="160" y1="107.2" x2="212.5" y2="107.2"/>
+  <line class="pos" x1="317.5" y1="107.2" x2="370" y2="107.2"/>
+  <line class="pos" x1="160" y1="181.4" x2="370" y2="181.4"/>
+  <line class="pos" x1="212.5" y1="107.2" x2="260.3" y2="54.7"/>
+  <line class="pos" x1="212.5" y1="107.2" x2="260.3" y2="181.4"/>
+  <line class="pos" x1="317.5" y1="107.2" x2="269.7" y2="54.7"/>
+  <line class="pos" x1="317.5" y1="107.2" x2="269.7" y2="181.4"/>
+  <line class="pos" x1="260.3" y1="54.7" x2="260.3" y2="181.4"/>
+  <line class="pos" x1="269.7" y1="54.7" x2="269.7" y2="181.4"/>
+  <circle class="bolt" cx="212.5" cy="107.2" r="12"/>
+  <circle class="bolt" cx="317.5" cy="107.2" r="12"/>
+  <circle class="bolt" cx="212.5" cy="332.8" r="12"/>
+  <circle class="bolt" cx="317.5" cy="332.8" r="12"/>
+  <line class="dim" x1="212.5" y1="22" x2="317.5" y2="22"/><line class="thin" x1="212.5" y1="16" x2="212.5" y2="28"/><line class="thin" x1="317.5" y1="16" x2="317.5" y2="28"/><text x="265" y="16" text-anchor="middle" class="sm">g = 70</text>
+  <line class="dim" x1="160" y1="420" x2="370" y2="420"/><text x="265" y="436" text-anchor="middle" class="sm">b<tspan baseline-shift="sub" font-size="9">p</tspan> = 140</text>
+  <line class="dim" x1="140" y1="54.7" x2="140" y2="107.2"/><text x="133" y="84.9" text-anchor="end" class="sm">p<tspan baseline-shift="sub" font-size="9">f</tspan> = 35</text>
+  <line class="dim" x1="140" y1="107.2" x2="140" y2="181.4"/><text x="133" y="148.3" text-anchor="end" class="sm">s = 49.5</text>
+  <line class="dim" x1="70" y1="107.2" x2="70" y2="392.7"/><text x="64" y="253.9" text-anchor="end" class="sm">h<tspan baseline-shift="sub" font-size="9">1</tspan></text>
+  <line class="dot" x1="66" y1="392.7" x2="190" y2="392.7"/><line class="dot" x1="66" y1="107.2" x2="198" y2="107.2"/>
+  <text x="390" y="58.7" class="sm">inner face of the tension flange</text>
+  <text x="390" y="111.2" class="sm">bolt line (bolt to edge)</text>
+  <text x="390" y="148.3" class="sm">diagonals from each bolt</text>
+  <text x="390" y="185.4" class="sm">s below the bolts</text>
+  <text x="390" y="221.4" class="sm">both faces of the web (between</text>
+  <text x="390" y="236.4" class="sm">the flange and the s-line)</text>
+  <text x="390" y="370" class="sm">beam end turns &theta; about</text>
+  <text x="390" y="385" class="sm">the compression flange</text>
+</svg>
+<figcaption><b>Figure 10.</b> Flush end plate with two bolts per row, the pattern of DG 16 Table 3-2, drawn to scale for an IPE 240 (dimensions in mm). All yield lines are drawn blue: for steel the sign does not change m<sub>p</sub>. The bolts are point supports: every region around a bolt turns about an axis through it (rule 2).</figcaption>
+</figure>
+<div class="eq">Y = (b<sub>p</sub>/2) [ h<sub>1</sub>(1/p<sub>f</sub> + 1/s) &minus; 1/2 ] + (2/g) [ h<sub>1</sub>(p<sub>f</sub> + s) ], &nbsp; s = &frac12;&radic;(b<sub>p</sub> g); use p<sub>f</sub> = s if p<sub>f</sub> &gt; s <span class="r">DG 16 Table 3-2</span></div>
+<p><b>Doing the work sum yourself.</b> Build the pattern of Figure 10 region by region: the region between the flange and the bolt line turns about the bolt line; so does the region between the bolt line and the s-line; the triangle at the web turns about the line from the compression flange through the bolt. Summing m<sub>p</sub>&theta;&ell; over all twelve lines gives exactly the two main terms, b<sub>p</sub>h<sub>1</sub>(1/p<sub>f</sub> + 1/s)/2 + 2h<sub>1</sub>(p<sub>f</sub> + s)/g (checked by <code>flushmech.m</code>). The published Y has one more term, &minus;b<sub>p</sub>/4. It lowers Y by about 3 % here, which is on the safe side; use the published formula.</p>
+<div class="eq">IPE 240 (h = 240, t<sub>f</sub> = 9.8), b<sub>p</sub> = 140, g = 70, p<sub>f</sub> = 35:<br>
+h<sub>1</sub> = 240 &minus; 9.8 &minus; 35 &minus; 4.9 = 190.3; &nbsp; s = &frac12;&radic;(140 &times; 70) = 49.5 (p<sub>f</sub> &lt; s, OK)<br>
+Y = 70 [190.3 (1/35 + 1/49.5) &minus; 0.5] + (2/70)[190.3 (35 + 49.5)] = 70 &times; 8.782 + 459.4 = <b>1 074 mm</b><br>
+t<sub>p</sub> = 12, A36: &phi;M<sub>pl</sub> = 0.9 &times; 248 &times; 144 &times; 1 074 = <b>34.5 kN&middot;m</b> &nbsp; (10 mm: 24.0; 16 mm: 61.4)</div>
+<p>For comparison, the V2 edge moment is M<sub>u</sub> = 19.05 kN&middot;m. This is the kind of check the bolted end plate of <code>cantilever_anchor_double_plate</code> will need, with the through-rods as the bolts; the bolt and prying checks of DG 16 come with it.</p>
+<p><b>Extended end plate, four bolts (4E).</b> AISC 358-16 Table 6.2 (p. 9.2-31), with the required thickness t<sub>p,req</sub> = 1.11M<sub>f</sub>/(&phi;<sub>d</sub>F<sub>yp</sub>Y<sub>p</sub>), Eq. 6.8-5:</p>
+<div class="eq">Y<sub>p</sub> = (b<sub>p</sub>/2) [ h<sub>1</sub>(1/p<sub>fi</sub> + 1/s) + h<sub>0</sub>(1/p<sub>fo</sub>) &minus; 1/2 ] + (2/g) [ h<sub>1</sub>(p<sub>fi</sub> + s) ], &nbsp; s = &frac12;&radic;(b<sub>p</sub> g); use p<sub>fi</sub> = s if p<sub>fi</sub> &gt; s</div>
+<p>Bruneau &sect;4.6.2 (Fig. 4.31, eqs. 4.61&ndash;4.63) derives it step by step, including the optimum s = &frac12;&radic;(b<sub>f</sub>g) from &part;W/&part;s = 0. That is the same minimisation you did for x in section 6.2.</p>
+
+<!-- ============================================================ 11 -->
+<h2 id="s11">11. Back to V2: what each plate check is</h2>
+<figure>
+<svg class="dg" viewBox="0 0 640 330" role="img" aria-label="V2 embed plate face with the strips of report steps 3b and 3c">
+<g transform="translate(-60,0)">
+  <rect class="pl" x="210" y="10" width="220" height="300"/>
+  <rect class="hl1" x="224" y="50.9" width="76" height="224.2"/><rect class="hl1" x="340" y="50.9" width="76" height="224.2"/>
+  <rect class="sec" x="260" y="40" width="120" height="9.8"/>
+  <rect class="sec" x="316.9" y="49.8" width="6.2" height="220.4"/>
+  <rect class="sec" x="260" y="270.2" width="120" height="9.8"/>
+  <rect class="bk" x="224" y="38.9" width="76" height="12"/><rect class="bk" x="340" y="38.9" width="76" height="12"/>
+  <rect class="hl2" x="300" y="32" width="40" height="25.8"/>
+  <rect x="300" y="32" width="40" height="25.8" fill="none" stroke="var(--s2)" stroke-width="1.5"/>
+</g>
+  <line class="thin" x1="280" y1="32" x2="414" y2="22"/><text x="418" y="26" class="sm">3b: strip 40 &times; 25.8 over the gap</text>
+  <line class="thin" x1="356" y1="44" x2="414" y2="56"/><text x="418" y="60" class="sm">platinas behind the plate (dashed)</text>
+  <line class="thin" x1="350" y1="150" x2="414" y2="150"/><text x="418" y="146" class="sm">3c: strips under the two platina</text><text x="418" y="160" class="sm">roots, b = 2 &times; 76 = 152, M = T e</text>
+  <line class="thin" x1="320" y1="275" x2="414" y2="275"/><text x="418" y="279" class="sm">3e: bearing behind the bottom flange</text>
+  <line class="thin" x1="150" y1="200" x2="90" y2="200"/><text x="86" y="196" text-anchor="end" class="sm">embed plate</text><text x="86" y="210" text-anchor="end" class="sm">12 &times; 220 &times; 300</text>
+  <line class="thin" x1="260" y1="160" x2="90" y2="120"/><text x="86" y="124" text-anchor="end" class="sm">IPE 240 web</text>
+  <line class="dim" x1="240" y1="300" x2="280" y2="300"/><text x="260" y="296" text-anchor="middle" class="sm">40</text>
+</svg>
+<figcaption><b>Figure 11.</b> Face of the V2 embed plate (to scale, edge assembly). Orange: the strip of report step 3b. Blue: the strips of step 3c. Each strip carries its load alone; everything around it is ignored.</figcaption>
+</figure>
+<div class="tw"><table class="t">
+<tr><th>Report step</th><th>Model</th><th>Plastic-theory type</th><th>Yield line?</th><th class="n">D/C</th></tr>
+<tr><td>3a through thickness</td><td>plate in tension between flange and platinas</td><td>not bending</td><td>no</td><td class="n">0.18</td></tr>
+<tr><td>3b over the gap</td><td>strip 25.8 wide, span 40, simply supported, F = 8m<sub>p</sub>b/L</td><td>lower bound for the plate; exact for the strip</td><td>yes, one line at mid-span (section 5)</td><td class="n">0.67</td></tr>
+<tr><td>3c bar offset (corner)</td><td>strip b = 152 under the platina roots, M = T e = 0.811 kN&middot;m vs &phi;m<sub>p</sub>b = 1.221 kN&middot;m</td><td>lower bound</td><td>yes, one line along the platina roots</td><td class="n">0.66</td></tr>
+<tr><td>3d platina root</td><td>tension + bending, AISC H1</td><td>member check</td><td>no</td><td class="n">0.75</td></tr>
+<tr><td>3e bearing</td><td>DG 1 cantilever c with the plate at m<sub>p</sub></td><td>strip (cantilever)</td><td>1-D: cantilever hinge along the edge of the flange footprint</td><td class="n">0.33</td></tr>
+</table></div>
+<p><b>Why the strips are safe.</b> A strip with its own supports is a moment field that is in equilibrium and never exceeds m<sub>p</sub>, with zero moment everywhere else in the plate. The whole plate admits that same field, so by the lower-bound theorem it carries at least as much. The condition is that the supports the strip leans on really exist and are strong enough: the platinas and their fillets (report steps 4 and 5e check them).</p>
+<p><b>When would V2 need a real yield-line check?</b> Only if a strip check failed and you wanted to find the reserve. Then the mechanism would have to respect things the simple patterns of this page don&rsquo;t have:</p>
+<ul>
+  <li>The plate is cast against concrete, so it can only move <i>away</i> from the concrete. The concrete is a one-sided support.</li>
+  <li>The flange, web and platinas are welded to the plate and are very stiff in their own planes. A yield line cannot cross them without also bending them.</li>
+  <li>The plate continues past every strip, so the end conditions are between pinned and clamped.</li>
+</ul>
+<p>With the largest plate ratio at 0.67 on lower bounds, V2 does not need that. The report&rsquo;s choice is the right one.</p>
+
+<!-- ============================================================ 12 -->
+<h2 id="s12">12. Pitfalls checklist</h2>
+<ol>
+  <li><b>Wrong mechanism = unsafe answer.</b> Try several patterns, optimise every free dimension, take the smallest. Prefer code patterns confirmed by tests (DG 16, AISC 358, AISC 360 Chapter K, DG 24).</li>
+  <li><b>Compatibility (rule 4).</b> A region may meet the still plate only along its own axis. Check every boundary.</li>
+  <li><b>Edges.</b> Negative lines along clamped or continuous edges; none along simply supported or free edges. A &ldquo;clamped&rdquo; edge must really be stiff.</li>
+  <li><b>Holes.</b> A yield line through bolt holes is shorter: use the net length (Segui uses &delta; = 1 &minus; d&prime;/p at the bolt line). DG 16 ignores holes because its patterns were checked against tests.</li>
+  <li><b>Shear and punching are not in the yield lines.</b> Check J4.2: &phi;V<sub>n</sub> = 1.0 &times; 0.6F<sub>y</sub>t &times; length. For small patches shear can govern (section 7).</li>
+  <li><b>What holds the plate must be stronger than the plate.</b> Welds and bolts along the supports must carry the forces at collapse, prying included. V2 checks this as its strength order (report step 5e).</li>
+  <li><b>Stiffness.</b> A yield-line strength says nothing about how much the connection rotates in service. For moment connections, AISC 360-16 B3.4b (Commentary J10.10). DG 16 &sect;2.4 adds a stiffness criterion for end plates.</li>
+  <li><b>Hidden reserve, don&rsquo;t count on it.</b> Tests are often well above yield-line predictions (membrane action, strain hardening), but only at large deformations. That is why AISC calls K2-13 a deformation limit.</li>
+  <li><b>Other stresses in the plate.</b> Axial or in-plane stress lowers the m<sub>p</sub> left for bending (Q<sub>f</sub> in the HSS formulas).</li>
+  <li><b>F<sub>y</sub> or F<sub>u</sub>?</b> Plastic theory uses F<sub>y</sub>. AISC prying uses F<sub>u</sub> by calibration (section 9). Follow the code you design to.</li>
+  <li><b>Units.</b> m<sub>p</sub> in N (N&middot;mm/mm). Pressure in MPa = N/mm&sup2;. Keep mm throughout.</li>
+</ol>
+
+<!-- ============================================================ 13 -->
+<h2 id="s13">13. Formula sheet</h2>
+<div class="tw"><table class="t">
+<tr><th>Case</th><th>Collapse load (nominal; apply &phi; = 0.90)</th><th>Type</th></tr>
+<tr><td>plastic moment per unit length</td><td>m<sub>p</sub> = F<sub>y</sub>t&sup2;/4</td><td>&ndash;</td></tr>
+<tr><td>strip, uniform load F, span L, width b</td><td>simply supported 8m<sub>p</sub>b/L; clamped 16m<sub>p</sub>b/L</td><td>exact for the strip</td></tr>
+<tr><td>strip, point load at mid-span</td><td>simply supported 4m<sub>p</sub>b/L; clamped 8m<sub>p</sub>b/L</td><td>exact for the strip</td></tr>
+<tr><td>square a, simply supported, pressure</td><td>24m<sub>p</sub>/a&sup2; (upper); 16m<sub>p</sub>/a&sup2; (lower); clamped edges: 48m<sub>p</sub>/a&sup2; (upper)</td><td>bracket</td></tr>
+<tr><td>rectangle a &times; b, simply supported, pressure</td><td>24m<sub>p</sub> / [a&sup2;(&radic;(3 + (a/b)&sup2;) &minus; a/b)&sup2;] (upper); 8m<sub>p</sub>(1/a&sup2; + 1/b&sup2;) (lower)</td><td>bracket</td></tr>
+<tr><td>point load in a continuous plate</td><td>4&pi;m<sub>p</sub> (simply supported circular plate, centre load: 2&pi;m<sub>p</sub>)</td><td>upper; check punching</td></tr>
+<tr><td>load c &times; b<sub>p</sub> between clamped edges L apart</td><td>F<sub>y</sub>t&sup2;[2&eta;/(1 &minus; &beta;) + 4/&radic;(1 &minus; &beta;)], &eta; = c/L, &beta; = b<sub>p</sub>/L; for b<sub>p</sub> = 0: m<sub>p</sub>(8c/L + 16)</td><td>upper; = AISC 360-05 K2-13</td></tr>
+<tr><td>T-stub, M<sub>p</sub> = m<sub>p</sub>&ell;<sub>eff</sub></td><td>min[ 4M<sub>p</sub>/m, (2M<sub>p</sub> + n&Sigma;B)/(m + n), &Sigma;B ], n &le; 1.25m</td><td>least of three mechanisms</td></tr>
+<tr><td>flush end plate, 2 bolts per row</td><td>&phi;M<sub>pl</sub> = 0.9F<sub>py</sub>t<sub>p</sub>&sup2;Y, Y from DG 16 Table 3-2</td><td>code pattern</td></tr>
+<tr><td>extended end plate, 4E</td><td>Y<sub>p</sub> from AISC 358-16 Table 6.2</td><td>code pattern</td></tr>
+</table></div>
+
+<!-- ============================================================ 14 -->
+<h2 id="s14">14. References</h2>
+<p>In your folder <code>C:\Users\winpat\Desktop\Bibliography4structures\</code>:</p>
+<ul>
+  <li><b>Bruneau, Uang &amp; Sabelli, <i>Ductile Design of Steel Structures</i>, 2nd ed. (2011).</b> <code>04 LIBROS\Ductile Design of Steel Structures 2nd Edition Bruneau.pdf</code>. &sect;4.3.1&ndash;4.3.3 the three theorems (pp. 192&ndash;193). &sect;4.6 Yield Lines (pp. 222&ndash;235): plate conventions, eq. 4.40 (m<sub>p</sub>), 4.41&ndash;4.42 (clamped plate), 4.44 (projection rule), 4.45&ndash;4.48 (square plate), 4.50&ndash;4.54 (rectangle), Fig. 4.27 (corner patterns), 4.55&ndash;4.56 (T-stub), 4.59&ndash;4.63 (end plates). <b>The best single source to read next.</b></li>
+  <li><b>ANSI/AISC 360-16 with Commentary.</b> <code>02 NORMATIVAS\AISC\a360-16-spec-and-commentary.pdf</code>. F1 (&phi;<sub>b</sub> = 0.90); F11.1 (M<sub>n</sub> = F<sub>y</sub>Z &le; 1.6F<sub>y</sub>S); J4.2 (shear); J4.5 (flexure of connecting elements); <b>J10.10 Transverse forces on plate elements and its User Note (p. 16.1-148)</b>; Commentary J10.10 with Fig. C-J10.10 (p. 16.1-461); B3.4b.</li>
+  <li><b>AISC 360-05</b>, in <code>02 NORMATIVAS\AISC\AISC 13th - Steel Construction Manual.pdf</code>: &sect;K2.3b(a), Eq. K2-13 (p. 16.1-132), and its Commentary (&ldquo;an analytical yield line solution&rdquo;, &phi; = 1.00).</li>
+  <li><b>AISC Design Guide 16</b>, Murray &amp; Shoemaker, <i>Flush and Extended Multiple-Row Moment End-Plate Connections</i>. <code>02 NORMATIVAS\AISC\guias de diseno\design-guide-16-...pdf</code>. &sect;2.2 Yield-line theory and mechanics (p. 7): virtual work, upper bound, &ldquo;one must find the least upper bound&rdquo;; &sect;2.3 split-tee model; &sect;2.4 stiffness; Table 3-2 (p. 18).</li>
+  <li><b>AISC Design Guide 4</b>, 2nd ed., Murray &amp; Sumner, extended end plates (seismic and wind). Same folder.</li>
+  <li><b>ANSI/AISC 358-16.</b> <code>02 NORMATIVAS\AISC\AISC 358-16 Prequalified Connections ....pdf</code>. &sect;6.8, Eq. 6.8-5, Table 6.2 (p. 9.2-31), and Tables 6.3&ndash;6.4.</li>
+  <li><b>AISC Design Guide 1</b>, 2nd ed., base plates. &sect;3.1.2 (p. 15): &lambda;n&prime; = &lambda;&radic;(d b<sub>f</sub>)/4, the &ldquo;yield-line theory cantilever distance&rdquo;; &sect;3.3.2 on yield-line analysis as an alternative.</li>
+  <li><b>AISC Design Guide 24</b>, HSS connections. Example 3.2 with Fig. 3-4, yield-line pattern of a tension branch (pp. 20&ndash;21).</li>
+  <li><b>Segui, <i>Steel Design</i>, 5th ed.</b> <code>04 LIBROS\Steel Design (5th Edition) by William T Segui.pdf</code>. &sect;7.8 Prying action (pp. 420&ndash;424), eqs. 7.9&ndash;7.20: the AISC Part 9 model and why F<sub>u</sub> is used.</li>
+</ul>
+<p>Not in your folder, worth knowing:</p>
+<ul>
+  <li>K. W. Johansen, <i>Yield-Line Theory</i>, Cement and Concrete Association, London, 1962: the original theory (for concrete slabs).</li>
+  <li>R. Park &amp; W. L. Gamble, <i>Reinforced Concrete Slabs</i>, 2nd ed., Wiley, 2000: the standard text on yield-line patterns and on the static (strip) method.</li>
+  <li>EN 1993-1-8:2005, &sect;6.2.4 (T-stub, Table 6.2) and Tables 6.4&ndash;6.6 (effective lengths for bolt rows): the most complete code catalogue of yield-line patterns around bolts.</li>
+</ul>
+
+<!-- ============================================================ 15 -->
+<h2 id="s15">15. How this page was checked</h2>
+<p>The folder <code>joint_calculations/yield_line_theory/</code> holds the checking code (MATLAB syntax, runs in Octave):</p>
+<ul>
+  <li><code>yl_work.m</code> computes W<sub>I</sub> of any mechanism from the deflection planes of its regions: for every yield line it takes the jump of slope across the line, without the projection rule. It also reports the jump of deflection along each line, which must be zero (rule 4).</li>
+  <li><code>yl_volume.m</code> computes the volume under the deflected plate (W<sub>E</sub> of a uniform load).</li>
+  <li><code>patchmech.m</code>, <code>flushmech.m</code> build the mechanisms of Figures 8 and 10; <code>lbcheck.m</code> checks lower-bound moment fields: equilibrium, edge moments, and the Johansen, Tresca and von Mises yield criteria.</li>
+  <li><code>yl_verify.m</code> runs it all and prints every number used on this page.</li>
+</ul>
+<pre class="mono" style="display:block;padding:8px 12px;overflow-x:auto">cd joint_calculations/yield_line_theory
+octave-cli yl_verify.m</pre>
+<p>What it confirmed: strips 8/16/4/8; square 24 (and the bracket from 16); the rectangle formula, its optimum x and the closed form; fans 2n tan(&pi;/n) &rarr; 2&pi;; the patch mechanism and its equality with K2-13; that the left pattern of Figure 8 tears the plate; the T-stub modes and crossovers; the DG 16 main terms; and the V2 numbers of report steps 3b and 3c.</p>
+<p class="ref">Written 2026-10-01 for the cantilever anchorage project.</p>
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var NS = 'http://www.w3.org/2000/svg';
+  function f1(v, d) { return v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }).replace(/,/g, '\u2009'); }
+
+  // circular fan lines of Figure 7
+  var g = document.getElementById('fanlines'), s = '';
+  for (var k = 0; k < 24; k++) {
+    var a = k * Math.PI / 12;
+    s += '<line x1="460" y1="115" x2="' + (460 + 90 * Math.cos(a)).toFixed(1) + '" y2="' + (115 + 90 * Math.sin(a)).toFixed(1) + '" style="stroke-width:1.4"/>';
+  }
+  g.innerHTML = s;
+
+  // ---- generic line chart: series are functions sampled on a grid, or dot lists
+  function chart(id, c) {
+    var host = document.getElementById(id);
+    var W = 640, H = c.h || 300, M = { l: 62, r: 18, t: 14, b: 48 };
+    var sx = function (v) { return M.l + (v - c.x[0]) / (c.x[1] - c.x[0]) * (W - M.l - M.r); };
+    var sy = function (v) { return H - M.b - (v - c.y[0]) / (c.y[1] - c.y[0]) * (H - M.t - M.b); };
+    var N = c.n || 200, i, j, v, o = '';
+    function path(f) {
+      var d = '';
+      for (i = 0; i <= N; i++) {
+        v = c.x[0] + (c.x[1] - c.x[0]) * i / N;
+        d += (i ? 'L' : 'M') + sx(v).toFixed(1) + ',' + sy(f(v)).toFixed(1);
+      }
+      return d;
+    }
+    o += '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + c.title + '">';
+    o += '<defs><clipPath id="' + id + 'k"><rect x="' + M.l + '" y="' + M.t + '" width="' + (W - M.l - M.r) + '" height="' + (H - M.t - M.b) + '"/></clipPath></defs>';
+    c.yt.forEach(function (t) {
+      o += '<line class="cg" x1="' + M.l + '" x2="' + (W - M.r) + '" y1="' + sy(t) + '" y2="' + sy(t) + '"/>';
+      o += '<text x="' + (M.l - 8) + '" y="' + (sy(t) + 4) + '" text-anchor="end">' + (c.yf ? c.yf(t) : t) + '</text>';
+    });
+    c.xt.forEach(function (t) {
+      o += '<text x="' + sx(t) + '" y="' + (H - M.b + 18) + '" text-anchor="middle">' + t + '</text>';
+    });
+    o += '<line class="cb" x1="' + M.l + '" x2="' + (W - M.r) + '" y1="' + sy(c.y[0]) + '" y2="' + sy(c.y[0]) + '"/>';
+    o += '<text class="tt" x="' + (M.l + (W - M.l - M.r) / 2) + '" y="' + (H - 8) + '" text-anchor="middle">' + c.xl + '</text>';
+    o += '<text class="tt" transform="translate(15,' + (M.t + (H - M.t - M.b) / 2) + ') rotate(-90)" text-anchor="middle">' + c.yl + '</text>';
+    o += '<g clip-path="url(#' + id + 'k)">';
+    if (c.band) {
+      var d = '';
+      for (i = 0; i <= N; i++) { v = c.band.x[0] + (c.band.x[1] - c.band.x[0]) * i / N; d += (i ? 'L' : 'M') + sx(v).toFixed(1) + ',' + sy(c.band.hi(v)).toFixed(1); }
+      for (i = N; i >= 0; i--) { v = c.band.x[0] + (c.band.x[1] - c.band.x[0]) * i / N; d += 'L' + sx(v).toFixed(1) + ',' + sy(c.band.lo(v)).toFixed(1); }
+      o += '<path class="band" style="fill:var(--' + (c.band.c || 's1') + ')" d="' + d + 'Z"/>';
+    }
+    if (c.env) o += '<path class="env" d="' + path(c.env) + '"/>';
+    c.s.forEach(function (S) {
+      if (S.dots) {
+        S.dots.forEach(function (x) { o += '<circle class="mkp" r="5" cx="' + sx(x) + '" cy="' + sy(S.f(x)) + '" style="fill:var(--' + S.c + ')"/>'; });
+      } else {
+        o += '<path class="cl" style="stroke:var(--' + S.c + ')" d="' + path(S.f) + '"/>';
+      }
+    });
+    o += '</g>';
+    (c.marks || []).forEach(function (m) {
+      o += '<circle class="mkp" r="5.5" cx="' + sx(m.x) + '" cy="' + sy(m.y) + '" style="fill:var(--' + (m.c || 'ink') + ')"/>';
+      o += '<text class="lab" x="' + (sx(m.x) + (m.dx || 8)) + '" y="' + (sy(m.y) + (m.dy || -8)) + '" text-anchor="' + (m.a || 'start') + '">' + m.t + '</text>';
+    });
+    (c.labels || []).forEach(function (m) {
+      o += '<text class="lab" x="' + sx(m.x) + '" y="' + sy(m.y) + '" text-anchor="' + (m.a || 'start') + '">' + m.t + '</text>';
+    });
+    o += '<line class="cx" id="' + id + 'x" y1="' + M.t + '" y2="' + (H - M.b) + '" style="display:none"/>';
+    c.s.forEach(function (S, k) { o += '<circle class="mkp" id="' + id + 'd' + k + '" r="4.5" style="fill:var(--' + S.c + ');display:none"/>'; });
+    o += '<rect class="hit" x="' + M.l + '" y="' + M.t + '" width="' + (W - M.l - M.r) + '" height="' + (H - M.t - M.b) + '"/>';
+    o += '</svg>';
+    var lg = '<div class="lg">' + c.s.map(function (S) { return '<span><i class="sw" style="background:var(--' + S.c + ')"></i>' + S.name + '</span>'; }).join('') +
+      (c.envName ? '<span><i class="sw" style="background:var(--ink);opacity:.25;height:8px"></i>' + c.envName + '</span>' : '') +
+      (c.bandName ? '<span><i class="sw" style="background:var(--' + (c.band.c || 's1') + ');opacity:.25;height:10px"></i>' + c.bandName + '</span>' : '') + '</div>';
+    var tb = '<details><summary>Data table</summary><div class="tw"><table class="t"><tr><th class="n">' + c.xl + '</th>' +
+      c.s.map(function (S) { return '<th class="n">' + S.name + '</th>'; }).join('') + '</tr>';
+    c.tab.forEach(function (x) {
+      tb += '<tr><td class="n">' + x + '</td>' + c.s.map(function (S) { var y = S.f(x); return '<td class="n">' + (isFinite(y) ? f1(y, c.dp) : '&ndash;') + '</td>'; }).join('') + '</tr>';
+    });
+    tb += '</table></div></details>';
+    host.innerHTML = '<p style="margin:0 0 2px;font-weight:600;font-size:15px">' + c.title + '</p>' + lg + svgWrap(o) + '<div class="tip"></div>' + tb;
+    var svg = host.querySelector('svg'), tip = host.querySelector('.tip'), cx = host.querySelector('#' + id + 'x');
+    function move(ev) {
+      var r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W;
+      var x = c.x[0] + (px - M.l) / (W - M.l - M.r) * (c.x[1] - c.x[0]);
+      x = Math.max(c.x[0], Math.min(c.x[1], x));
+      if (c.snap) { var b = c.snap[0]; c.snap.forEach(function (q) { if (Math.abs(q - x) < Math.abs(b - x)) b = q; }); x = b; }
+      else if (c.step) x = Math.round(x / c.step) * c.step;
+      cx.setAttribute('x1', sx(x)); cx.setAttribute('x2', sx(x)); cx.style.display = '';
+      var h = '<b>' + c.xn + ' = ' + f1(x, c.xdp || 0) + '</b>';
+      c.s.forEach(function (S, k) {
+        var y = S.f(x), dot = host.querySelector('#' + id + 'd' + k);
+        if (isFinite(y) && y >= c.y[0] && y <= c.y[1]) { dot.setAttribute('cx', sx(x)); dot.setAttribute('cy', sy(y)); dot.style.display = ''; }
+        else dot.style.display = 'none';
+        h += '<br><i class="sw" style="background:var(--' + S.c + ')"></i>' + S.name + ': ' + (isFinite(y) ? f1(y, c.dp) : '&ndash;') + ' ' + (c.u || '');
+      });
+      if (c.tipx) h += '<br>' + c.tipx(x);
+      tip.innerHTML = h; tip.style.display = 'block';
+      var hr = host.getBoundingClientRect(), left = ev.clientX - hr.left + 14;
+      if (left + tip.offsetWidth > hr.width) left = ev.clientX - hr.left - tip.offsetWidth - 14;
+      tip.style.left = Math.max(0, left) + 'px'; tip.style.top = (ev.clientY - hr.top - 10) + 'px';
+    }
+    function leave() {
+      tip.style.display = 'none'; cx.style.display = 'none';
+      c.s.forEach(function (S, k) { host.querySelector('#' + id + 'd' + k).style.display = 'none'; });
+    }
+    svg.addEventListener('mousemove', move); svg.addEventListener('mouseleave', leave);
+    svg.addEventListener('touchstart', function (e) { move(e.touches[0]); }, { passive: true });
+  }
+  function svgWrap(s) { return s; }
+
+  // ---- data
+  var mp = function (t, F) { return F * t * t / 4; };
+  var m12 = mp(12, 248);
+
+  chart('cMp', {
+    title: 'Plastic moment per unit length against thickness', xl: 'plate thickness t (mm)', yl: 'm<tspan baseline-shift="sub" font-size="10">p</tspan> (kN·m/m = kN)', xn: 't', u: 'kN',
+    x: [6, 30], y: [0, 80], xt: [6, 10, 15, 20, 25, 30], yt: [0, 20, 40, 60, 80], dp: 2, step: 1, xdp: 0,
+    s: [{ name: 'A36, Fy 248', c: 's1', f: function (t) { return mp(t, 248) / 1000; } },
+        { name: 'A572 Gr 50, Fy 345', c: 's2', f: function (t) { return mp(t, 345) / 1000; } }],
+    marks: [{ x: 12, y: m12 / 1000, t: '12 mm A36: 8.93', c: 's1', dx: -8, dy: -10, a: 'end' }],
+    tab: [6, 8, 10, 12, 16, 20, 25, 30]
+  });
+
+  var ra = 200, rb = 400;
+  var wx = function (x) { return 12 * m12 * (2 * rb * x + ra * ra) / (ra * ra * x * (3 * rb - 2 * x)); };
+  var x0 = ra / (2 * rb) * (-ra + Math.sqrt(ra * ra + 3 * rb * rb));
+  var wlo = 8 * m12 * (1 / (ra * ra) + 1 / (rb * rb)), wst = 8 * m12 / (ra * ra);
+  chart('cRect', {
+    title: 'Rectangle 200 × 400, t = 12 A36: collapse pressure of each mechanism', xl: 'ridge parameter x (mm)', yl: 'pressure (MPa)', xn: 'x', u: 'MPa',
+    x: [20, 200], y: [0, 7], xt: [20, 50, 80, 110, 140, 170, 200], yt: [0, 1, 2, 3, 4, 5, 6, 7], dp: 3, step: 1,
+    band: { x: [20, 200], lo: function () { return wlo; }, hi: function () { return wx(x0); }, c: 's1' }, bandName: 'true collapse load lies here',
+    s: [{ name: 'upper bound w(x)', c: 's1', f: wx },
+        { name: 'lower bound, two-way field', c: 's3', f: function () { return wlo; } },
+        { name: 'lower bound, one-way strip', c: 's2', f: function () { return wst; } }],
+    marks: [{ x: x0, y: wx(x0), t: 'least upper bound 3.16 MPa at x = 130', c: 's1', dx: 0, dy: -14, a: 'middle' }],
+    tab: [20, 50, 80, 110, 130.3, 160, 200]
+  });
+
+  var ub = function (q) { var r = 1 / q; return 24 / Math.pow(Math.sqrt(3 + r * r) - r, 2); };
+  var lb = function (q) { return 8 * (1 + 1 / (q * q)); };
+  chart('cBracket', {
+    title: 'Simply supported rectangle: upper and lower bound against aspect ratio', xl: 'aspect ratio b/a', yl: 'w a² / m<tspan baseline-shift="sub" font-size="10">p</tspan>', xn: 'b/a', u: '',
+    x: [1, 6], y: [0, 26], xt: [1, 2, 3, 4, 5, 6], yt: [0, 8, 16, 24], dp: 2, step: 0.05, xdp: 2,
+    band: { x: [1, 6], lo: lb, hi: ub, c: 's1' }, bandName: 'true value lies here',
+    s: [{ name: 'upper bound (yield lines)', c: 's1', f: ub }, { name: 'lower bound (two-way field)', c: 's3', f: lb }],
+    labels: [{ x: 5.9, y: 5.2, t: 'both → 8 as the plate becomes a one-way strip', a: 'end' }],
+    tab: [1, 1.5, 2, 3, 4, 6]
+  });
+
+  var fan = function (n) { return 2 * n * Math.tan(Math.PI / n); };
+  var ns = [3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 24];
+  chart('cFan', {
+    title: 'Fan of n triangles around a point load: positive yield lines only', xl: 'number of triangles n', yl: 'P / m<tspan baseline-shift="sub" font-size="10">p</tspan>', xn: 'n', u: 'm<sub>p</sub>',
+    x: [2, 25], y: [5.5, 11], xt: [3, 6, 9, 12, 15, 18, 21, 24], yt: [6, 7, 8, 9, 10, 11], dp: 3, snap: ns,
+    s: [{ name: '2n tan(π/n)', c: 's1', f: fan, dots: ns }, { name: '2π (circle)', c: 's2', f: function () { return 2 * Math.PI; } }],
+    labels: [{ x: 24.5, y: 5.9, t: '2π = 6.283', a: 'end' }],
+    tab: [3, 4, 6, 8, 12, 24]
+  });
+
+  var PL = 164, Pc = 120, Pb = 22, mw = mp(10, 248);
+  var Pe = function (e) { return mw * (8 * (Pc + 2 * e) / (PL - Pb) + 4 * PL / e) / 1000; };
+  var eo = Math.sqrt(PL * (PL - Pb)) / 2;
+  chart('cPatch', {
+    title: 'HEB 240 web, attachment 120 × 22: collapse load of each mechanism', xl: 'size of the end triangles e (mm)', yl: 'P (kN)', xn: 'e', u: 'kN',
+    x: [20, 250], y: [0, 280], xt: [20, 50, 100, 150, 200, 250], yt: [0, 50, 100, 150, 200, 250], dp: 1, step: 1,
+    s: [{ name: 'P(e), upper bound', c: 's1', f: Pe }],
+    marks: [{ x: eo, y: Pe(eo), t: 'least: 148.5 kN at e = 76.3 mm', c: 's1', dx: 0, dy: 22, a: 'middle' }],
+    tab: [20, 40, 60, 76.3, 100, 150, 250]
+  });
+
+  var Tm = 35, Tn = 30, Tl = 150, TB = 0.75 * 0.75 * 400 * Math.PI * 64;
+  var TM = function (t) { return 0.9 * mp(t, 248) * Tl; };
+  var F1 = function (t) { return 4 * TM(t) / Tm / 1000; };
+  var F2 = function (t) { return (2 * TM(t) + Tn * 2 * TB) / (Tm + Tn) / 1000; };
+  var F3 = function () { return 2 * TB / 1000; };
+  chart('cTstub', {
+    title: 'T-stub of section 9: design strength of each mode against plate thickness', xl: 'plate thickness t (mm)', yl: 'F (kN)', xn: 't', u: 'kN',
+    x: [6, 24], y: [0, 200], xt: [6, 8, 10, 12, 14, 16, 18, 20, 22, 24], yt: [0, 50, 100, 150, 200], dp: 1, step: 0.5, xdp: 1,
+    env: function (t) { return Math.min(F1(t), F2(t), F3(t)); }, envName: 'governing (smallest)',
+    s: [{ name: 'mode 1, plate', c: 's1', f: F1 }, { name: 'mode 2, plate + bolts', c: 's2', f: F2 }, { name: 'mode 3, bolts', c: 's3', f: F3 }],
+    tipx: function (t) { var a = [F1(t), F2(t), F3(t)], k = a.indexOf(Math.min.apply(null, a)); return 'governs: mode ' + (k + 1); },
+    marks: [{ x: 7.73, y: F1(7.73), t: '7.7 mm', c: 'ink', dx: 6, dy: 18 }, { x: 13.75, y: F3(), t: '13.8 mm', c: 'ink', dx: 0, dy: 22, a: 'middle' }],
+    tab: [6, 8, 10, 12, 14, 16, 20, 24]
+  });
+
+  // ---- calculators
+  function val(id) { return parseFloat(document.getElementById(id).value); }
+  function rows(r) { return '<table>' + r.map(function (x) { return '<tr><td>' + x[0] + '</td><td class="n">' + x[1] + '</td><td>' + (x[2] || '') + '</td></tr>'; }).join('') + '</table>'; }
+  function calcRect() {
+    var a = val('ra'), b = val('rb'), t = val('rt'), F = val('rf');
+    if (!(a > 0 && b > 0 && t > 0 && F > 0)) return;
+    if (a > b) { var q = a; a = b; b = q; }
+    var m = mp(t, F), r = a / b, x = a / (2 * b) * (-a + Math.sqrt(a * a + 3 * b * b));
+    var wu = 24 * m / (a * a * Math.pow(Math.sqrt(3 + r * r) - r, 2)), wl = 8 * m * (1 / (a * a) + 1 / (b * b));
+    document.getElementById('rOut').innerHTML = rows([
+      ['m<sub>p</sub> = F<sub>y</sub>t&sup2;/4', f1(m, 0), 'N'], ['optimum x', f1(x, 1), 'mm'],
+      ['upper bound w<sub>u</sub>', f1(wu, 3), 'MPa'], ['lower bound 8m<sub>p</sub>(1/a&sup2; + 1/b&sup2;)', f1(wl, 3), 'MPa'],
+      ['&phi;w<sub>l</sub> (safe design value)', f1(0.9 * wl, 3), 'MPa']]);
+  }
+  function calcPatch() {
+    var L = val('pL'), c = val('pc'), b = val('pb'), t = val('pt'), F = val('pf');
+    if (!(L > 0 && c >= 0 && b >= 0 && b < L && t > 0 && F > 0)) { document.getElementById('pOut').innerHTML = 'Need 0 &le; b<sub>p</sub> &lt; L.'; return; }
+    var eta = c / L, be = b / L, P = F * t * t * (2 * eta / (1 - be) + 4 / Math.sqrt(1 - be));
+    document.getElementById('pOut').innerHTML = rows([
+      ['&eta; = c/L, &beta; = b<sub>p</sub>/L', f1(eta, 3) + ', ' + f1(be, 3)], ['e<sub>opt</sub> = &radic;(L(L &minus; b<sub>p</sub>))/2', f1(Math.sqrt(L * (L - b)) / 2, 1), 'mm'],
+      ['P<sub>n</sub> = F<sub>y</sub>t&sup2;[2&eta;/(1&minus;&beta;) + 4/&radic;(1&minus;&beta;)]', f1(P / 1000, 1), 'kN'], ['&phi;P<sub>n</sub>, &phi; = 0.9', f1(0.9 * P / 1000, 1), 'kN'],
+      ['same with b<sub>p</sub> = 0: m<sub>p</sub>(8c/L + 16)', f1(mp(t, F) * (8 * c / L + 16) / 1000, 1), 'kN']]);
+  }
+  function calcT() {
+    var m = val('tm'), n = val('tn'), l = val('tl'), t = val('tt'), F = val('tf'), B = val('tb') * 1000;
+    if (!(m > 0 && n > 0 && l > 0 && t > 0 && F > 0 && B > 0)) return;
+    var M = 0.9 * mp(t, F) * l, a = [4 * M / m, (2 * M + n * 2 * B) / (m + n), 2 * B], k = a.indexOf(Math.min.apply(null, a));
+    document.getElementById('tOut').innerHTML = rows([
+      ['&phi;M<sub>p</sub> = 0.9 m<sub>p</sub>&ell;<sub>eff</sub>', f1(M / 1e6, 3), 'kN&middot;m'],
+      ['mode 1: 4M<sub>p</sub>/m', f1(a[0] / 1000, 1), 'kN'], ['mode 2: (2M<sub>p</sub> + n&Sigma;B)/(m + n)', f1(a[1] / 1000, 1), 'kN'], ['mode 3: &Sigma;B', f1(a[2] / 1000, 1), 'kN'],
+      ['governs', 'mode ' + (k + 1), n > 1.25 * m ? '(n &gt; 1.25m: use n = 1.25m)' : '']]);
+  }
+  [['kRect', calcRect], ['kPatch', calcPatch], ['kT', calcT]].forEach(function (p) {
+    document.getElementById(p[0]).addEventListener('input', p[1]); p[1]();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 391" width="680" height="391" font-family="Helvetica, Arial, sans-serif">
+<rect width="680" height="391" fill="#ffffff"/>
+<rect x="85.0" y="153.0" width="510.0" height="595.0" fill="#ece9e2" stroke="#6b6b6b" stroke-width="1"/>
+<rect x="0.0" y="-17.0" width="680.0" height="170.0" fill="#ece9e2" stroke="#6b6b6b" stroke-width="1"/>
+<circle cx="280.5" cy="103.7" r="13.5" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<circle cx="280.5" cy="78.2" r="13.5" fill="#c0392b" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="399.5" cy="103.7" r="13.5" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<circle cx="399.5" cy="78.2" r="13.5" fill="#c0392b" stroke="#ffffff" stroke-width="0.8"/>
+<circle cx="190.4" cy="268.6" r="10.2" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<circle cx="190.4" cy="290.7" r="10.2" fill="#5d6d7e" stroke="#ffffff" stroke-width="0.8"/>
+<polyline points="280.5,78.2 190.4,290.7 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<text x="242.2" y="184.4" font-size="11.5" text-anchor="start" fill="#111111">r = 135.8</text>
+<circle cx="340.0" cy="268.6" r="10.2" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<circle cx="340.0" cy="290.7" r="10.2" fill="#5d6d7e" stroke="#ffffff" stroke-width="0.8"/>
+<polyline points="399.5,78.2 340.0,290.7 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<text x="376.6" y="184.4" font-size="11.5" text-anchor="start" fill="#111111">r = 129.8</text>
+<circle cx="489.6" cy="268.6" r="10.2" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<circle cx="489.6" cy="290.7" r="10.2" fill="#5d6d7e" stroke="#ffffff" stroke-width="0.8"/>
+<polyline points="399.5,78.2 489.6,290.7 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<text x="451.3" y="184.4" font-size="11.5" text-anchor="start" fill="#111111">r = 135.8</text>
+<circle cx="210.8" cy="289.0" r="10.2" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<circle cx="210.8" cy="311.1" r="10.2" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<polyline points="280.5,78.2 210.8,311.1 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<text x="252.4" y="194.7" font-size="11.5" text-anchor="start" fill="#111111">r = 143.0</text>
+<circle cx="469.2" cy="289.0" r="10.2" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<circle cx="469.2" cy="311.1" r="10.2" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<polyline points="399.5,78.2 469.2,311.1 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<text x="441.1" y="194.7" font-size="11.5" text-anchor="start" fill="#111111">r = 143.0</text>
+<circle cx="190.4" cy="311.1" r="10.2" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<circle cx="489.6" cy="311.1" r="10.2" fill="#5d6d7e" fill-opacity="0.35" stroke="#5d6d7e" stroke-width="0.6"/>
+<polyline points="66.3,311.1 66.3,78.2 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="68.8,313.6 63.8,308.6 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="68.8,80.7 63.8,75.7 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="62.8" y="194.7" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-90.0 62.8 194.7)">137</text>
+<polyline points="340.0,358.7 399.5,358.7 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="337.5,361.2 342.5,356.2 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="397.0,361.2 402.0,356.2 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="369.8" y="355.2" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 369.8 355.2)">35</text>
+<polyline points="399.5,358.7 489.6,358.7 " fill="none" stroke="#222222" stroke-width="0.7"/>
+<polyline points="397.0,361.2 402.0,356.2 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<polyline points="487.1,361.2 492.1,356.2 " fill="none" stroke="#222222" stroke-width="1.3"/>
+<text x="444.6" y="355.2" font-size="11" text-anchor="middle" fill="#111111" transform="rotate(-0.0 444.6 355.2)">53</text>
+<text x="8.5" y="13.6" font-size="11.5" text-anchor="start" fill="#111111"><tspan font-weight="bold">E1. Section across the beam in line, near the back plate</tspan></text>
+<text x="8.5" y="37.4" font-size="11.5" text-anchor="start" fill="#111111">light: nominal; solid: with tolerances (anchors +15, beam bars -13)</text>
+<text x="8.5" y="382.5" font-size="11.5" text-anchor="start" fill="#111111">VCM top line at -68 (lower layer) and the 2 bars in contact under the corner bars (not counted)</text>
+</svg>

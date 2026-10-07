@@ -1,0 +1,13 @@
+TWO IPE 140 LINES (third points of B-C) instead of one IPE 160: ESTIMATE from ETABS run 2 (f_two_lines.m, 2026-10-05)
+Per line, dead: tip load 1.95 kN; M at VCS north 4.38 / south 3.87 kN m; V 4.43 / 4.15 kN. Factor 2.58.
+
+Check                                                                                          Demand Capacity   D/C
+IPE 140 north: flexure at VCS (Lb 1.45, Cb 1)                                                    11.3     17.8  0.63  kN m
+IPE 140 south cantilever: flexure at VCS (Lb 1.27, Cb 1)                                         10.0     18.3  0.54  kN m
+IPE 140: shear                                                                                   11.4     97.9  0.12  kN
+2 rods Ø20 at the top: tension (rebar fu 550, threads)                                          58.5     97.2  0.60  kN
+End plate PL 12 A36 at the rods: strips to the flange (27/35) and the web (28/55)                18.0      8.0  2.24  kN m/m
+Same, with a 12 mm extra plate (half each)                                                        9.0      8.0  1.12  kN m/m
+Alternative: strap PL 12x60 on the top flanges (73 wide): tension yield                          79.3    160.7  0.49  kN
+
+Steel per bay B-C (beams 2.72 m + connection across VCS): 1 IPE 160 53 kg; 2 IPE 140 90 kg (+70%)

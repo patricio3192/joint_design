@@ -1,0 +1,163 @@
+EQUATIONS AND REFERENCES - end_plate_column.m
+=============================================
+Units N, mm, MPa. "PDF p." = page index of the PDF file (as opened in a PDF
+viewer), not the printed page number.
+
+Files (C:\Users\winpat\Desktop\Bibliography4structures\02 NORMATIVAS\):
+  [A360] AISC\AISC 360-16 Specification for Structural Steel Buildings.pdf
+  [DG39] AISC\guias de diseno\pdfcoffee.com_aisc-design-guide-39-end-plate-moment-connections-2023-4-pdf-free.pdf
+  [DG1]  AISC\guias de diseno\design-guide-1-base-plate-and-anchor-rod-design-second-edition.pdf
+  [ACI]  ACI\ACI 318-19.pdf  (in-lb edition; SI coefficients from its Appendix C, PDF p. 587-595)
+  Not in the folder: ASTM A193 (rod Fu, Fy), ISO 7089 (washer OD 30 mm for M16).
+Items marked (SI conv.) are not in the Appendix C table; the in-lb value was converted.
+
+---------------------------------------------------------------------------
+MODULE 2 - Geometry and clashes (information)
+---------------------------------------------------------------------------
+Min clear spacing of parallel bars: max(25 mm, db, 4/3 dagg) [ACI] 25.2.1, PDF p. 469
+hef = distance from the concrete face to the bearing face of the head plate.
+
+---------------------------------------------------------------------------
+MODULE 3 - DG 39 tested geometry range
+---------------------------------------------------------------------------
+Table 5-1 tested ranges, +/-10 % (Sec. 5.2.1)              [DG39] PDF p. 69
+
+---------------------------------------------------------------------------
+MODULE 4 - Compression side (plate on 30 mm grout)
+---------------------------------------------------------------------------
+fp(max) = phi 0.85 f'c sqrt(A2/A1), sqrt(A2/A1) <= 2       [ACI] 22.8.3.2, PDF p. 431
+  A2 frustum (1V:2H) on the column face; limited by the column sides and top;
+  no edge below (cold joint at the beam soffit ignored - agreed 2026-10-07)
+phi = 0.65 bearing                                          [ACI] Table 21.2.1, PDF p. 393
+Grout strength 2 x concrete -> use concrete f'c             [DG1] Sec. 3.1, PDF p. 22
+Y = D - sqrt(D^2 - 2 Mu/(fp bp)), Pr = 0                    [DG1] Eq. 3.4.3, PDF p. 33
+Solution exists if D^2 >= 2 Mu/(fp bp)                      [DG1] Eq. 3.4.4, PDF p. 33
+  D = f + N/2 = tension row to the plate bottom edge
+m = ext + 0.025 d  (one-sided (N - 0.95d)/2); n = (bp - 0.8 bf)/2   [DG1] Sec. 3.1.2, PDF p. 22
+tp,req = 1.49 m sqrt(fp/Fy)       (Y >= m)                  [DG1] Eq. 3.3.14a-1, PDF p. 32
+tp,req = 2.11 sqrt(fp Y (m - Y/2)/Fy) (Y < m)               [DG1] Eq. 3.3.15a-1, PDF p. 32
+tp,req = 1.49 n sqrt(fp/Fy)                                 [DG1] Eq. 3.3.14a-1 with n
+Lever arm for the rods: min(h1, D - Y/2)
+DG 39 h1 = d - tf/2 - (distance to tension row)            [DG39] Table 5-2, PDF p. 70
+
+---------------------------------------------------------------------------
+MODULE 5 - Rod tension
+---------------------------------------------------------------------------
+A193 approved for threaded rods                             [A360] Sec. A3.4, PDF p. 65
+Fnt = 0.75 Fu (threaded parts); phi Rn = 0.75 Fnt Ab        [A360] Table J3.2, Eq. J3-1, PDF p. 185, 187
+Bolt rupture without prying phi Mnp = phi 2 Pt h1           [DG39] Table 5-2, PDF p. 70
+Thick-plate design path (bolt size by Eq. 5-3, then tp by Eq. 5-4, gamma_r 0.80)
+                                                            [DG39] Sec. 5.1.1, Example 5.2-1, PDF p. 65-66, 79-82
+Nsa = Ase,N futa; futa <= min(1.9 fya, 860 MPa)             [ACI] Eq. 17.6.1.2, PDF p. 249
+  Ase = pi/4 (da - 0.9382 P)^2 (M16x2: 157 mm2)             [ACI] R17.6.1.2 (metric pitch form)
+phi = 0.75 tension / 0.65 shear, ductile steel              [ACI] Table 17.5.3(a), PDF p. 248
+Fu = 860, Fy = 720 MPa (125 / 105 ksi), B7, d <= 2.5 in     ASTM A193 Table 2 (not in folder)
+
+---------------------------------------------------------------------------
+MODULE 6 - End plate, tension side (thick plate, no prying)
+---------------------------------------------------------------------------
+s = sqrt(bp g)/2; pfi = s if pfi > s                        [DG39] Table 5-2, PDF p. 70
+Yp = bp/2 [h1 (1/pfi + 1/s)] + 2/g [h1 (pfi + s)]           [DG39] Table 5-2, PDF p. 70
+phi Mpl = phi_b Fyp tp^2 Yp, phi_b = 0.90                   [DG39] Table 5-2, PDF p. 70
+gamma_r = 0.80 flush                                        [DG39] Eq. 5-1, PDF p. 65
+tp,req = sqrt(1.10 Mu/(gamma_r phi_b Fyp Yp))               [DG39] Eq. 5-4a, PDF p. 66
+
+---------------------------------------------------------------------------
+MODULE 7 - Rod shear
+---------------------------------------------------------------------------
+Shear taken by the compression-side bolts                  [DG39] Sec. 3.1, PDF p. 49; Example 5.2-1, PDF p. 79
+Fnv = 0.450 Fu (threads not excluded); phi 0.75            [A360] Table J3.2, Eq. J3-1, PDF p. 185, 187
+Vsa = 0.6 Ase,V futa (cast-in headed bolt)                  [ACI] Eq. 17.7.1.2b, PDF p. 263
+Built-up grout pad: Vsa x 0.80                              [ACI] 17.7.1.2.1, PDF p. 263
+Standard hole M16 = 18 mm                                   [A360] Table J3.3M, PDF p. 186
+  (DG 1 recommends larger holes for anchor rods)            [DG1] Table 2.3, Sec. 2.6, PDF p. 12
+Bearing 2.4 d t Fu; tearout 1.2 lc t Fu; phi 0.75           [A360] Eqs. J3-6a, J3-6c, PDF p. 192
+Friction (info): phi Vn = phi mu Pu, mu = 0.40, phi 0.75    [DG1] Sec. 3.5.1, PDF p. 34
+
+---------------------------------------------------------------------------
+MODULE 8 - Tension anchors in concrete and anchor reinforcement
+---------------------------------------------------------------------------
+Np = 8 Abrg f'c (cast-in headed)                            [ACI] Eq. 17.6.3.2.2a, PDF p. 256
+psi_c,P = 1.0 cracked                                       [ACI] 17.6.3.3.1(b), PDF p. 256
+phi = 0.70 pullout and pryout, cast-in                      [ACI] Table 17.5.3(c), PDF p. 248
+Side-face blowout if hef > 2.5 ca1: Nsb = 13 ca1 sqrt(Abrg) lambda_a sqrt(f'c)
+                                                            [ACI] Eq. 17.6.4.1, PDF p. 257; SI PDF p. 590
+Breakout (info and pryout):
+  Ncbg = ANc/ANco psi_ec psi_ed psi_c psi_cp Nb             [ACI] Eq. 17.6.2.1b, PDF p. 249
+  ANco = 9 hef^2                                            [ACI] Eq. 17.6.2.1.4, PDF p. 249/252
+  3 or more edges < 1.5 hef: hef' = max(ca,max/1.5, s/3)    [ACI] 17.6.2.1.2, PDF p. 251
+  Nb = 10 lambda_a sqrt(f'c) hef^1.5 (cast-in)              [ACI] Eq. 17.6.2.2.1, PDF p. 252; SI PDF p. 589
+  Nb = 3.9 lambda_a sqrt(f'c) hef^(5/3), 280 <= hef <= 635  [ACI] Eq. 17.6.2.2.3, PDF p. 253; SI PDF p. 589
+  psi_ed,N = 0.7 + 0.3 ca,min/(1.5 hef) <= 1                [ACI] Eq. 17.6.2.4.1a,b, PDF p. 254
+  psi_c,N = 1.0 cracked                                     [ACI] 17.6.2.5.1, PDF p. 254
+Anchor reinforcement replaces breakout if developed on both sides of the
+  breakout surface                                          [ACI] 17.5.2.1(a), PDF p. 242
+  phi = 0.75 for anchor reinforcement                       [ACI] 17.5.3, PDF p. 247
+  only bars within 0.5 hef of the anchor centreline         [ACI] R17.5.2.1, Fig. R17.5.2.1a, PDF p. 242-243
+  Breakout surface: 1.5 across per 1 along the anchor (35 deg to the face); a bar
+  at distance r crosses it at z = hef - r/1.5 (own geometry, as Fig. R17.5.2.1a)
+Hook: ldh = max(fy psi_e psi_r psi_o psi_c/(23 lambda sqrt(f'c)) db^1.5, 8db, 150 mm)
+                                                            [ACI] 25.4.3.1, PDF p. 476; SI PDF p. 594
+  psi_r = 1.0 (hook spacing >= 6db), psi_o = 1.0 (inside the column core,
+  side cover >= 65 mm), psi_c = f'c/105 + 0.6 (SI conv. of f'c/15000 + 0.6)
+                                                            [ACI] Table 25.4.3.2, PDF p. 477
+Straight: ld = fy psi_t psi_e psi_g/(k lambda sqrt(f'c)) db, k = 2.1 (spacing/cover/
+  stirrups OK) or 1.4 (other cases), bars <= 19 mm          [ACI] Table 25.4.2.3, PDF p. 474; SI PDF p. 594
+  ld >= 300 mm                                              [ACI] 25.4.2.1, PDF p. 473
+  psi_t = 1.3 (> 300 mm of fresh concrete below); psi_t psi_e <= 1.7   [ACI] Table 25.4.2.5, PDF p. 476
+
+---------------------------------------------------------------------------
+MODULE 9 - Shear anchors in concrete
+---------------------------------------------------------------------------
+Vcpg = kcp Ncpg, kcp = 2.0 (hef >= 65 mm), Ncpg = Ncbg      [ACI] Eq. 17.7.3.1b, 17.7.3.1.2, PDF p. 271
+Interaction may be neglected if Nua/phiNn <= 0.2 or Vua/phiVn <= 0.2   [ACI] 17.8.2, PDF p. 272
+
+---------------------------------------------------------------------------
+MODULE 10 - Head plates
+---------------------------------------------------------------------------
+Cantilever from the washer edge, full width a: M = q a l^2/2, l = (a - dw)/2,
+  phi Mn = 0.90 Fy a t^2/4 (same strip as DG 1 Eq. 3.3.13a). Not an ACI
+  provision: square head plates are outside ACI headed-anchor testing (agreed).
+
+---------------------------------------------------------------------------
+MODULE 11 - Spacing and edge distances
+---------------------------------------------------------------------------
+s >= 2 2/3 d                                                [A360] J3.3, PDF p. 187
+Min edge distance M16 = 22 mm                               [A360] Table J3.4M, PDF p. 188
+Min spacing 4da, min edge = specified cover (cast-in, not torqued)   [ACI] Table 17.9.2(a), PDF p. 273
+
+---------------------------------------------------------------------------
+MODULE 12 - IPE 240 shear
+---------------------------------------------------------------------------
+Vn = 0.6 Fy Aw Cv1, Aw = d tw; phi 1.00, Cv1 1.0 if h/tw <= 2.24 sqrt(E/Fy)
+                                                            [A360] Eq. G2-1, G2.1(a), PDF p. 126-127
+
+---------------------------------------------------------------------------
+MODULE 13 - Welds (same as the sandwich script)
+---------------------------------------------------------------------------
+Ru = max(Mu/(d-tf), 0.60 Fy bf tf)                          [DG39] Eq. 3-38a, PDF p. 54
+CJP: joint strength = base metal; phi 0.90 Fy bf tf         [A360] Table J2.5, Eq. J4-1, PDF p. 179, 193
+Fillet: Fnw = 0.60 FEXX (1 + 0.5 sin^1.5 theta), phi 0.75   [A360] Eqs. J2-4, J2-5, PDF p. 178
+Min fillet 5 mm (6-13 mm parts); max t - 2 mm               [A360] Table J2.4, J2.2b, PDF p. 175
+Web: Tuw = Mu/(d-tf); Tuwd = max(Tuw, 0.60 Fy tw lwt)       [DG39] Eqs. 3-39, 3-40, 3-41a, PDF p. 54
+  lwt = pfi + 6 in; lwv = min(d - 2tf - lwt, d/2 - tf)      [DG39] Example 5.2-1, PDF p. 81-82
+Web shear rupture 0.60 Fu Anv, phi 0.75                     [A360] Eq. J4-4, PDF p. 193
+
+---------------------------------------------------------------------------
+MODULE 14 - Beam-column joint (ordinary frame)
+---------------------------------------------------------------------------
+Joint shear from moment transfer must be considered         [ACI] 15.2.3, PDF p. 213
+Column extension counts only if >= h above the joint (105 < 400: "other")   [ACI] 15.2.6, PDF p. 213
+Confined by transverse beams (width >= 3/4 column, extend >= h,
+  >= 2 continuous top and bottom bars, stirrups)            [ACI] 15.2.8, PDF p. 214
+Vu on a plane at mid-height from beam bar forces (and column shear, taken 0)
+                                                            [ACI] 15.4.1.1, PDF p. 215
+  T = 0.85 f'c bw a, a from Mu (rectangular block)          [ACI] 22.2.2.4.1
+phi Vn >= Vu, phi = 0.75                                    [ACI] 15.4.2.1, 15.4.2.2, PDF p. 215
+Vn: column "other", beam "other"/confined or continuous/not confined -> 15 lambda sqrt(f'c) Aj
+  (in-lb) = 1.25 lambda sqrt(f'c) Aj (SI conv., 15 x 0.083)  [ACI] Table 15.4.2.3, PDF p. 216
+Aj = column depth x effective width <= min(bw + h, 2 x distance to side face)   [ACI] 15.4.2.4, PDF p. 216
+Joint hoops required unless confined in all directions etc. [ACI] 15.3.1.1, PDF p. 214
+  >= 2 layers within the shallowest beam depth              [ACI] 15.3.1.3, PDF p. 214
+  spacing <= 8 in (200 mm, SI conv.) within the deepest beam [ACI] 15.3.1.4, PDF p. 214
+Hooks turned toward mid-depth of the column                 [ACI] 15.3.3.2, PDF p. 215
