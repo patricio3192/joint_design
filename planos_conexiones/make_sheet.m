@@ -582,7 +582,7 @@ function it = dr_sw_front(P)
   for v = vt, for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, tb.D/2, 'r_tube'); end, end
   for v = -[sw.yT sw.yS], for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, P.rod.d/2, 'r_anc'); end, end
   it{end+1} = d_text(sw.b/2 + 20, -sw.H - 40, 'P3 + IPE 200 (después)', 'small', 'start');
-  it{end+1} = d_text(L - 20, -h + 22, 'tubos PVC 3/4" (pared ≤ 2)', 'small', 'end');
+  it{end+1} = d_text(L - 20, -h + 22, 'tubos PVC 3/4" (pared ≤ 2 mm)', 'small', 'end');
   for v = vt, it = [it, d_arrow(L - 150, -h + 35, sw.g/2 + tb.D/2 - 1, v - 3)]; end
   it{end+1} = d_text(-L + 20, -h + 75, 'estribos Ø10', 'tie', 'start');
   it{end+1} = d_dim(-sw.g/2, 0, sw.g/2, 0, 60, sprintf('%g', sw.g));
@@ -642,7 +642,7 @@ function it = dr_sw_plan(P)
     q = T{k,1};  it{end+1} = d_text(q(1) + 10, q(2) - 8, T{k,3}, iif(k == 4, 'anc', 'small'), 'start');
     it = [it, d_arrow(q(1), q(2), T{k,2}(1), T{k,2}(2))];
   end
-  it{end+1} = d_text(-xl - 10, 235, 'tubos PVC 3/4", pared ≤ 2', 'small', 'end');
+  it{end+1} = d_text(-xl - 10, 235, 'tubos PVC 3/4", pared ≤ 2 mm', 'small', 'end');
   it = [it, d_arrow(-xl, 227, -sw.g/2 - P.tube.D/2, 100)];
   it{end+1} = d_dim(-L, b/2, -L, b/2 + sw.gr, 60, sprintf('%g', sw.gr));
   it{end+1} = d_dim(L, -b/2, L, b/2, -60, sprintf('%g', b));
@@ -873,7 +873,7 @@ function rows = quantities(P)
     'E14', 'Estribo columna', 'Ø14 cerrado, ganchos 135°, L ≈ 1450; 2 por columna, las 16 columnas', '2', '32'
     'E10', 'Estribo del nudo', 'Ø10 cerrado (o 4 piezas), L ≈ 1400; cada 75 aprox. en el nudo, las 16 columnas', '4', '64'
     'G', 'Grout', sprintf('sin contracción, espesor %g, bajo P2 (5) y P3 (20); ver nota 13', P.ep.gr), '1 o 2', '25'
-    'TU', 'Tubo para A2', 'PVC conduit 3/4" de pared ≤ 2 (Ø ext. ≤ 24) o EMT 3/4" (23.4 x 1.2), L = 400 (se corta al ras), uno por A2 (nota 18)', '4', '40'
+    'TU', 'Tubo para A2', 'PVC conduit 3/4" de pared ≤ 2 mm (Ø ext. ≤ 24 mm) o EMT 3/4" (23.4 x 1.2 mm), L = 400 (se corta al ras), uno por A2 (nota 18)', '4', '40'
     'SE', 'Separador', 'taco de acero 25 x 25 x 40, en el espacio del grout: 2 por placa P3 (quedan dentro del grout)', '4', '40'
     'EP', 'Epóxico', 'de inyección, baja viscosidad, similar a Sikadur-52: relleno de los tubos, ≈ 45 ml por tubo', '-', '3 kg'};
   rows = {};
@@ -904,11 +904,11 @@ function N = notes(P)
     'La columna se funde hasta el fondo de las vigas; nudo, vigas y cabeza de columna en una sola fundida.'
     '**Losa: verter el hormigón simultáneamente a ambos lados de las vigas de los ejes 4 y D**, avanzando parejo a cada lado, para no cargar esas vigas en torsión.'
     '**Anclas preinstaladas (se funden con el hormigón): solo las A1 de las columnas** (B4, C4, D4X, D4Y, D3). **Las A2 del sándwich no:** se funden los tubos y las varillas A2 se meten después de colocar la IPE 200.'
-    ['**Tubos para las A2:** PVC conduit 3/4" de pared ≤ 2 (Ø ext. ≤ 24) o EMT 3/4", uno por ancla, de 400: atraviesa el encofrado por agujeros hechos con la plantilla; cortar al ras al desencofrar. ' ...
+    ['**Tubos para las A2:** PVC conduit 3/4" de pared ≤ 2 mm (Ø ext. ≤ 24 mm) o EMT 3/4", uno por ancla, de 400: atraviesa el encofrado por agujeros hechos con la plantilla; cortar al ras al desencofrar. ' ...
      'Fila superior: tubo apoyado sobre las barras superiores de la viga, ancla a 39. Fila inferior: tubo 2.5 más alto que el ancla, para que la varilla apoye en el fondo. Tapar los extremos al fundir. ' ...
      'Sándwich sin tuercas de nivelación: IPE 200 apuntalada y nivelada, 2 separadores de acero de 25 entre cada placa y la viga; meter las varillas (entran sueltas) y apretar a mano las tuercas exteriores, que aprietan las 2 placas contra los separadores. ' ...
      'Rellenar el tubo con epóxico de inyección de baja viscosidad (similar a Sikadur-52), por un extremo hasta que salga por el otro. Luego el grout.']
-    '**Al comprar los tubos pedir tubo "conduit" (eléctrico) de pared delgada, no tubo de presión ni roscable para agua:** su pared es más gruesa y la varilla no entra con la holgura necesaria. Verificar Ø ext. ≤ 24 y pared ≤ 2.'};
+    '**Al comprar los tubos pedir tubo "conduit" (eléctrico) de pared delgada, no tubo de presión ni roscable para agua:** su pared es más gruesa y la varilla no entra con la holgura necesaria. Verificar Ø ext. ≤ 24 mm y pared ≤ 2 mm.'};
 end
 
 % =====================================================================
