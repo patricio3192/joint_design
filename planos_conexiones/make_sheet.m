@@ -27,7 +27,7 @@ function file = make_sheet(outdir, opts)
   c2{end+1} = blk_h(2, '2. Unión placa extremo - columna (C4; igual en B4, D4X, D4Y, D3)');
   c2{end+1} = blk_draw(dr_c4_elev(P), 150, 'DETALLE 2.1 - C4: CORTE POR EL EJE DEL VOLADIZO', ...
       ['Anclajes A1 (rojo) con placa de cabeza P1 dentro de la jaula de estribos. Bastones Ø12 (naranja) con pata de 200 hacia abajo. ' ...
-       'Estribos del nudo Ø10 (morado) en 4 niveles; 2 estribos Ø14 (verde) en la cabeza de la columna. Transparente: va después.']);
+       'Estribos del nudo Ø10 (morado) cada 75 aprox.; 2 estribos Ø14 (verde) en la cabeza de la columna. Transparente: va después.']);
   c2{end+1} = blk_row([0.5 0.5], { ...
       {blk_draw(dr_c4_front(P), 135, 'DETALLE 2.2 - C4: VISTA DESDE EL VOLADIZO', ...
          'Placa P2 140x260x12 sobre grout de 25. **En D4X los A1 van a 62 y 173** (cruzan debajo de los de D4Y).')}, ...
@@ -41,15 +41,15 @@ function file = make_sheet(outdir, opts)
       {blk_draw(dr_sw_front(P), 95, 'DETALLE 3.1 - SÁNDWICH: VISTA LATERAL DE LA VIGA', ...
          'Placa P3 140x220x12 sobre grout de 25 a cada lado (después). **Un estribo a cada lado de los anclajes**, los demás cada 110 desde ellos.')}, ...
       {blk_draw(dr_sw_plan(P), 95, 'DETALLE 3.2 - SÁNDWICH: PLANTA POR LOS ANCLAJES', ...
-         'Anclajes A2 pasantes, L = 440, entre estribos. Grout 25, placas, tuercas e IPE 200: después.')}});
+         [sprintf('Anclajes A2 pasantes, L = %g, entre estribos.', P.rod.L2) ' Grout 25, placas, tuercas e IPE 200: después.'])}});
 
   % ---- column 3: pieces, quantities, notes ------------------------------------------------------
   c3{end+1} = blk_h(2, '4. Piezas, cantidades y notas');
   c3{end+1} = blk_row([1 1 1]/3, { ...
       {blk_draw(dr_tie(P, 14), 60, 'DETALLE 4.1 - ESTRIBO Ø14', ...
-         'Cabeza de la columna (105 sobre las vigas): 2 por columna, juntos, a 63 de la cara superior de la columna.')}, ...
+         'Cabeza de la columna (105 sobre las vigas): 2 por columna, juntos. Recubrimiento 36 (barras de la columna a 58).')}, ...
       {blk_draw(dr_tie(P, 10), 60, 'DETALLE 4.2 - ESTRIBO DEL NUDO Ø10', ...
-         '4 niveles: 110, 155, 230 y 305 bajo la cara superior de las vigas (cada 75 o menos).')}, ...
+         'Cada 75 aprox. en el nudo; se pueden mover ± 20 para acomodar las barras longitudinales.')}, ...
       {blk_draw(dr_tie4(P), 60, 'DETALLE 4.3 - OPCIÓN: Ø10 EN 4 PIEZAS', ...
          '4 piezas rectas con ganchos de 135° a las barras de esquina, una por cara.')}});
   c3{end+1} = blk_row([0.5 0.5], { ...
@@ -94,11 +94,12 @@ function P = params()
   P.ip2 = struct('h', 200, 'b', 100, 'tf', 8.5, 'tw', 5.6);
   % end plate on column
   P.ep = struct('t', 12, 'b', 140, 'H', 260, 'g', 80, 'yT', 42, 'yS', 198, 'gr', 25);
-  P.rod = struct('d', 16, 'tip', 345, 'L1', 440, 'L2', 440, 'nut', 16, 'wsh', 3, 'dw', 30, 'hole', 18);
+  P.rod = struct('d', 16, 'tip', 345, 'L1', 470, 'L2', 470, 'nut', 16, 'wsh', 3, 'dw', 30, 'hole', 18);
   P.hd  = struct('a', 50, 't', 12, 'z', 309);                       % head plate: bearing face at z = hef
   P.bas = struct('d', 12, 'x', 82, 'y', 80, 'yX', 98, 'zh', 66, 'Ls', 1220, 'pata', 200);
   P.jt  = [110 155 230 305];                                        % joint ties Ø10 (below the top of the beams)
-  P.tt  = [28 42];                                                  % ties Ø14 above the top of the beams
+  P.tt  = [14 28];                                                  % ties Ø14 above the top of the beams
+  P.cv  = 40;                                                       % cover: ties, and top of the column to the Ø16 hooks
   % sandwich
   P.sw = struct('gr', 25, 't', 12, 'b', 140, 'H', 220, 'g', 55, 'yT', 42, 'yS', 150, 's', 110, 'xe', 46);
 end
@@ -267,6 +268,7 @@ function it = dr_beamsec(P, kind)
   end
   it{end+1} = d_dim(-b/2, 0, b/2, 0, -100, sprintf('%g', b));
   it{end+1} = d_dim(-b/2, 0, -b/2, h, 60, sprintf('%g', h));
+  it{end+1} = d_dim(b/2, 0, b/2, ct - 5, -40, sprintf('rec. %g', ct - 5), 'before');
 end
 
 % =====================================================================
@@ -281,8 +283,8 @@ function it = dr_c4_elev(P)
   it{end+1} = d_rectxy(b, -P.bm.h, zL, 0, 'r_conc');                  % VCM (cut)
   it{end+1} = d_line(zL, 0, zL, -P.bm.h, 'edge');
   for z = [P.col.rc, b - P.col.rc]
-    zi = iif(z < b/2, z + 190, z - 190);
-    it{end+1} = d_path(fillet([z vb; z P.col.top - 48; zi P.col.top - 48], 40), 16, 'r_colS');
+    zi = iif(z < b/2, z + 190, z - 190);  vh = P.col.top - P.cv - P.col.db/2;
+    it{end+1} = d_path(fillet([z vb; z vh; zi vh], 40), 16, 'r_colS');
   end
   for z = [100 300], it{end+1} = d_path([z P.col.top + 60; z -300], 12, 'r_rodS'); end   % steel-column anchors
   for v = -P.jt, it{end+1} = d_path([45 v; b - 45 v], 10, 'r_tieS'); end
@@ -307,18 +309,22 @@ function it = dr_c4_elev(P)
     it{end+1} = d_rectxy(zi - r.wsh, v - 15, zi, v + 15, 'r_ancg');
     it{end+1} = d_rectxy(zi - r.wsh - r.nut, v - 12, zi - r.wsh, v + 12, 'r_ancg');
   end
-  % labels on the right, raised so the leaders are inclined
-  xt = zL + 90;  up = P.bm.h/2;
-  L = {40, [b - 60, P.tt(2)], '2 estribos Ø14 juntos, en la cabeza de la columna', 'new';
-       -40, [600, -56], 'VCM: 5Ø12 arriba (2 líneas), gancho contra los estribos', 'bsm';
-       -100, [700, -ba.y], sprintf('bastón Ø12: recto %g + pata %g', ba.Ls, ba.pata), 'hk';
-       -170, [b - 60, -P.jt(2)], sprintf('estribos Ø10 del nudo cada 75 aprox. (110, 155, 230, 305);\nse pueden mover ± 20 para acomodar las barras longitudinales'), 'tie';
-       -250, [300, -250], 'anclas Ø12 de la columna metálica, a 200 entre sí', 'bsm';
-       -300, [200, -282], 'VCS: 3Ø12 + 3Ø12 (cruza)', 'bsm';
-       -350, [600, -294], 'VCM: 5Ø12 abajo (2 líneas)', 'bsm'};
+  % labels on the right: short horizontal landing, inclined leader, dot on the element.
+  % Ordered so that the leaders do not cross.
+  xk = zL + 25;  xt = zL + 70;
+  L = {220, [b - 70, P.tt(2)], '2 estribos Ø14 juntos, en la cabeza de la columna', 'new';
+       160, [b - 70, -P.jt(2)], sprintf('estribos Ø10 del nudo cada 75 aprox.;\nse pueden mover ± 20 para acomodar las barras longitudinales'), 'tie';
+       85, [300, -190], 'anclas Ø12 de la columna metálica, a 200 entre sí', 'bsm';
+       35, [106, -282], 'VCS: 3Ø12 + 3Ø12 (cruza)', 'bsm';
+       -15, [880, -56], 'VCM: 5Ø12 arriba (2 líneas), gancho contra los estribos', 'bsm';
+       -65, [900, -ba.y], sprintf('bastón Ø12: recto %g + pata %g', ba.Ls, ba.pata), 'hk';
+       -115, [880, -294], 'VCM: 5Ø12 abajo (2 líneas)', 'bsm'};
   for k = 1:size(L, 1)
-    it{end+1} = d_line(xt - 10, L{k,1} + up + 8, L{k,2}(1), L{k,2}(2), 'grid');
-    it{end+1} = d_text(xt, L{k,1} + up, L{k,3}, L{k,4}, 'start');
+    vl = L{k,1} + 8;  q = L{k,2};
+    it{end+1} = d_line(xt - 8, vl, xk, vl, 'leadt');
+    it{end+1} = d_line(xk, vl, q(1), q(2), 'leadt');
+    it{end+1} = d_circle(q(1), q(2), 7, 'leadf');
+    it{end+1} = d_text(xt, L{k,1}, L{k,3}, L{k,4}, 'start');
   end
   % A1 to the left (beyond the dimensions), P1 to the right, with an arrow to each pair
   it{end+1} = d_text(zo - 130, 80, 'A1', 'anc', 'end');
@@ -341,7 +347,13 @@ function it = dr_c4_elev(P)
   it{end+1} = d_dim(0, yd, hd.z, yd, 0, sprintf('%g', hd.z));
   it{end+1} = d_dim(hd.z, yd, b, yd, 0, sprintf('%g', b - hd.z));
   it{end+1} = d_dim(0, 0, 0, P.col.top, 45, sprintf('%g', P.col.top));
-  it{end+1} = d_dim(b, P.tt(2), b, P.col.top, -40, sprintf('%g', P.col.top - P.tt(2)));
+  it{end+1} = d_dim(b, P.col.top - P.cv, b, P.col.top, -40, sprintf('rec. %g', P.cv));
+  % steel-column anchors, below the column, with their axes dashed down
+  vd = vb - 50;
+  for z = [100 300], it{end+1} = d_line(z, -300, z, vd, 'cut'); end
+  it{end+1} = d_dim(0, vd, 100, vd, 0, '100');
+  it{end+1} = d_dim(100, vd, 300, vd, 0, '200');
+  it{end+1} = d_dim(300, vd, b, vd, 0, '100');
 end
 
 % Front view from the cantilever: x horizontal (0 = column axis), v up (0 = top of beams)
@@ -355,8 +367,7 @@ function it = dr_c4_front(P)
   for v = -[68 282], it{end+1} = d_path([-420 v; 420 v], 12, 'r_bm3'); end
   it = [it, vcm_patas(P)];
   for s = [-1 1]
-    it{end+1} = d_path([s*ba.x, -ba.y; s*ba.x, -ba.y - ba.pata + 6], 12, 'r_bas');
-    it{end+1} = d_half(s*ba.x, -ba.y, 6, 1, 'r_bas');
+    it{end+1} = d_pata(s*ba.x, -ba.y, ba.pata - 6, -1, 12, 'r_bas');
   end
   it{end+1} = d_rectxy(-ep.b/2 - 10, -ep.H - 10, ep.b/2 + 10, 0, 'r_grout');
   it{end+1} = d_rectxy(-ep.b/2, -ep.H, ep.b/2, 0, 'r_eplate');
@@ -367,7 +378,7 @@ function it = dr_c4_front(P)
   end, end
   it{end+1} = d_text(0, -P.bm.h - 80, 'columna', 'label', 'middle');
   it{end+1} = d_text(-310, 30, 'VCS', 'label', 'middle');  it{end+1} = d_text(310, 30, 'VCS', 'label', 'middle');
-  it{end+1} = d_text(440, -60, sprintf('Estribos Ø10 del nudo\ncada 75 aprox.\n(110, 155, 230, 305);\n± 20 para acomodar\nlas barras longitudinales'), 'tie', 'start');
+  it{end+1} = d_text(440, -60, sprintf('Estribos Ø10 del nudo\ncada 75 aprox.;\n± 20 para acomodar\nlas barras longitudinales'), 'tie', 'start');
   it{end+1} = d_text(440, -330, 'P2 (después)', 'small', 'start');
   % plate and bastón dimensions below the column, with the axes dashed down to them
   vd = -480 - 50;
@@ -377,7 +388,8 @@ function it = dr_c4_front(P)
   it{end+1} = d_dim(-ep.b/2, -ep.H, ep.b/2, -ep.H, -(-vd + 70 - ep.H), sprintf('%g', ep.b));
   it{end+1} = d_dim(-ba.x, vd - 140, ba.x, vd - 140, 0, sprintf('%g', 2*ba.x));
   it{end+1} = d_dim(-b/2, 0, -b/2, -ba.y, 60, sprintf('%g', ba.y));
-  it{end+1} = d_dim(-b/2, P.col.top, b/2, P.col.top, 50, sprintf('%g', b));
+  it{end+1} = d_dim(-100, P.col.top + 60, 100, P.col.top + 60, 25, '200');
+  it{end+1} = d_dim(-b/2, P.col.top, b/2, P.col.top, 125, sprintf('%g', b));
   it{end+1} = d_dim(-420, 0, -420, P.col.top, 50, sprintf('%g', P.col.top));
 end
 
@@ -395,17 +407,16 @@ function it = vcm_patas(P)
   it = {};
   T = [-94 56; 0 56; 94 56; -94 80; 94 80];  B = [-94 294; 0 294; 94 294; -94 270; 94 270];
   for k = 1:5
-    it{end+1} = d_path([T(k,1), -T(k,2); T(k,1), -T(k,2) - 150], 12, 'r_bm1');
-    it{end+1} = d_half(T(k,1), -T(k,2), 6, 1, 'r_bm1');
-    it{end+1} = d_path([B(k,1), -B(k,2); B(k,1), -B(k,2) + 150], 12, 'r_bm1');
-    it{end+1} = d_half(B(k,1), -B(k,2), 6, -1, 'r_bm1');
+    it{end+1} = d_pata(T(k,1), -T(k,2), 150, -1, 12, 'r_bm1');
+    it{end+1} = d_pata(B(k,1), -B(k,2), 150, 1, 12, 'r_bm1');
   end
 end
 
-function it = d_half(x, y, r, up, s)
-  % half circle: the end of a bar that turns toward the viewer (up = 1: upper half)
-  a = linspace(0, pi, 13)';  if up < 0, a = a + pi; end
-  it = d_poly([x + r*cos(a), y + r*sin(a)], s);
+function it = d_pata(x, y, len, dir, d, s)
+  % hook leg seen from the front: the bar turns toward the viewer at (x, y), drawn as one
+  % outline with a rounded end (no line across it); dir = -1: leg goes down, 1: up
+  r = d/2;  a = linspace(0, pi, 13)';  if dir > 0, a = a + pi; end
+  it = d_poly([x - dir*r, y + dir*len; x - dir*r, y; x + r*cos(a), y + r*sin(a); x + dir*r, y; x + dir*r, y + dir*len], s);
 end
 
 function I = ishape(ip)
@@ -469,8 +480,7 @@ function it = dr_d4_front(P)
   it{end+1} = d_path(fillet([xW -282; b/2 - 70, -282; b/2 - 70, -282 + 150], 25), 12, 'r_bm3');
   it = [it, vcm_patas(P)];
   for s = [-1 1]
-    it{end+1} = d_path([s*ba.x, -ba.y; s*ba.x, -ba.y - ba.pata + 6], 12, 'r_bas');
-    it{end+1} = d_half(s*ba.x, -ba.y, 6, 1, 'r_bas');
+    it{end+1} = d_pata(s*ba.x, -ba.y, ba.pata - 6, -1, 12, 'r_bas');
   end
   xh = b/2 - ba.zh;
   it{end+1} = d_path(fillet([xh - ba.Ls, -ba.yX; xh - 6, -ba.yX; xh - 6, -ba.yX - ba.pata + 6], 25), 12, 'r_bas');
@@ -491,6 +501,8 @@ function it = dr_d4_front(P)
   it{end+1} = d_text(-700, -ba.yX - 35, sprintf('bastones D4X (a %g)', ba.yX), 'hk', 'middle');
   it{end+1} = d_text(-280, -235, 'A1 de D4X', 'anc', 'end');
   for v = -vT, it = [it, d_arrow(-275, -225, b/2 - r.tip + 15, v)]; end
+  it{end+1} = d_text(-280, -420, 'A1 de D4Y', 'anc', 'end');
+  for v = -[ep.yT ep.yS], it = [it, d_arrow(-275, -410, -ep.g/2 - 6, v - 6)]; end
   it{end+1} = d_text(0, vb - 50, 'D4Y: placa, A1 y bastones de frente (iguales a C4)', 'small', 'middle');
   % anchor axes: dashed lines out to the dimensions (D4X and D4Y, two chains on the right)
   xd = xi + 420;  xy = xd + 130;  vd = vb - 120;
@@ -589,8 +601,9 @@ function it = dr_tie(P, db)
     if sx ~= 0 || sy ~= 0, it{end+1} = d_circle(sx*c, sy*c, 8, 'r_col'); end
   end, end
   it{end+1} = d_path(Q1, db, st);  it{end+1} = d_path(Q2, db, st);
-  o = c + r + db/2;
+  o = c + r + db/2;  B = P.col.b/2;
   it{end+1} = d_dim(-o, -o, o, -o, -90, sprintf('%.0f', 2*o));
+  it{end+1} = d_dim(-B, B, -o, B, 30, sprintf('rec. %.0f', B - o));
   it{end+1} = d_dim(o, -o, o, o, -90, sprintf('%.0f', 2*o));
 end
 
@@ -678,10 +691,10 @@ function rows = quantities(P)
     'P3', 'Placa sándwich', 'PL 140x220x12 A36, 4 agujeros Ø18 (después)', '2', '20'
     'T', 'Tuerca', '5/8"-11 UNC grado 8 o A194 2H: 3 por A1 (cabeza, nivelación, exterior), 4 por A2 (2 de nivelación, 2 exteriores)', '-', '220'
     'W', 'Arandela', 'plana Ø30 x 3: 3 por A1, 4 por A2', '-', '220'
-    'BA', 'Bastón', sprintf('Ø12 fy 4200, L = %g (recto %g + pata %g hacia abajo)', Lb, P.bas.Ls, P.bas.pata), '2', '10'
-    'VE', 'Varilla extra VCS', 'Ø12 fy 4200, L = 1500, recta, abajo, centrada en F y G (eje 4)', '-', '2'
+    'BA', 'Bastón', sprintf('Ø12, L = %g (recto %g + pata %g hacia abajo)', Lb, P.bas.Ls, P.bas.pata), '2', '10'
+    'VE', 'Varilla extra VCS', 'Ø12, L = 1500, recta, abajo, centrada en F y G (eje 4)', '-', '2'
     'E14', 'Estribo columna', 'Ø14 cerrado, ganchos 135°, L ≈ 1450; 2 por columna, las 16 columnas', '2', '32'
-    'E10', 'Estribo del nudo', 'Ø10 cerrado (o 4 piezas), L ≈ 1400; 4 niveles, las 16 columnas', '4', '64'
+    'E10', 'Estribo del nudo', 'Ø10 cerrado (o 4 piezas), L ≈ 1400; cada 75 aprox. en el nudo, las 16 columnas', '4', '64'
     'G', 'Grout', sprintf('sin contracción (ASTM C1107), mínimo 280 kg/cm2, similar a SikaGrout-212, espesor %g: bajo P2 (5) y bajo P3 (20). Después de fundir', P.ep.gr), '1 o 2', '25'};
   rows = {};
   for i = 1:size(t, 1), rows{end+1} = t(i,:); end
@@ -691,13 +704,14 @@ function N = notes(P)
   N = {
     'Medidas en mm. Cotas desde la cara superior de las vigas (= cara superior de las IPE).'
     'Hormigón fc = 240 kg/cm2. Acero de refuerzo fy = 4200 kg/cm2.'
+    'Recubrimiento libre 40 a los estribos en vigas y columnas, y 40 sobre los ganchos Ø16 en la cara superior de la columna.'
     '**Anclajes A1 y A2: varilla roscada ASTM A193 B7 con certificado del proveedor.** Tuercas grado 8 o A194 2H. Apretar a mano (sin torque).'
     '**Colocar A1 y A2 antes de fundir, con una plantilla de acero perforada igual a la placa** (agujeros Ø18). Proteger las roscas con cinta.'
     'A1: placa de cabeza P1 dentro de la jaula de estribos de la columna, punta a 345 de la cara. Si choca con una barra, inclinarla o correrla unos mm.'
     '**Bastones Ø12 (2 por unión):** pata de 200 hacia abajo a 66 de la cara del voladizo, tramo recto de 1220 hacia la viga en línea, junto al par de esquina.'
     '**D4: los A1 de D4X van a 62 y 173 (debajo de los de D4Y) y sus bastones a 98.** Correr los estribos del nudo lo necesario.'
-    'Estribos del nudo Ø10 en las 16 columnas, a 110, 155, 230 y 305; deben quedar a 13 o más de anclajes y bastones.'
-    '2 estribos Ø14 juntos en los 105 de la columna sobre las vigas, en las 16 columnas. Ganchos Ø16 de la columna hacia el centro.'
+    'Estribos del nudo Ø10 en las 16 columnas, cada 75 aprox. (se pueden mover ± 20 para acomodar las barras); deben quedar a 13 o más de anclajes y bastones.'
+    '2 estribos Ø14 juntos en los 105 de la columna sobre las vigas, en las 16 columnas. Ganchos Ø16 de la columna hacia el centro, con 40 de recubrimiento a la cara superior.'
     'Sándwich: un estribo Ø10 a cada lado de los anclajes A2; los demás cada 110 desde ellos. A2 entre estribos, paralelos a sus ramas.'
     'Viga D entre 3 y 4: estribos Ø10 cada 110 de 3 a 10 y de 11 a 4; cada 140 entre 10 y 11.'
     '**Después de fundir:** placas P2 y P3, IPE, tuercas de nivelación y exteriores, grout sin contracción (ASTM C1107, mínimo 280 kg/cm2) similar a SikaGrout-212, 25 bajo P2 y P3.'
