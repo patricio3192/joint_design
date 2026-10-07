@@ -32,7 +32,7 @@ function file = make_sheet(outdir, opts)
                'Malla 4.5-15, lisa o corrugada, fy ≥ 490 MPa. Cumple la cuantía mínima: %.0f mm2/m, se piden %.0f. ' ...
                'Traslapo de la malla: 300 (2 cuadros de la malla).'], sl.hd + sl.tc, As, 0.0018*sl.tc*1000))}, ...
       {blk_draw(dr_tube(P), 69, 'DETALLE 5.2 - TUBO Y ANCLA A2 (CORTE POR LA VIGA)', ...
-         'Fila superior: tubo apoyado en las barras superiores, varilla en la parte alta del tubo. Fila inferior: tubo 2.5 más alto, varilla apoyada en el fondo. Ver notas 18 y 19.')}});
+         'En las dos filas la varilla va apoyada en el fondo del tubo. Fila superior: tubo apoyado en las barras superiores. Fila inferior: tubo 2.5 más alto que la varilla. Ver notas 18 y 19.')}});
 
   % ---- column 2: C4 and sandwich ---------------------------------------------------------
   c2{end+1} = blk_h(2, '2. Unión placa extremo - columna (C4; igual en B4, D4X, D4Y, D3)');
@@ -76,7 +76,7 @@ function file = make_sheet(outdir, opts)
   c3{end+1} = blk_table({'Marca', 'Elemento', 'Descripción', 'Por conexión', 'Total'}, quantities(P), ...
                         [0.08 0.17 0.53 0.12 0.10], [4 5], []);
   c3{end+1} = blk_note(['[[azul]]*** Opción para A1 y A2:** varilla roscada 5/8"-11 UNC ASTM A449 tipo 1 (equivalente a SAE grado 5), con certificado. ' ...
-                        'Mismas tuercas A194 2H, arandelas F436 y longitud 470. Verificada: tracción 0.85 en el sándwich y 0.33 en columnas. ' ...
+                        'Mismas tuercas A194 2H, arandelas F436 y longitud 470. Verificada: tracción 0.86 en el sándwich y 0.33 en columnas. ' ...
                         'No usar varilla común (A307, A36): no pasa en el sándwich.[[/azul]]']);
   c3{end+1} = blk_h(3, '**Notas**');
   N = notes(P);
@@ -122,7 +122,7 @@ function P = params()
   P.cv  = 40;                                                       % cover: ties, and top of the column to the Ø16 hooks
   P.tube = struct('D', 24, 't', 1.5, 'top', 50);                    % sleeve for A2 (3/4"); top bars' top at 50
   % sandwich
-  P.sw = struct('gr', 25, 't', 12, 'b', 140, 'H', 220, 'g', 55, 'yT', 39, 'yS', 150, 's', 110, 'xe', 46);
+  P.sw = struct('gr', 25, 't', 12, 'b', 140, 'H', 220, 'g', 55, 'yT', 40, 'yS', 150, 's', 110, 'xe', 46);
 end
 
 % =====================================================================
@@ -744,7 +744,7 @@ function it = dr_tube(P)
   % labels
   xl = X + 30;  a = 7;
   T = {[xl, -15], [sw.g/2 + tb.D/2, vt(1) + 3], sprintf('tubo Ø %g mm,\npared ≤ %g mm', tb.D, 2), 'small';
-       [xl, -50], [sw.g/2, -sw.yT], 'A2 arriba en el tubo', 'anc';
+       [xl, -50], [sw.g/2, -sw.yT], sprintf('A2 apoyada\nen el fondo'), 'anc';
        [xl, -80], [X - 8, -tb.top - 6], 'barras superiores', 'small';
        [xl, -150], [sw.g/2 + tb.D/2, vt(2)], sprintf('A2 apoyada\nen el fondo'), 'anc';
        [xl, 15], [xs + 4, -42], 'estribo', 'tie'};
@@ -947,7 +947,7 @@ function N = notes(P)
     '**Losa: verter el hormigón simultáneamente a ambos lados de las vigas de los ejes 4 y D**, avanzando parejo a cada lado, para no cargar esas vigas en torsión.'
     '**Anclas preinstaladas (se funden con el hormigón): solo las A1 de las columnas** (B4, C4, D4X, D4Y, D3). **Las A2 del sándwich no:** se funden los tubos y las varillas A2 se meten después de colocar la IPE 200.'
     ['**Tubos para las A2:** PVC conduit 3/4" de pared ≤ 2 mm (Ø ext. ≤ 24 mm) o EMT 3/4", uno por ancla, de 400: atraviesa el encofrado por agujeros hechos con la plantilla; cortar al ras al desencofrar. ' ...
-     'Fila superior: tubo apoyado sobre las barras superiores de la viga, ancla a 39. Fila inferior: tubo 2.5 más alto que el ancla, para que la varilla apoye en el fondo. Tapar los extremos al fundir. ' ...
+     'Fila superior: tubo apoyado sobre las barras superiores de la viga, ancla a 40. Fila inferior: tubo 2.5 más alto que el ancla. En las dos filas la varilla apoya en el fondo del tubo. Tapar los extremos al fundir. ' ...
      'Sándwich sin tuercas de nivelación: IPE 200 apuntalada y nivelada, 2 separadores de acero de 25 entre cada placa y la viga; meter las varillas (entran sueltas) y apretar a mano las tuercas exteriores, que aprietan las 2 placas contra los separadores. ' ...
      'Rellenar el tubo con epóxico de inyección de baja viscosidad (similar a Sikadur-52), por un extremo hasta que salga por el otro. Luego el grout.']
     '**Al comprar los tubos pedir tubo "conduit" (eléctrico) de pared delgada, no tubo de presión ni roscable para agua:** su pared es más gruesa y la varilla no entra con la holgura necesaria. Verificar Ø ext. ≤ 24 mm y pared ≤ 2 mm.'};

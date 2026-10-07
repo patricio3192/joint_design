@@ -58,8 +58,8 @@ Fu_rod = 860;           % ASTM A193 Table 2, B7, d <= 2.5 in: Fu = 125 ksi.
 dh  = 18;               % standard hole M16, AISC Table J3.3M [mm]
 
 % Rod positions (measured from the top face of the IPE = top of concrete)
-dist_top = 39;          % tension row [mm]: rod in a 3/4" sleeve (OD <= 24, wall <= 2) resting on the
-                        % top bars (top of bars at 50); the rod rides high in the sleeve. pfi >= 30 (Module 1)
+dist_top = 40;          % tension row [mm]: rod resting on the bottom of a 3/4" sleeve (OD <= 24,
+                        % wall <= 2) that rests on the top bars (top of bars at 50): 50 - 2 - 8. pfi >= 30 (Module 1)
 pfi = dist_top - tf;    % inner face of top flange to tension row [mm]
 g   = 55;               % gage [mm]
 dist_bot = 150;         % shear row [mm] (highest feasible row, module 7)

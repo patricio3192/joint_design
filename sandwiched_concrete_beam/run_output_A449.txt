@@ -3,38 +3,38 @@
 ==============================================================
 
 --- 1. DG 39 TABLE 5-1 TESTED RANGE (+/-10%), two-bolt flush ---
-  pf (pfi)  =   30.5 mm   range   30.0 -   62.9 mm   OK
+  pf (pfi)  =   31.5 mm   range   30.0 -   62.9 mm   OK
   g         =   55.0 mm   range   51.4 -  125.7 mm   OK
   d         =  200.0 mm   range  182.9 -  670.6 mm   OK
   bp        =  140.0 mm   range  114.3 -  391.2 mm   OK
   tf        =    8.5 mm   range    4.3 -   21.0 mm   OK
 
 --- 2. COMPRESSION SIDE (DG 1 Sec. 3.4 + ACI 22.8.3.2) ---
-  h1 (DG 39, to flange centre) = 156.8 mm;  D (to plate bottom edge) = 181.0 mm
+  h1 (DG 39, to flange centre) = 155.8 mm;  D (to plate bottom edge) = 180.0 mm
   fp(max) = phi*0.85*fc*sqrt(A2/A1) = 0.65*0.85*21*2.00 = 23.20 MPa  [ACI 22.8.3.2]
-  A1 (bounding rectangle) = 10559 mm2, A2 = 134168 mm2, sqrt(A2/A1) = 3.56 (cap 2)
+  A1 (bounding rectangle) = 10759 mm2, A2 = 134740 mm2, sqrt(A2/A1) = 3.54 (cap 2)
   Strict strips: c = 26.4 mm (DG 1 Eq. 3.3.14a-1 solved for length)
-  Pressure field from plate bottom up to y = 75.4 mm; web zone width = 58.4 mm
-  C = 158.5 kN at 32.7 mm from plate bottom -> real lever arm = 148.3 mm
-  Bearing: moment carried by compression zone    D =    23.50  C =    30.97 kNm  ratio =  0.76  OK     [DG1 3.4.1 / ACI 22.8.3.2]
+  Pressure field from plate bottom up to y = 76.8 mm; web zone width = 58.4 mm
+  C = 160.0 kN at 33.1 mm from plate bottom -> real lever arm = 146.9 mm
+  Bearing: moment carried by compression zone    D =    23.50  C =    30.67 kNm  ratio =  0.77  OK     [DG1 3.4.1 / ACI 22.8.3.2]
   Plate strip below flange (ext <= c)            D =    20.00  C =    26.42 mm   ratio =  0.76  OK     [DG1 Eq. 3.3.14a-1]
   Plate strip beyond flange tip ((bp-bf)/2 <= c) D =    20.00  C =    26.42 mm   ratio =  0.76  OK     [DG1 Eq. 3.3.14a-1]
-  FLAG: real lever arm (148.3 mm) < DG 39 h1 (156.8 mm): the flange-centre
+  FLAG: real lever arm (146.9 mm) < DG 39 h1 (155.8 mm): the flange-centre
         assumption is NOT conservative here; bolts are also checked with the real arm.
   Info, DG 1 literal (uniform fp over bp x Y, Eq. 3.4.3 with Pr = 0):
-    Y = 45.7 mm, arm = 158.1 mm, T per bolt = 74.3 kN
+    Y = 46.1 mm, arm = 157.0 mm, T per bolt = 74.9 kN
     t req: m = 25.0 mm -> 11.3 mm (Eq. 3.3.14a/15a); n = 30.0 mm -> 13.6 mm;
-           strip above flange 17.2 mm -> 7.8 mm (not a DG 1 check). tp = 12 mm
+           strip above flange 17.6 mm -> 8.0 mm (not a DG 1 check). tp = 12 mm
 
 --- 3. ROD TENSION (A193 B7: Fnt = 0.75Fu = 620 MPa) ---
-  Rod tension, DG 39 arm h1                      D =    74.96  C =    93.53 kN   ratio =  0.80  OK     [J3-1, Table J3.2; DG39 Tab.5-2]
-  Rod tension, real arm (strict strips)          D =    79.23  C =    93.53 kN   ratio =  0.85  OK     [J3-1, Table J3.2]
+  Rod tension, DG 39 arm h1                      D =    75.44  C =    93.53 kN   ratio =  0.81  OK     [J3-1, Table J3.2; DG39 Tab.5-2]
+  Rod tension, real arm (strict strips)          D =    79.99  C =    93.53 kN   ratio =  0.86  OK     [J3-1, Table J3.2]
 
 --- 4. END PLATE, TENSION SIDE (DG 39) ---
-  s = 43.9 mm, Yp = 1033.8 mm
-  End-plate yielding phi*Mpl (Table 5-2)         D =    23.50  C =    33.49 kNm  ratio =  0.70  OK     [DG39 Tab.5-2]
-  Plate thickness, thick plate Eq. 5-4a          D =    11.79  C =    12.00 mm   ratio =  0.98  OK     [DG39 Eq.5-4a, 5-1]
-  Info: Eq. 5-5a (thin plate, needs prying check) t_req = 11.24 mm
+  s = 43.9 mm, Yp = 1021.5 mm
+  End-plate yielding phi*Mpl (Table 5-2)         D =    23.50  C =    33.10 kNm  ratio =  0.71  OK     [DG39 Tab.5-2]
+  Plate thickness, thick plate Eq. 5-4a          D =    11.86  C =    12.00 mm   ratio =  0.99  OK     [DG39 Eq.5-4a, 5-1]
+  Info: Eq. 5-5a (thin plate, needs prying check) t_req = 11.31 mm
   NOTE: both DG 39 paths reported; see PENDIENTE.txt item 2.
 
 --- 5. ROD SHEAR AND PLATE BEARING ---
@@ -49,27 +49,27 @@
 
 --- 7. SHEAR-ROW POSITION SWEEP (dist from top of IPE) ---
       dist      ca1    y_field    phiVcbg_B feasible
-        87      263       71.8         46.4       no
-        97      253       71.8         44.8       no
-       107      243       71.8         43.1       no
-       117      233       71.8         41.5       no
-       127      223       71.8         39.8       no
-       137      213       71.8         38.2       no
-       147      203       74.3         36.5       no
-       153      197       76.1         35.8      yes
-       157      193       76.4         35.5      yes
-  Highest feasible shear row: dist_bot = 153 mm (input uses 150 mm)
+        88      262       72.9         46.3       no
+        98      252       72.9         44.6       no
+       108      242       72.9         43.0       no
+       118      232       72.9         41.3       no
+       128      222       72.9         39.7       no
+       138      212       72.9         38.0       no
+       148      202       76.2         36.4       no
+       152      198       77.2         35.9      yes
+       158      192       77.8         35.4      yes
+  Highest feasible shear row: dist_bot = 152 mm (input uses 150 mm)
 
 --- 8. SPACING AND EDGE DISTANCES ---
   AISC min spacing, gage (2 2/3 d)               D =    42.67  C =    55.00 mm   ratio =  0.78  OK     [AISC J3.3]
-  AISC min spacing, rows (2 2/3 d)               D =    42.67  C =   111.00 mm   ratio =  0.38  OK     [AISC J3.3]
+  AISC min spacing, rows (2 2/3 d)               D =    42.67  C =   110.00 mm   ratio =  0.39  OK     [AISC J3.3]
   AISC min edge, plate side                      D =    22.00  C =    42.50 mm   ratio =  0.52  OK     [AISC Table J3.4M]
-  AISC min edge, plate top                       D =    22.00  C =    39.00 mm   ratio =  0.56  OK     [AISC Table J3.4M]
+  AISC min edge, plate top                       D =    22.00  C =    40.00 mm   ratio =  0.55  OK     [AISC Table J3.4M]
   AISC min edge, plate bottom                    D =    22.00  C =    70.00 mm   ratio =  0.31  OK     [AISC Table J3.4M]
-  ACI Table 17.9.2(a): min spacing 4da (not torqued) = 64 mm; gage = 55 mm, rows = 111 mm
+  ACI Table 17.9.2(a): min spacing 4da (not torqued) = 64 mm; gage = 55 mm, rows = 110 mm
   -> gage below ACI minimum; WAIVED per ACI 17.9.1 by supplementary reinforcement
      (2 stirrups, one each side of the rods). ACI gives no sizing rule: engineering judgment.
-  ACI min edge (not torqued) = specified cover 40 mm; top rod clear cover = 31 mm
+  ACI min edge (not torqued) = specified cover 40 mm; top rod clear cover = 32 mm
   -> slab cast on top: the beam top is not a free edge, requirement met.
   Rods run parallel to the stirrup legs: place them between stirrups.
 
@@ -89,9 +89,9 @@
   Bottom flange fillet max size (t-2)            D =     6.00  C =     6.50 mm   ratio =  0.92  OK     [AISC J2.2b]
   Bottom flange fillet (designed for Ru)         D =   127.50  C =   235.17 kN   ratio =  0.54  OK     [AISC J2-4, J2-5]
   (bottom flange is in compression; Ru used in case of moment reversal; ext = 20 mm >= w)
-  Web tension yielding near tension rods         D =   122.72  C =   230.45 kN   ratio =  0.53  OK     [DG39 3-40; J4-1]
-  Web weld, tension region                       D =   153.64  C =   504.85 kN   ratio =  0.30  OK     [DG39 3-41a; J2-4, J2-5]
-  FLAG: DG 39 tension length pfi + 6 in. = 183 mm covers the whole web of this
+  Web tension yielding near tension rods         D =   122.72  C =   230.58 kN   ratio =  0.53  OK     [DG39 3-40; J4-1]
+  Web weld, tension region                       D =   153.72  C =   505.13 kN   ratio =  0.30  OK     [DG39 3-41a; J2-4, J2-5]
+  FLAG: DG 39 tension length pfi + 6 in. = 184 mm covers the whole web of this
         shallow beam; no weld is left for shear. Lower half of the web (91.5 mm)
         checked for tension + shear together (resultant at angle theta, J2-5).
   Web weld, tension + shear (lower half)         D =   436.12  C =  1354.86 N/mm ratio =  0.32  OK     [J2-4, J2-5 (deviation)]
@@ -137,20 +137,20 @@
 ==============================================================
   SUMMARY (ratio = demand / capacity)
 ==============================================================
-  Bearing: moment carried by compression zone         0.76  OK
+  Bearing: moment carried by compression zone         0.77  OK
   Plate strip below flange (ext <= c)                 0.76  OK
   Plate strip beyond flange tip ((bp-bf)/2 <= c)      0.76  OK
-  Rod tension, DG 39 arm h1                           0.80  OK
-  Rod tension, real arm (strict strips)               0.85  OK
-  End-plate yielding phi*Mpl (Table 5-2)              0.70  OK
-  Plate thickness, thick plate Eq. 5-4a               0.98  OK
+  Rod tension, DG 39 arm h1                           0.81  OK
+  Rod tension, real arm (strict strips)               0.86  OK
+  End-plate yielding phi*Mpl (Table 5-2)              0.71  OK
+  Plate thickness, thick plate Eq. 5-4a               0.99  OK
   Rod shear (Fnv = 0.450Fu)                           0.19  OK
   Bearing / tearout at plate hole                     0.08  OK
   Breakout, model B (both faces, one body)            0.86  OK
   AISC min spacing, gage (2 2/3 d)                    0.78  OK
-  AISC min spacing, rows (2 2/3 d)                    0.38  OK
+  AISC min spacing, rows (2 2/3 d)                    0.39  OK
   AISC min edge, plate side                           0.52  OK
-  AISC min edge, plate top                            0.56  OK
+  AISC min edge, plate top                            0.55  OK
   AISC min edge, plate bottom                         0.31  OK
   Flexure LTB, Lb = 2.4 m, Cb = 1                     0.57  OK
   Flexure LTB, Lb = 4.8 m, Cb = 1                     0.93  OK
@@ -187,5 +187,5 @@
   N2 right stirrup spacing                            0.94  OK
   N2 right long. tension face (As+Al/2)               0.85  OK
   N2 right long. compression face (Al/2)              0.37  OK
-  Governing: Plate thickness, thick plate Eq. 5-4a (0.98)
+  Governing: Plate thickness, thick plate Eq. 5-4a (0.99)
 ==============================================================
