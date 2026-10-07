@@ -67,12 +67,15 @@ function file = make_sheet(outdir, opts)
       {blk_draw(dr_rod(P, 2), 45, 'DETALLE 4.5 - ANCLAJE A2 (SÁNDWICH)', ...
          'Pasante. Grout 25, placas P3, tuercas de nivelación y exteriores: después.')}});
   c3{end+1} = blk_row([0.25 0.375 0.375], { ...
-      {blk_draw(dr_plates(P, 1), 55, 'P1 - PL 50x50x12', 'Agujero Ø18.')}, ...
-      {blk_draw(dr_plates(P, 2), 55, 'P2 - PL 140x260x12 A36', 'Columnas. 4 agujeros Ø18.')}, ...
-      {blk_draw(dr_plates(P, 3), 55, 'P3 - PL 140x220x12 A36', 'Sándwich. 4 agujeros Ø18.')}});
+      {blk_draw(dr_plates(P, 1), 50, 'P1 - PL 50x50x12', 'Agujero Ø18.')}, ...
+      {blk_draw(dr_plates(P, 2), 50, 'P2 - PL 140x260x12 A36', 'Columnas. 4 agujeros Ø18.')}, ...
+      {blk_draw(dr_plates(P, 3), 50, 'P3 - PL 140x220x12 A36', 'Sándwich. 4 agujeros Ø18.')}});
   c3{end+1} = blk_h(3, '**Cantidades (solo lo que se añade)**');
   c3{end+1} = blk_table({'Marca', 'Elemento', 'Descripción', 'Por conexión', 'Total'}, quantities(P), ...
                         [0.08 0.17 0.53 0.12 0.10], [4 5], []);
+  c3{end+1} = blk_note(['[[azul]]*** Opción para A1 y A2:** varilla roscada 5/8"-11 UNC ASTM A449 tipo 1 (equivalente a SAE grado 5), con certificado. ' ...
+                        'Mismas tuercas A194 2H, arandelas F436 y longitud 470. Verificada: tracción 0.87 en el sándwich y 0.33 en columnas. ' ...
+                        'No usar varilla común (A307, A36): no pasa en el sándwich.[[/azul]]']);
   c3{end+1} = blk_h(3, '**Notas**');
   N = notes(P);
   for i = 1:numel(N), c3{end+1} = blk_note(sprintf('%d. %s', i, N{i})); end
@@ -849,8 +852,8 @@ function rows = quantities(P)
   r = P.rod;
   Lb = P.bas.Ls + P.bas.pata;
   t = {
-    'A1', 'Anclaje columna', sprintf('varilla roscada Ø16 (5/8"-11 UNC) ASTM A193 B7, L = %g', r.L1), '4', '20'
-    'A2', 'Anclaje sándwich', sprintf('varilla roscada Ø16 (5/8"-11 UNC) ASTM A193 B7, L = %g', r.L2), '4', '40'
+    'A1', 'Anclaje columna', sprintf('varilla roscada Ø16 (5/8"-11 UNC) ASTM A193 B7*, L = %g', r.L1), '4', '20'
+    'A2', 'Anclaje sándwich', sprintf('varilla roscada Ø16 (5/8"-11 UNC) ASTM A193 B7*, L = %g', r.L2), '4', '40'
     'P1', 'Placa de cabeza', 'PL 50x50x12 A36, agujero Ø18 (una por A1)', '4', '20'
     'P2', 'Placa extremo', 'PL 140x260x12 A36, 4 agujeros Ø18 (después)', '1', '5'
     'P3', 'Placa sándwich', 'PL 140x220x12 A36, 4 agujeros Ø18 (después)', '2', '20'
@@ -870,7 +873,7 @@ function N = notes(P)
     'Medidas en mm. Cotas desde la cara superior de las vigas (= cara superior de las IPE).'
     'Hormigón: vigas y columnas fc = 240 kg/cm2; losa fc = 210 kg/cm2 (las conexiones se verificaron con 210). Acero de refuerzo fy = 4200 kg/cm2; malla electrosoldada fy ≥ 490 MPa.'
     'Recubrimiento libre 40 a los estribos en vigas y columnas, y 40 sobre los ganchos Ø16 en la cara superior de la columna.'
-    '**Anclajes A1 y A2: varilla roscada ASTM A193 B7 con certificado del proveedor.** Tuercas hexagonales pesadas ASTM A194 2H y arandelas endurecidas ASTM F436 (no usar tuercas ni arandelas comunes). Apretar a mano (sin torque).'
+    '**Anclajes A1 y A2: varilla roscada ASTM A193 B7 (o la opción * bajo la tabla) con certificado del proveedor.** Tuercas hexagonales pesadas ASTM A194 2H y arandelas endurecidas ASTM F436 (no usar tuercas ni arandelas comunes). Apretar a mano (sin torque).'
     '**Colocar A1 y A2 antes de fundir, con una plantilla de acero perforada igual a la placa** (agujeros Ø18). Proteger las roscas con cinta.'
     sprintf('A1: placa de cabeza P1 dentro de la jaula de estribos de la columna, punta a %g de la cara. Si choca con una barra, inclinarla o correrla unos mm.', P.rod.tip)
     '**Bastones Ø12 (2 por unión):** pata de 200 hacia abajo a 66 de la cara del voladizo, tramo recto de 1220 hacia la viga en línea, junto al par de esquina.'

@@ -150,6 +150,7 @@ import re  # noqa: E402
 
 def _P(text, style):
     t = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", J.escape(str(text)))
+    t = re.sub(r"\[\[azul\]\](.+?)\[\[/azul\]\]", r'<font color="#1f5fa8">\1</font>', t)   # blue text
     return J.Paragraph(t, style)
 
 
