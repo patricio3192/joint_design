@@ -15,7 +15,7 @@ function file = make_sheet(outdir, opts)
       ['**Rojo: unión placa extremo-columna** (B4, C4, D4X, D4Y, D3), con 2 bastones Ø12 (naranja) en la viga en línea; ' ...
        'punto naranja: pata hacia abajo. **Círculos: conexión sándwich (10)**, con los 2 anclajes que atraviesan la viga. ' ...
        'Viga D entre 3 y 4: estribos Ø10 cada 110 / 140 / 110. Ejes 4 (B-C y C-D): **VCS+1Ø12**, varilla extra abajo (celeste). ' ...
-       'Azul: vigas de acero IPE 240 (voladizos) e IPE 160 (bordes en los ejes 9 y E).']);
+       'Azul: IPE 240 (voladizos). Verde claro: IPE 160 (bordes en los ejes 9 y E).']);
   c1{end+1} = blk_row([1 1 1]/3, { ...
       {blk_draw(dr_beamsec(P, 'vcs1'), 95, 'CORTE A-A: VCS+1Ø12 (EJE 4)', ...
          '3Ø12 arriba, 4Ø12 abajo (1-2-1). **Varilla extra Ø12, L = 1500, centrada en el cruce con la IPE 200 (ejes F y G).**')}, ...
@@ -176,8 +176,8 @@ function it = dr_keyplan(P)
   for y = [y4 y3], it{end+1} = d_rectxy(xD + c, y - bf/2, xE, y + bf/2, 'plate'); end
   % edge beams IPE 160 on grids 9 (B to E) and E (9 to 3)
   b6 = P.ip6.b;
-  it{end+1} = d_rectxy(xB - bf/2, y9 - b6/2, xE + b6/2, y9 + b6/2, 'plate');
-  it{end+1} = d_rectxy(xE - b6/2, y9 + b6/2, xE + b6/2, y3 + bf/2, 'plate');
+  it{end+1} = d_rectxy(xB - bf/2, y9 - b6/2, xE + b6/2, y9 + b6/2, 'ipe160');
+  it{end+1} = d_rectxy(xE - b6/2, y9 + b6/2, xE + b6/2, y3 + bf/2, 'ipe160');
   % extra bar of VCS+1Ø12 (drawn just south of the beam), centred on F and G
   for x = [xF xG]
     it{end+1} = d_path([x - 750, y4 - bw/2 - 90; x + 750, y4 - bw/2 - 90], 45, 'r_bm2');
@@ -863,7 +863,7 @@ function rows = quantities(P)
     'VE', 'Varilla extra VCS', 'Ø12, L = 1500, recta, abajo, centrada en F y G (eje 4)', '-', '2'
     'E14', 'Estribo columna', 'Ø14 cerrado, ganchos 135°, L ≈ 1450; 2 por columna, las 16 columnas', '2', '32'
     'E10', 'Estribo del nudo', 'Ø10 cerrado (o 4 piezas), L ≈ 1400; cada 75 aprox. en el nudo, las 16 columnas', '4', '64'
-    'G', 'Grout', sprintf('sin contracción (ASTM C1107), mínimo 280 kg/cm2, similar a SikaGrout-212, espesor %g: bajo P2 (5) y bajo P3 (20). Después de fundir', P.ep.gr), '1 o 2', '25'};
+    'G', 'Grout', sprintf('sin contracción, espesor %g, bajo P2 (5) y P3 (20); ver nota 13', P.ep.gr), '1 o 2', '25'};
   rows = {};
   for i = 1:size(t, 1), rows{end+1} = t(i,:); end
 end
@@ -882,8 +882,9 @@ function N = notes(P)
     '2 estribos Ø14 juntos en los 105 de la columna sobre las vigas, en las 16 columnas. Ganchos Ø16 de la columna hacia el centro, con 40 de recubrimiento a la cara superior.'
     'Sándwich: un estribo Ø10 a cada lado de los anclajes A2; los demás cada 110 desde ellos. A2 entre estribos, paralelos a sus ramas.'
     'Viga D entre 3 y 4: estribos Ø10 cada 110 de 3 a 10 y de 11 a 4; cada 140 entre 10 y 11.'
-    ['**Después de fundir:** placas P2 y P3, IPE, tuercas de nivelación y exteriores, grout sin contracción (ASTM C1107, mínimo 280 kg/cm2) similar a SikaGrout-212, 25 bajo P2 y P3. ' ...
-     '**Grout y no mortero:** el mortero se retrae al secar y deja la placa sin apoyo; el grout no se contrae, es fluido y llena los 25 sin vacíos, y gana resistencia rápido.']
+    ['**Después de fundir, en este orden:** 1) soldar cada IPE a su placa (mejor en el suelo); 2) placa sobre las tuercas de nivelación, a plomo y nivel, voladizos apuntalados, tuercas exteriores a mano; ' ...
+     '3) grout sin contracción (ASTM C1107, mínimo 280 kg/cm2, similar a SikaGrout-212), 25 bajo P2 y P3; 4) retirar los puntales cuando el grout alcance la resistencia del fabricante. ' ...
+     'No soldar después del grout: lo calienta y lo despega. **Grout y no mortero:** el mortero se retrae y deja la placa sin apoyo; el grout no se contrae, llena sin vacíos y gana resistencia rápido.']
     ['**Soldaduras viga - placa (detalle 5), todas en obra:** electrodo E70XX de bajo hidrógeno (E7018), soldador calificado según AWS D1.1. ' ...
      'Ala superior: penetración completa (CJP) en todo el ancho, con bisel en el ala, junta precalificada AWS D1.1 (con respaldo, o resanando la raíz por debajo y rematando), sin agujeros de acceso. ' ...
      'Ala inferior: filete de 6 por fuera en todo el ancho y por dentro de la punta del ala al inicio del radio. Alma: filete de 6 a ambos lados en la parte recta. ' ...
