@@ -176,8 +176,17 @@ function it = dr_keyplan(P)
   for y = [y4 y3], it{end+1} = d_rectxy(xD + c, y - bf/2, xE, y + bf/2, 'plate'); end
   % edge beams IPE 160 on grids 9 (B to E) and E (9 to 3)
   b6 = P.ip6.b;
-  it{end+1} = d_rectxy(xB - bf/2, y9 - b6/2, xE + b6/2, y9 + b6/2, 'ipe160');
-  it{end+1} = d_rectxy(xE - b6/2, y9 + b6/2, xE + b6/2, y3 + bf/2, 'ipe160');
+  % cut between the beams they frame into (shear connections): on 9 between the IPE 240 / IPE 200 tips,
+  % on E between 9, the D4X cantilever (4) and the D3 cantilever (3)
+  gp = 25;                                                                    % gap drawn at each shear connection
+  xs = [xB xF xC xG xD];  ws = [bf P.ip2.b bf P.ip2.b bf];
+  for k = 1:numel(xs)
+    xa = xs(k) + ws(k)/2 + gp;
+    if k < numel(xs), xb = xs(k+1) - ws(k+1)/2 - gp; else, xb = xE + b6/2; end
+    it{end+1} = d_rectxy(xa, y9 - b6/2, xb, y9 + b6/2, 'ipe160');
+  end
+  it{end+1} = d_rectxy(xE - b6/2, y9 + b6/2 + gp, xE + b6/2, y4 - bf/2 - gp, 'ipe160');
+  it{end+1} = d_rectxy(xE - b6/2, y4 + bf/2 + gp, xE + b6/2, y3 - bf/2 - gp, 'ipe160');
   % extra bar of VCS+1Ø12 (drawn just south of the beam), centred on F and G
   for x = [xF xG]
     it{end+1} = d_path([x - 750, y4 - bw/2 - 90; x + 750, y4 - bw/2 - 90], 45, 'r_bm2');
