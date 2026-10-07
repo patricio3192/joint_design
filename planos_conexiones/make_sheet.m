@@ -350,7 +350,7 @@ function it = dr_c4_elev(P)
   % Ordered so that the leaders do not cross.
   xk = zL + 25;  xt = zL + 70;
   L = {220, [b - 70, P.tt(2)], '2 estribos Ø14 juntos, en la cabeza de la columna', 'new';
-       160, [b - 70, -P.jt(2)], sprintf('estribos Ø10 del nudo cada 75 aprox.;\nse pueden mover ± 20 para acomodar las barras longitudinales'), 'tie';
+       160, [b - 70, -P.jt(2)], sprintf('estribos Ø10 del nudo, 4 en total, cada 75 aprox.;\nse pueden mover ± 20 para acomodar las barras longitudinales'), 'tie';
        85, [300, -190], 'anclas Ø12 de la columna metálica, a 200 entre sí', 'bsm';
        35, [106, -282], 'VCS: 3Ø12 + 3Ø12 (cruza)', 'bsm';
        -15, [880, -56], 'VCM: 5Ø12 arriba (2 líneas), gancho contra los estribos', 'bsm';
