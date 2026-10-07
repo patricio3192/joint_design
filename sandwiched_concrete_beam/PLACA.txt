@@ -16,7 +16,7 @@ PLATE
 HOLES (4 x dia. 18, standard hole for 16 mm rods, AISC Table J3.3M)
   Horizontal ....... gage 55: x = -27.5 and +27.5 from the plate centreline
                      (edge distance to the plate sides 42.5)
-  Tension row ...... 42 below the plate top edge (33.5 below the inner face of
+  Tension row ...... 39 below the plate top edge (30.5 below the inner face of
                      the top flange)
   Shear row ........ 150 below the plate top edge (70 above the plate bottom
                      edge; 41.5 above the inner face of the bottom flange)
@@ -26,7 +26,7 @@ HOLES (4 x dia. 18, standard hole for 16 mm rods, AISC Table J3.3M)
           +---------------------------------+  -- 0   (top of IPE / concrete)
           |=========== top flange ==========|     CJP groove weld
           |                                 |
-          |      O          |          O    |  -- 42   tension row
+          |      O          |          O    |  -- 39   tension row
           |                 |               |
           |                 | web           |
           |                 |               |
@@ -62,3 +62,7 @@ CONCRETE BEAM (at the joint)
   - 2 extra closed stirrups (135 deg hooks), one each side of the rod pair, as
     close to the rods as possible (splitting control, ACI 17.9.1).
   - Stirrup spacing <= 110 in the torsion zone (PENDIENTE item 3).
+
+2026-10-07: tension row moved from 42 to 39. The A2 rods go in 3/4" sleeves (OD <= 24,
+wall <= 2) cast in the beam, resting on the top bars; rods inserted after the IPE is placed.
+pfi = 30.5 (DG 39 range >= 30.0). See run_output.txt.

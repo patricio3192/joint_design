@@ -19,7 +19,7 @@ PENDIENTES - planos_conexiones   (actualizado 2026-10-07)
      flecha, pandeo lateral), la punta del voladizo IPE 240 que la recibe
      (carga y torsión) y la unión de continuidad. Detallar la unión en la lámina.
 
-2. Montaje de las IPE 200 con sándwich en los dos extremos
+2. Montaje de las IPE 200 con sándwich en los dos extremos   [RESUELTO 2026-10-07: tubos]
    - Ejes 10 y 11, tramos A-B, B-C y C-D (6 tramos). Las A2 sobresalen ~50 de
      la cara de la placa P3, dentro del perfil de la IPE: con las anclas puestas
      el tramo no entra (tendría que avanzar hacia los dos extremos a la vez).
@@ -33,3 +33,6 @@ PENDIENTES - planos_conexiones   (actualizado 2026-10-07)
        4. Muñones de IPE soldados a las P3 y empalme a momento en obra.
    - POR HACER: decidir (¿vigas A, B, C, D ya fundidas?), recalcular el sándwich
      para la opción elegida y actualizar los detalles 3.1, 3.2, 4.5 y la nota 13.
+   - RESUELTO: tubos 3/4" en las vigas (notas 17 y 18 de la lámina); las A2 se meten después de
+     colocar la IPE. Fila de tracción a 39 (sandwiched_connection.m, run_output.txt). MONTAJE.txt queda
+     solo como referencia.

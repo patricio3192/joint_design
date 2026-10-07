@@ -58,7 +58,8 @@ Fu_rod = 860;           % ASTM A193 Table 2, B7, d <= 2.5 in: Fu = 125 ksi.
 dh  = 18;               % standard hole M16, AISC Table J3.3M [mm]
 
 % Rod positions (measured from the top face of the IPE = top of concrete)
-dist_top = 50 - d_b/2;  % tension row [mm]
+dist_top = 39;          % tension row [mm]: rod in a 3/4" sleeve (OD <= 24, wall <= 2) resting on the
+                        % top bars (top of bars at 50); the rod rides high in the sleeve. pfi >= 30 (Module 1)
 pfi = dist_top - tf;    % inner face of top flange to tension row [mm]
 g   = 55;               % gage [mm]
 dist_bot = 150;         % shear row [mm] (highest feasible row, module 7)
@@ -364,7 +365,7 @@ S(end+1,:) = print_check('Web weld, tension region', Tuwd/1e3, 0.75*2*0.60*FEXX*
 lt   = h - 2*tf - lwt;
 l05  = h/2 - tf;
 lwv  = min(lt, l05);
-if lwv > 0
+if lt >= l05                                       % tension region leaves at least the lower half for shear
     S(end+1,:) = print_check('Web weld, shear region', Vu/1e3, 0.75*2*0.60*FEXX*0.707*w_web*lwv/1e3, 'kN', 'J2-4 (theta = 0)');
     S(end+1,:) = print_check('Web shear rupture at weld', Vu/1e3, 0.75*0.60*Fu*lwv*tw/1e3, 'kN', 'AISC J4-4');
 else

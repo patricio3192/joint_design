@@ -11,11 +11,11 @@ function file = make_sheet(outdir, opts)
   % ---- column 1: location plan and sections -------------------------------------------
   c1{end+1} = blk_h(1, 'Conexiones de vigas de acero a vigas y columnas de hormigón');
   c1{end+1} = blk_h(2, '1. Planta de ubicación');
-  c1{end+1} = blk_draw(dr_keyplan(P), 300, 'PLANTA DE UBICACIÓN', ...
+  c1{end+1} = blk_draw(dr_keyplan(P), 320, 'PLANTA DE UBICACIÓN', ...
       ['**Rojo: unión placa extremo-columna** (B4, C4, D4X, D4Y, D3), con 2 bastones Ø12 (naranja) en la viga en línea; ' ...
        'punto naranja: pata hacia abajo. **Círculos: conexión sándwich (10)**, con los 2 anclajes que atraviesan la viga. ' ...
        'Viga D entre 3 y 4: estribos Ø10 cada 110 / 140 / 110. Ejes 4 (B-C y C-D): **VCS+1Ø12**, varilla extra abajo (celeste). ' ...
-       'Azul: IPE 240 (voladizos). Verde claro: IPE 160 (bordes en los ejes 9 y E).']);
+       'Azul: IPE 240 (voladizos). Verde claro: IPE 160 (bordes en los ejes 9 y E). Blanco: tubos para las anclas A2 (se meten después).']);
   c1{end+1} = blk_row([1 1 1]/3, { ...
       {blk_draw(dr_beamsec(P, 'vcs1'), 95, 'CORTE A-A: VCS+1Ø12 (EJE 4)', ...
          '3Ø12 arriba, 4Ø12 abajo (1-2-1). **Varilla extra Ø12, L = 1500, centrada en el cruce con la IPE 200 (ejes F y G).**')}, ...
@@ -23,14 +23,13 @@ function file = make_sheet(outdir, opts)
          'B4, C4, D4Y. VCM 5Ø12 + 5Ø12 (pares en las esquinas). **Bastones Ø12 junto al par de esquina, a 80 de arriba.**')}, ...
       {blk_draw(dr_beamsec(P, 'vcs'), 95, 'CORTE C-C: VCS CON BASTONES', ...
          'D4X y D3. VCS 3Ø12 + 3Ø12. **Bastones Ø12 contra el estribo, debajo de las esquinas, a 80 de arriba (en D4X: a 98).**')}});
-  c1{end+1} = blk_h(2, '5. Soldadura de las vigas a las placas (IPE 240 a P2, IPE 200 a P3)');
-  c1{end+1} = blk_row([0.58 0.42], { ...
-      {blk_draw(dr_weld_front(P), 68, 'DETALLE 5.1 - SOLDADURAS VIGA - PLACA, VISTA DE FRENTE', ...
-         ['Mismo detalle para IPE 240 + P2 e IPE 200 + P3 (dibujada la IPE 240). **Todas en obra, E70XX.** Largos de los filetes de 6: ' ...
-          'IPE 240: alma 2 x 190, ala inferior 120 por fuera y 2 x 42 por dentro; IPE 200: alma 2 x 159, ala inferior 100 por fuera y 2 x 35 por dentro. ' ...
-          '**No soldar en los radios entre ala y alma.**'])}, ...
-      {blk_draw(dr_weld_side(P), 68, 'DETALLE 5.2 - CORTE POR EL ALMA', ...
-         'Bandera: soldadura en obra. Ala superior: CJP con bisel en el ala, junta precalificada AWS D1.1, sin agujeros de acceso.')}});
+
+  sl = P.sl;  Am = pi*sl.dm^2/4;  As = Am*1000/sl.sm;
+  c1{end+1} = blk_h(2, '5. Losa');
+  c1{end+1} = blk_draw(dr_deck(P), 60, 'DETALLE 5.1 - LOSA: NOVALOSA 55 + 5 CM DE HORMIGÓN (GENÉRICO)', ...
+      sprintf(['Placa según el fabricante. Nivel terminado: %g sobre las vigas. ' ...
+               'Malla 4.5-15, lisa o corrugada, fy ≥ 490 MPa. Cumple la cuantía mínima: %.0f mm2/m, se piden %.0f. ' ...
+               'Traslapo de la malla: 300 (2 cuadros de la malla).'], sl.hd + sl.tc, As, 0.0018*sl.tc*1000));
 
   % ---- column 2: C4 and sandwich ---------------------------------------------------------
   c2{end+1} = blk_h(2, '2. Unión placa extremo - columna (C4; igual en B4, D4X, D4Y, D3)');
@@ -50,7 +49,7 @@ function file = make_sheet(outdir, opts)
       {blk_draw(dr_sw_front(P), 95, 'DETALLE 3.1 - SÁNDWICH: VISTA LATERAL DE LA VIGA', ...
          'Placa P3 140x220x12 sobre grout de 25 a cada lado (después). **Un estribo a cada lado de los anclajes**, los demás cada 110 desde ellos.')}, ...
       {blk_draw(dr_sw_plan(P), 95, 'DETALLE 3.2 - SÁNDWICH: PLANTA POR LOS ANCLAJES', ...
-         [sprintf('Anclajes A2 pasantes, L = %g, entre estribos.', P.rod.L2) ' Grout 25, placas, tuercas e IPE 200: después.'])}});
+         [sprintf('A2 en tubos, L = %g, entre estribos.', P.rod.L2) ' Grout 25, placas, tuercas e IPE 200: después.'])}});
 
   % ---- column 3: pieces, quantities, notes ------------------------------------------------------
   c3{end+1} = blk_h(2, '4. Piezas, cantidades y notas');
@@ -65,7 +64,7 @@ function file = make_sheet(outdir, opts)
       {blk_draw(dr_rod(P, 1), 45, 'DETALLE 4.4 - ANCLAJE A1 (COLUMNAS)', ...
          'Desde la cara de la columna. Placa de cabeza P1, arandela y tuerca: antes. Tuercas de nivelación (dentro del grout) y exterior: después.')}, ...
       {blk_draw(dr_rod(P, 2), 45, 'DETALLE 4.5 - ANCLAJE A2 (SÁNDWICH)', ...
-         'Pasante. Grout 25, placas P3, tuercas de nivelación y exteriores: después.')}});
+         'Pasante, dentro de un tubo PVC 3/4" (se mete después). Grout 25, placas P3, tuercas de nivelación y exteriores: después.')}});
   c3{end+1} = blk_row([0.25 0.375 0.375], { ...
       {blk_draw(dr_plates(P, 1), 50, 'P1 - PL 50x50x12', 'Agujero Ø18.')}, ...
       {blk_draw(dr_plates(P, 2), 50, 'P2 - PL 140x260x12 A36', 'Columnas. 4 agujeros Ø18.')}, ...
@@ -74,16 +73,11 @@ function file = make_sheet(outdir, opts)
   c3{end+1} = blk_table({'Marca', 'Elemento', 'Descripción', 'Por conexión', 'Total'}, quantities(P), ...
                         [0.08 0.17 0.53 0.12 0.10], [4 5], []);
   c3{end+1} = blk_note(['[[azul]]*** Opción para A1 y A2:** varilla roscada 5/8"-11 UNC ASTM A449 tipo 1 (equivalente a SAE grado 5), con certificado. ' ...
-                        'Mismas tuercas A194 2H, arandelas F436 y longitud 470. Verificada: tracción 0.87 en el sándwich y 0.33 en columnas. ' ...
+                        'Mismas tuercas A194 2H, arandelas F436 y longitud 470. Verificada: tracción 0.85 en el sándwich y 0.33 en columnas. ' ...
                         'No usar varilla común (A307, A36): no pasa en el sándwich.[[/azul]]']);
   c3{end+1} = blk_h(3, '**Notas**');
   N = notes(P);
   for i = 1:numel(N), c3{end+1} = blk_note(sprintf('%d. %s', i, N{i})); end
-  sl = P.sl;  Am = pi*sl.dm^2/4;  As = Am*1000/sl.sm;
-  c3{end+1} = blk_draw(dr_deck(P), 41, 'DETALLE 4.6 - LOSA: NOVALOSA 55 + 5 CM DE HORMIGÓN (GENÉRICO)', ...
-      sprintf(['Placa según el fabricante. Nivel terminado: %g sobre las vigas. ' ...
-               'Malla 4.5-15, lisa o corrugada, fy ≥ 490 MPa. Cumple la cuantía mínima: %.0f mm2/m, se piden %.0f. ' ...
-               'Traslapo de la malla: 300 (2 cuadros de la malla).'], sl.hd + sl.tc, As, 0.0018*sl.tc*1000));
 
   B = {blk_row([0.38 0.35 0.27], {c1, c2, c3})};
   doc = struct('title', 'Conexiones de vigas de acero', 'page', opts.page, 'fs', opts.fs, 'blocks', {B}, ...
@@ -123,8 +117,9 @@ function P = params()
   P.jt  = [110 155 230 305];                                        % joint ties Ø10 (below the top of the beams)
   P.tt  = [14 28];                                                  % ties Ø14 above the top of the beams
   P.cv  = 40;                                                       % cover: ties, and top of the column to the Ø16 hooks
+  P.tube = struct('D', 24, 't', 1.5, 'top', 50);                    % sleeve for A2 (3/4"); top bars' top at 50
   % sandwich
-  P.sw = struct('gr', 25, 't', 12, 'b', 140, 'H', 220, 'g', 55, 'yT', 42, 'yS', 150, 's', 110, 'xe', 46);
+  P.sw = struct('gr', 25, 't', 12, 'b', 140, 'H', 220, 'g', 55, 'yT', 39, 'yS', 150, 's', 110, 'xe', 46);
 end
 
 % =====================================================================
@@ -207,11 +202,13 @@ function it = dr_keyplan(P)
   for y = [y11 y10]
     for x = [xA(G, y) xB xC xD]
       it{end+1} = d_circle(x, y, 380, 'r_oval_l');
+      for sg = [-1 1], it{end+1} = d_rectxy(x - bw/2, y + sg*60 - 35, x + bw/2, y + sg*60 + 35, 'r_tube'); end
       for sg = [-1 1], it{end+1} = d_path([x - 200, y + sg*60; x + 200, y + sg*60], 40, 'r_anc'); end
     end
   end
   for x = [xF xG]
     it{end+1} = d_circle(x, y4, 380, 'r_oval_l');
+    for sg = [-1 1], it{end+1} = d_rectxy(x + sg*60 - 35, y4 - bw/2, x + sg*60 + 35, y4 + bw/2, 'r_tube'); end
     for sg = [-1 1], it{end+1} = d_path([x + sg*60, y4 - 200; x + sg*60, y4 + 200], 40, 'r_anc'); end
   end
   % labels
@@ -581,8 +578,12 @@ function it = dr_sw_front(P)
   I = [-ip.b/2 0; ip.b/2 0; ip.b/2 -ip.tf; ip.tw/2 -ip.tf; ip.tw/2 -ip.h + ip.tf; ip.b/2 -ip.h + ip.tf; ip.b/2 -ip.h; ...
        -ip.b/2 -ip.h; -ip.b/2 -ip.h + ip.tf; -ip.tw/2 -ip.h + ip.tf; -ip.tw/2 -ip.tf; -ip.b/2 -ip.tf];
   it{end+1} = d_poly(I, 'r_ipe');
+  tb = P.tube;  vt = [-(tb.top - tb.D/2), -sw.yS + (tb.D - 2*tb.t - P.rod.d)/2];   % sleeve centres: top on the bars, bottom raised
+  for v = vt, for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, tb.D/2, 'r_tube'); end, end
   for v = -[sw.yT sw.yS], for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, P.rod.d/2, 'r_anc'); end, end
   it{end+1} = d_text(sw.b/2 + 20, -sw.H - 40, 'P3 + IPE 200 (después)', 'small', 'start');
+  it{end+1} = d_text(L - 20, -h + 22, 'tubos PVC 3/4"', 'small', 'end');
+  for v = vt, it = [it, d_arrow(L - 150, -h + 35, sw.g/2 + tb.D/2 - 1, v - 3)]; end
   it{end+1} = d_text(-L + 20, -h + 75, 'estribos Ø10', 'tie', 'start');
   it{end+1} = d_dim(-sw.g/2, 0, sw.g/2, 0, 60, sprintf('%g', sw.g));
   it{end+1} = d_dim(-sw.b/2, 0, sw.b/2, 0, 130, sprintf('%g', sw.b));
@@ -618,6 +619,7 @@ function it = dr_sw_plan(P)
     it{end+1} = d_rectxy(-P.ip2.b/2, s*(b/2 + sw.gr + sw.t), P.ip2.b/2, s*(b/2 + sw.gr + sw.t + 250), 'r_ipe');
   end
   e = (r.L2 - b)/2;
+  for x = [-1 1]*sw.g/2, it{end+1} = d_rectxy(x - P.tube.D/2, -b/2, x + P.tube.D/2, b/2, 'r_tube'); end
   for x = [-1 1]*sw.g/2
     it{end+1} = d_bar(x, -b/2 - e, x, b/2 + e, r.d, 'r_anc');
     for s = [-1 1]
@@ -640,6 +642,8 @@ function it = dr_sw_plan(P)
     q = T{k,1};  it{end+1} = d_text(q(1) + 10, q(2) - 8, T{k,3}, iif(k == 4, 'anc', 'small'), 'start');
     it = [it, d_arrow(q(1), q(2), T{k,2}(1), T{k,2}(2))];
   end
+  it{end+1} = d_text(-xl - 10, 235, 'tubos PVC 3/4" (en la viga)', 'small', 'end');
+  it = [it, d_arrow(-xl, 227, -sw.g/2 - P.tube.D/2, 100)];
   it{end+1} = d_dim(-L, b/2, -L, b/2 + sw.gr, 60, sprintf('%g', sw.gr));
   it{end+1} = d_dim(L, -b/2, L, b/2, -60, sprintf('%g', b));
   it{end+1} = d_dim(-sw.g/2, -b/2 - e, -sw.g/2, b/2 + e, 73, sprintf('%g', r.L2));
@@ -807,6 +811,7 @@ function it = dr_rod(P, k)
   else
     L = r.L2;  b = P.bm.b;  x0 = (L - b)/2;  t = P.sw.t;
     it{end+1} = d_rectxy(x0, -45, x0 + b, 45, 'r_concb');
+    it{end+1} = d_rectxy(x0, -P.tube.D/2, x0 + b, P.tube.D/2, 'r_tube');
     it{end+1} = d_bar(0, 0, L, 0, r.d, 'r_anc');
     gr = P.sw.gr;
     for s = [0 1]
@@ -828,6 +833,7 @@ function it = dr_rod(P, k)
     it{end+1} = d_dim(0, -50, L, -50, -165, sprintf('L = %g', L));
     it{end+1} = d_dim(x0, 55, x0 + b, 55, 0, sprintf('%g (viga)', b));
     it{end+1} = d_text(L/2, 122, sprintf('grout %g', gr), 'small', 'middle');
+    it{end+1} = d_text(L/2, -40, 'tubo PVC 3/4"', 'small', 'middle');
     it{end+1} = d_text(L/2, -125, 'tuercas de nivelación', 'small', 'middle');
     for xn = [x0 - gr + r.wsh + r.nut/2, x0 + b + gr - r.wsh - r.nut/2]
       it = [it, d_arrow(L/2 + sign(xn - L/2)*40, -108, xn, -r.nw/2 - 2)];
@@ -872,7 +878,9 @@ function rows = quantities(P)
     'VE', 'Varilla extra VCS', 'Ø12, L = 1500, recta, abajo, centrada en F y G (eje 4)', '-', '2'
     'E14', 'Estribo columna', 'Ø14 cerrado, ganchos 135°, L ≈ 1450; 2 por columna, las 16 columnas', '2', '32'
     'E10', 'Estribo del nudo', 'Ø10 cerrado (o 4 piezas), L ≈ 1400; cada 75 aprox. en el nudo, las 16 columnas', '4', '64'
-    'G', 'Grout', sprintf('sin contracción, espesor %g, bajo P2 (5) y P3 (20); ver nota 13', P.ep.gr), '1 o 2', '25'};
+    'G', 'Grout', sprintf('sin contracción, espesor %g, bajo P2 (5) y P3 (20); ver nota 13', P.ep.gr), '1 o 2', '25'
+    'TU', 'Tubo para A2', 'PVC conduit 3/4" de pared ≤ 2 (Ø ext. ≤ 24) o EMT 3/4" (23.4 x 1.2), L = 300, uno por A2 (ver nota 18)', '4', '40'
+    'EP', 'Epóxico', 'de inyección, baja viscosidad, similar a Sikadur-52: relleno de los tubos, ≈ 45 ml por tubo', '-', '3 kg'};
   rows = {};
   for i = 1:size(t, 1), rows{end+1} = t(i,:); end
 end
@@ -899,7 +907,11 @@ function N = notes(P)
      'Ala inferior: filete de 6 por fuera en todo el ancho y por dentro de la punta del ala al inicio del radio. Alma: filete de 6 a ambos lados en la parte recta. ' ...
      '**No soldar en los radios entre ala y alma.** Limpiar óxido y pintura antes de soldar. Inspección visual del 100 % por el fiscalizador. CJP del ala superior: además, tintes penetrantes (kit de aerosoles: limpiador, penetrante y revelador).']
     'La columna se funde hasta el fondo de las vigas; nudo, vigas y cabeza de columna en una sola fundida.'
-    '**Losa: verter el hormigón simultáneamente a ambos lados de las vigas de los ejes 4 y D**, avanzando parejo a cada lado, para no cargar esas vigas en torsión.'};
+    '**Losa: verter el hormigón simultáneamente a ambos lados de las vigas de los ejes 4 y D**, avanzando parejo a cada lado, para no cargar esas vigas en torsión.'
+    '**Anclas preinstaladas (se funden con el hormigón): solo las A1 de las columnas** (B4, C4, D4X, D4Y, D3). **Las A2 del sándwich no:** se funden los tubos y las varillas A2 se meten después de colocar la IPE 200.'
+    ['**Tubos para las A2:** PVC conduit 3/4" de pared ≤ 2 (Ø ext. ≤ 24) o EMT 3/4", L = 300, uno por ancla, fijos al encofrado con la plantilla. ' ...
+     'Fila superior: tubo apoyado sobre las barras superiores de la viga, ancla a 39. Fila inferior: tubo 2.5 más alto que el ancla, para que la varilla apoye en el fondo. Tapar los extremos al fundir. ' ...
+     'Con la IPE 200 colocada: meter la varilla girándola para enroscar las tuercas de nivelación, y rellenar el tubo con epóxico de inyección de baja viscosidad (similar a Sikadur-52) por un extremo hasta que salga por el otro. Luego el grout.']};
 end
 
 % =====================================================================
