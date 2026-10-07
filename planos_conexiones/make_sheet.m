@@ -54,21 +54,21 @@ function file = make_sheet(outdir, opts)
   % ---- column 3: pieces, quantities, notes ------------------------------------------------------
   c3{end+1} = blk_h(2, '4. Piezas, cantidades y notas');
   c3{end+1} = blk_row([1 1 1]/3, { ...
-      {blk_draw(dr_tie(P, 14), 56, 'DETALLE 4.1 - ESTRIBO Ø14', ...
+      {blk_draw(dr_tie(P, 14), 48, 'DETALLE 4.1 - ESTRIBO Ø14', ...
          'Cabeza de la columna (105 sobre las vigas): 2 por columna, juntos. Recubrimiento 36 (barras de la columna a 58).')}, ...
-      {blk_draw(dr_tie(P, 10), 56, 'DETALLE 4.2 - ESTRIBO DEL NUDO Ø10', ...
+      {blk_draw(dr_tie(P, 10), 48, 'DETALLE 4.2 - ESTRIBO DEL NUDO Ø10', ...
          'Cada 75 aprox. en el nudo; se pueden mover ± 20 para acomodar las barras longitudinales.')}, ...
-      {blk_draw(dr_tie4(P), 56, 'DETALLE 4.3 - OPCIÓN: Ø10 EN 4 PIEZAS', ...
+      {blk_draw(dr_tie4(P), 48, 'DETALLE 4.3 - OPCIÓN: Ø10 EN 4 PIEZAS', ...
          '4 piezas rectas con ganchos de 135° a las barras de esquina, una por cara.')}});
   c3{end+1} = blk_row([0.5 0.5], { ...
       {blk_draw(dr_rod(P, 1), 45, 'DETALLE 4.4 - ANCLAJE A1 (COLUMNAS)', ...
          'Desde la cara de la columna. Placa de cabeza P1, arandela y tuerca: antes. Tuercas de nivelación (dentro del grout) y exterior: después.')}, ...
       {blk_draw(dr_rod(P, 2), 45, 'DETALLE 4.5 - ANCLAJE A2 (SÁNDWICH)', ...
-         'Pasante, dentro de un tubo PVC 3/4" (se mete después). Grout 25, placas P3, tuercas de nivelación y exteriores: después.')}});
+         'Pasante, dentro de un tubo PVC 3/4" (se mete después). Sin tuercas de nivelación. Grout 25, placas P3 y tuercas exteriores: después.')}});
   c3{end+1} = blk_row([0.25 0.375 0.375], { ...
-      {blk_draw(dr_plates(P, 1), 50, 'P1 - PL 50x50x12', 'Agujero Ø18.')}, ...
-      {blk_draw(dr_plates(P, 2), 50, 'P2 - PL 140x260x12 A36', 'Columnas. 4 agujeros Ø18.')}, ...
-      {blk_draw(dr_plates(P, 3), 50, 'P3 - PL 140x220x12 A36', 'Sándwich. 4 agujeros Ø18.')}});
+      {blk_draw(dr_plates(P, 1), 44, 'P1 - PL 50x50x12', 'Agujero Ø18.')}, ...
+      {blk_draw(dr_plates(P, 2), 44, 'P2 - PL 140x260x12 A36', 'Columnas. 4 agujeros Ø18.')}, ...
+      {blk_draw(dr_plates(P, 3), 44, 'P3 - PL 140x220x12 A36', 'Sándwich. 4 agujeros Ø18.')}});
   c3{end+1} = blk_h(3, '**Cantidades (solo lo que se añade)**');
   c3{end+1} = blk_table({'Marca', 'Elemento', 'Descripción', 'Por conexión', 'Total'}, quantities(P), ...
                         [0.08 0.17 0.53 0.12 0.10], [4 5], []);
@@ -626,11 +626,11 @@ function it = dr_sw_plan(P)
       w0 = s*(b/2 + sw.gr + sw.t);
       it{end+1} = d_rectxy(x - r.dw/2, w0, x + r.dw/2, w0 + s*r.wsh, 'r_ancg');
       it{end+1} = d_rectxy(x - r.nw/2, w0 + s*r.wsh, x + r.nw/2, w0 + s*(r.wsh + r.nut), 'r_ancg');
-      w1 = s*(b/2 + sw.gr);
-      it{end+1} = d_rectxy(x - r.dw/2, w1, x + r.dw/2, w1 - s*r.wsh, 'r_ancg');
-      it{end+1} = d_rectxy(x - r.nw/2, w1 - s*r.wsh, x + r.nw/2, w1 - s*(r.wsh + r.nut), 'r_ancg');
     end
   end
+  for s = [-1 1], for x = [-1 1]*(sw.b/2 - 15)                              % steel spacers, 25 thick
+    it{end+1} = d_rectxy(x - 12, s*b/2, x + 12, s*(b/2 + sw.gr), 'r_bp');
+  end, end
   wp = b/2 + sw.gr + sw.t;  xl = 190;
   T = {[xl, 400], [P.ip2.b/2 - 5, 390], 'IPE 200 (después)';
        [xl, 300], [sw.b/2 - 10, wp - sw.t/2], sprintf('P3 140x220x12 (después)');
@@ -819,10 +819,6 @@ function it = dr_rod(P, k)
       xg = iif(s == 0, x0 - gr, x0 + b);
       it{end+1} = d_rectxy(xg, -P.sw.H/4, xg + gr, P.sw.H/4, 'r_grout');
       it{end+1} = d_rectxy(xp, -P.sw.H/4, xp + t, P.sw.H/4, 'r_eplate');
-      xw = iif(s == 0, xp + t, xp - r.wsh);                                    % leveling washer and nut
-      it{end+1} = d_rectxy(xw, -r.dw/2, xw + r.wsh, r.dw/2, 'r_nut');
-      xl = iif(s == 0, xw + r.wsh, xw - r.nut);
-      it{end+1} = d_rectxy(xl, -r.nw/2, xl + r.nut, r.nw/2, 'r_nut');
       it{end+1} = d_dim(xg, -P.sw.H/4, xg + gr, -P.sw.H/4, -20, sprintf('%g', gr), iif(s == 0, 'before', 'after'));
       it = [it, d_arrow(L/2, 115, xg + gr/2, 35)];
       xo = iif(s == 0, xp - r.wsh, xp + t);
@@ -834,10 +830,7 @@ function it = dr_rod(P, k)
     it{end+1} = d_dim(x0, 55, x0 + b, 55, 0, sprintf('%g (viga)', b));
     it{end+1} = d_text(L/2, 122, sprintf('grout %g', gr), 'small', 'middle');
     it{end+1} = d_text(L/2, -40, 'tubo PVC 3/4"', 'small', 'middle');
-    it{end+1} = d_text(L/2, -125, 'tuercas de nivelación', 'small', 'middle');
-    for xn = [x0 - gr + r.wsh + r.nut/2, x0 + b + gr - r.wsh - r.nut/2]
-      it = [it, d_arrow(L/2 + sign(xn - L/2)*40, -108, xn, -r.nw/2 - 2)];
-    end
+    it{end+1} = d_text(L/2, -125, 'sin tuercas de nivelación', 'small', 'middle');
   end
 end
 
@@ -872,14 +865,15 @@ function rows = quantities(P)
     'P1', 'Placa de cabeza', 'PL 50x50x12 A36, agujero Ø18 (una por A1)', '4', '20'
     'P2', 'Placa extremo', 'PL 140x260x12 A36, 4 agujeros Ø18 (después)', '1', '5'
     'P3', 'Placa sándwich', 'PL 140x220x12 A36, 4 agujeros Ø18 (después)', '2', '20'
-    'T', 'Tuerca', 'hexagonal pesada 5/8"-11 UNC ASTM A194 2H (27 entre caras, 16 de alto): 3 por A1 (cabeza, nivelación, exterior), 4 por A2 (2 de nivelación, 2 exteriores)', '-', '220'
-    'W', 'Arandela', 'endurecida ASTM F436 para 5/8" (Ø ext. 33, int. 17.5, espesor 4): 3 por A1, 4 por A2', '-', '220'
+    'T', 'Tuerca', 'hexagonal pesada 5/8"-11 UNC ASTM A194 2H (27 entre caras, 16 de alto): 3 por A1 (cabeza, nivelación, exterior), 2 por A2 (exteriores)', '-', '140'
+    'W', 'Arandela', 'endurecida ASTM F436 para 5/8" (Ø ext. 33, int. 17.5, espesor 4): 3 por A1, 2 por A2', '-', '140'
     'BA', 'Bastón', sprintf('Ø12, L = %g (recto %g + pata %g hacia abajo)', Lb, P.bas.Ls, P.bas.pata), '2', '10'
     'VE', 'Varilla extra VCS', 'Ø12, L = 1500, recta, abajo, centrada en F y G (eje 4)', '-', '2'
     'E14', 'Estribo columna', 'Ø14 cerrado, ganchos 135°, L ≈ 1450; 2 por columna, las 16 columnas', '2', '32'
     'E10', 'Estribo del nudo', 'Ø10 cerrado (o 4 piezas), L ≈ 1400; cada 75 aprox. en el nudo, las 16 columnas', '4', '64'
     'G', 'Grout', sprintf('sin contracción, espesor %g, bajo P2 (5) y P3 (20); ver nota 13', P.ep.gr), '1 o 2', '25'
     'TU', 'Tubo para A2', 'PVC conduit 3/4" de pared ≤ 2 (Ø ext. ≤ 24) o EMT 3/4" (23.4 x 1.2), L = 300, uno por A2 (ver nota 18)', '4', '40'
+    'SE', 'Separador', 'taco de acero 25 x 25 x 40, en el espacio del grout: 2 por placa P3 (quedan dentro del grout)', '4', '40'
     'EP', 'Epóxico', 'de inyección, baja viscosidad, similar a Sikadur-52: relleno de los tubos, ≈ 45 ml por tubo', '-', '3 kg'};
   rows = {};
   for i = 1:size(t, 1), rows{end+1} = t(i,:); end
@@ -891,7 +885,7 @@ function N = notes(P)
     'Hormigón: vigas y columnas fc = 240 kg/cm2; losa fc = 210 kg/cm2 (las conexiones se verificaron con 210). Acero de refuerzo fy = 4200 kg/cm2; malla electrosoldada fy ≥ 490 MPa.'
     'Recubrimiento libre 40 a los estribos en vigas y columnas, y 40 sobre los ganchos Ø16 en la cara superior de la columna.'
     '**Anclajes A1 y A2: varilla roscada ASTM A193 B7 (o la opción * bajo la tabla) con certificado del proveedor.** Tuercas hexagonales pesadas ASTM A194 2H y arandelas endurecidas ASTM F436 (no usar tuercas ni arandelas comunes). Apretar a mano (sin torque).'
-    '**Colocar A1 y A2 antes de fundir, con una plantilla de acero perforada igual a la placa** (agujeros Ø18). Proteger las roscas con cinta.'
+    '**Colocar A1 y los tubos de las A2 antes de fundir, con una plantilla de acero perforada igual a la placa** (agujeros Ø18). Proteger las roscas con cinta.'
     sprintf('A1: placa de cabeza P1 dentro de la jaula de estribos de la columna, punta a %g de la cara. Si choca con una barra, inclinarla o correrla unos mm.', P.rod.tip)
     '**Bastones Ø12 (2 por unión):** pata de 200 hacia abajo a 66 de la cara del voladizo, tramo recto de 1220 hacia la viga en línea, junto al par de esquina.'
     '**D4: los A1 de D4X van a 62 y 173 (debajo de los de D4Y) y sus bastones a 98.** Correr los estribos del nudo lo necesario.'
@@ -902,7 +896,7 @@ function N = notes(P)
     ['**Después de fundir, en este orden:** 1) soldar cada IPE a su placa (mejor en el suelo); 2) placa sobre las tuercas de nivelación, a plomo y nivel, voladizos apuntalados, tuercas exteriores a mano; ' ...
      '3) grout sin contracción (ASTM C1107, mínimo 280 kg/cm2, similar a SikaGrout-212), 25 bajo P2 y P3; 4) retirar los puntales cuando el grout alcance la resistencia del fabricante. ' ...
      'No soldar después del grout: lo calienta y lo despega. **Grout y no mortero:** el mortero se retrae y deja la placa sin apoyo; el grout no se contrae, llena sin vacíos y gana resistencia rápido.']
-    ['**Soldaduras viga - placa (detalle 5), todas en obra:** electrodo E70XX de bajo hidrógeno (E7018), soldador calificado según AWS D1.1. ' ...
+    ['**Soldaduras viga - placa, todas en obra:** electrodo E70XX de bajo hidrógeno (E7018), soldador calificado según AWS D1.1. ' ...
      'Ala superior: penetración completa (CJP) en todo el ancho, con bisel en el ala, junta precalificada AWS D1.1 (con respaldo, o resanando la raíz por debajo y rematando), sin agujeros de acceso. ' ...
      'Ala inferior: filete de 6 por fuera en todo el ancho y por dentro de la punta del ala al inicio del radio. Alma: filete de 6 a ambos lados en la parte recta. ' ...
      '**No soldar en los radios entre ala y alma.** Limpiar óxido y pintura antes de soldar. Inspección visual del 100 % por el fiscalizador. CJP del ala superior: además, tintes penetrantes (kit de aerosoles: limpiador, penetrante y revelador).']
@@ -911,7 +905,9 @@ function N = notes(P)
     '**Anclas preinstaladas (se funden con el hormigón): solo las A1 de las columnas** (B4, C4, D4X, D4Y, D3). **Las A2 del sándwich no:** se funden los tubos y las varillas A2 se meten después de colocar la IPE 200.'
     ['**Tubos para las A2:** PVC conduit 3/4" de pared ≤ 2 (Ø ext. ≤ 24) o EMT 3/4", L = 300, uno por ancla, fijos al encofrado con la plantilla. ' ...
      'Fila superior: tubo apoyado sobre las barras superiores de la viga, ancla a 39. Fila inferior: tubo 2.5 más alto que el ancla, para que la varilla apoye en el fondo. Tapar los extremos al fundir. ' ...
-     'Con la IPE 200 colocada: meter la varilla girándola para enroscar las tuercas de nivelación, y rellenar el tubo con epóxico de inyección de baja viscosidad (similar a Sikadur-52) por un extremo hasta que salga por el otro. Luego el grout.']};
+     'Sándwich sin tuercas de nivelación: IPE 200 apuntalada y nivelada, 2 separadores de acero de 25 entre cada placa y la viga; meter las varillas (entran sueltas) y apretar a mano las tuercas exteriores, que aprietan las 2 placas contra los separadores. ' ...
+     'Rellenar el tubo con epóxico de inyección de baja viscosidad (similar a Sikadur-52), por un extremo hasta que salga por el otro. Luego el grout.']
+    '**Al comprar los tubos pedir tubo "conduit" (eléctrico) de pared delgada, no tubo de presión ni roscable para agua:** su pared es más gruesa y la varilla no entra con la holgura necesaria. Verificar Ø ext. ≤ 24 y pared ≤ 2.'};
 end
 
 % =====================================================================
