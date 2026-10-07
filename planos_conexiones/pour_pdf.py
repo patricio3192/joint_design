@@ -49,6 +49,7 @@ J.SHAPE.update({
     "r_oval":   ("#e8603c", 1.1, None, 0, (5, 3)),       # dashed tomato oval around a beam with bastones
     "r_oval_l": ("#e8603c", 0.6, None, 0, None),           # its leader
     "lead":    ("#222222", 1.0, None, 0, None),             # leader of a note that must be seen
+    "leadf":   ("#222222", 0.3, "#222222", 1.00, None),     # its arrowhead
     "dimk":    ("#222222", 0.6, None, 0, None),             # braces of the bar counts
     # end plate of the IPE 240 and its grout pad: placed after the pour, shown for reference
     "r_eplate": ("#1f3347", 0.6, "#a9bdd1", 0.30, None),
