@@ -54,11 +54,11 @@ function file = make_sheet(outdir, opts)
   % ---- column 3: pieces, quantities, notes ------------------------------------------------------
   c3{end+1} = blk_h(2, '4. Piezas, cantidades y notas');
   c3{end+1} = blk_row([1 1 1]/3, { ...
-      {blk_draw(dr_tie(P, 14), 48, 'DETALLE 4.1 - ESTRIBO Ø14', ...
+      {blk_draw(dr_tie(P, 14), 42, 'DETALLE 4.1 - ESTRIBO Ø14', ...
          'Cabeza de la columna (105 sobre las vigas): 2 por columna, juntos. Recubrimiento 36 (barras de la columna a 58).')}, ...
-      {blk_draw(dr_tie(P, 10), 48, 'DETALLE 4.2 - ESTRIBO DEL NUDO Ø10', ...
+      {blk_draw(dr_tie(P, 10), 42, 'DETALLE 4.2 - ESTRIBO DEL NUDO Ø10', ...
          'Cada 75 aprox. en el nudo; se pueden mover ± 20 para acomodar las barras longitudinales.')}, ...
-      {blk_draw(dr_tie4(P), 48, 'DETALLE 4.3 - OPCIÓN: Ø10 EN 4 PIEZAS', ...
+      {blk_draw(dr_tie4(P), 42, 'DETALLE 4.3 - OPCIÓN: Ø10 EN 4 PIEZAS', ...
          '4 piezas rectas con ganchos de 135° a las barras de esquina, una por cara.')}});
   c3{end+1} = blk_row([0.5 0.5], { ...
       {blk_draw(dr_rod(P, 1), 45, 'DETALLE 4.4 - ANCLAJE A1 (COLUMNAS)', ...
@@ -66,9 +66,9 @@ function file = make_sheet(outdir, opts)
       {blk_draw(dr_rod(P, 2), 45, 'DETALLE 4.5 - ANCLAJE A2 (SÁNDWICH)', ...
          'Pasante, dentro de un tubo PVC 3/4" (se mete después). Sin tuercas de nivelación. Grout 25, placas P3 y tuercas exteriores: después.')}});
   c3{end+1} = blk_row([0.25 0.375 0.375], { ...
-      {blk_draw(dr_plates(P, 1), 44, 'P1 - PL 50x50x12', 'Agujero Ø18.')}, ...
-      {blk_draw(dr_plates(P, 2), 44, 'P2 - PL 140x260x12 A36', 'Columnas. 4 agujeros Ø18.')}, ...
-      {blk_draw(dr_plates(P, 3), 44, 'P3 - PL 140x220x12 A36', 'Sándwich. 4 agujeros Ø18.')}});
+      {blk_draw(dr_plates(P, 1), 46, 'P1 - PL 50x50x12', 'Agujero Ø18.')}, ...
+      {blk_draw(dr_plates(P, 2), 46, 'P2 - PL 140x260x12 A36', 'Columnas. 4 agujeros Ø18.')}, ...
+      {blk_draw(dr_plates(P, 3), 46, 'P3 - PL 140x220x12 A36', 'Sándwich. 4 agujeros Ø18.')}});
   c3{end+1} = blk_h(3, '**Cantidades (solo lo que se añade)**');
   c3{end+1} = blk_table({'Marca', 'Elemento', 'Descripción', 'Por conexión', 'Total'}, quantities(P), ...
                         [0.08 0.17 0.53 0.12 0.10], [4 5], []);
@@ -582,7 +582,7 @@ function it = dr_sw_front(P)
   for v = vt, for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, tb.D/2, 'r_tube'); end, end
   for v = -[sw.yT sw.yS], for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, P.rod.d/2, 'r_anc'); end, end
   it{end+1} = d_text(sw.b/2 + 20, -sw.H - 40, 'P3 + IPE 200 (después)', 'small', 'start');
-  it{end+1} = d_text(L - 20, -h + 22, 'tubos PVC 3/4"', 'small', 'end');
+  it{end+1} = d_text(L - 20, -h + 22, 'tubos PVC 3/4" (pared ≤ 2)', 'small', 'end');
   for v = vt, it = [it, d_arrow(L - 150, -h + 35, sw.g/2 + tb.D/2 - 1, v - 3)]; end
   it{end+1} = d_text(-L + 20, -h + 75, 'estribos Ø10', 'tie', 'start');
   it{end+1} = d_dim(-sw.g/2, 0, sw.g/2, 0, 60, sprintf('%g', sw.g));
@@ -642,7 +642,7 @@ function it = dr_sw_plan(P)
     q = T{k,1};  it{end+1} = d_text(q(1) + 10, q(2) - 8, T{k,3}, iif(k == 4, 'anc', 'small'), 'start');
     it = [it, d_arrow(q(1), q(2), T{k,2}(1), T{k,2}(2))];
   end
-  it{end+1} = d_text(-xl - 10, 235, 'tubos PVC 3/4" (en la viga)', 'small', 'end');
+  it{end+1} = d_text(-xl - 10, 235, 'tubos PVC 3/4", pared ≤ 2', 'small', 'end');
   it = [it, d_arrow(-xl, 227, -sw.g/2 - P.tube.D/2, 100)];
   it{end+1} = d_dim(-L, b/2, -L, b/2 + sw.gr, 60, sprintf('%g', sw.gr));
   it{end+1} = d_dim(L, -b/2, L, b/2, -60, sprintf('%g', b));
@@ -829,8 +829,9 @@ function it = dr_rod(P, k)
     it{end+1} = d_dim(0, -50, L, -50, -165, sprintf('L = %g', L));
     it{end+1} = d_dim(x0, 55, x0 + b, 55, 0, sprintf('%g (viga)', b));
     it{end+1} = d_text(L/2, 122, sprintf('grout %g', gr), 'small', 'middle');
-    it{end+1} = d_text(L/2, -40, 'tubo PVC 3/4"', 'small', 'middle');
-    it{end+1} = d_text(L/2, -125, 'sin tuercas de nivelación', 'small', 'middle');
+    it{end+1} = d_text(L/2, -112, 'tubo PVC 3/4"', 'small', 'middle');
+    it = [it, d_arrow(L/2, -92, L/2, -P.tube.D/2)];
+    it{end+1} = d_text(L/2, -145, 'sin tuercas de nivelación', 'small', 'middle');
   end
 end
 
@@ -847,7 +848,7 @@ function it = dr_plates(P, k)
       for v = -[s.yT s.yS], for x = [-1 1]*s.g/2, it{end+1} = d_circle(x, v, 9, 'void'); end, end
       it{end+1} = d_dim(-s.b/2, -s.H, s.b/2, -s.H, -30, sprintf('%g', s.b));
       it{end+1} = d_dim(-s.g/2, 0, s.g/2, 0, 30, sprintf('%g', s.g));
-      it{end+1} = d_dim(s.b/2, 0, s.b/2, -s.yT, 30, sprintf('%g', s.yT));
+      it{end+1} = d_dim(s.b/2, 0, s.b/2, -s.yT, 30, sprintf('%g', s.yT), 'before');
       it{end+1} = d_dim(s.b/2, -s.yT, s.b/2, -s.yS, 30, sprintf('%g', s.yS - s.yT));
       it{end+1} = d_dim(s.b/2, -s.yS, s.b/2, -s.H, 30, sprintf('%g', s.H - s.yS));
   end
@@ -893,7 +894,7 @@ function N = notes(P)
     '2 estribos Ø14 juntos en los 105 de la columna sobre las vigas, en las 16 columnas. Ganchos Ø16 de la columna hacia el centro, con 40 de recubrimiento a la cara superior.'
     'Sándwich: un estribo Ø10 a cada lado de los anclajes A2; los demás cada 110 desde ellos. A2 entre estribos, paralelos a sus ramas.'
     'Viga D entre 3 y 4: estribos Ø10 cada 110 de 3 a 10 y de 11 a 4; cada 140 entre 10 y 11.'
-    ['**Después de fundir, en este orden:** 1) soldar cada IPE a su placa (mejor en el suelo); 2) placa sobre las tuercas de nivelación, a plomo y nivel, voladizos apuntalados, tuercas exteriores a mano; ' ...
+    ['**Después de fundir, en este orden:** 1) soldar cada IPE a su placa (mejor en el suelo); 2) placa P2 sobre las tuercas de nivelación (sándwich: nota 18), a plomo y nivel, voladizos apuntalados, tuercas exteriores a mano; ' ...
      '3) grout sin contracción (ASTM C1107, mínimo 280 kg/cm2, similar a SikaGrout-212), 25 bajo P2 y P3; 4) retirar los puntales cuando el grout alcance la resistencia del fabricante. ' ...
      'No soldar después del grout: lo calienta y lo despega. **Grout y no mortero:** el mortero se retrae y deja la placa sin apoyo; el grout no se contrae, llena sin vacíos y gana resistencia rápido.']
     ['**Soldaduras viga - placa, todas en obra:** electrodo E70XX de bajo hidrógeno (E7018), soldador calificado según AWS D1.1. ' ...
