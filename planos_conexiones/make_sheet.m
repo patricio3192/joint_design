@@ -32,7 +32,7 @@ function file = make_sheet(outdir, opts)
                'Malla 4.5-15, lisa o corrugada, fy ≥ 490 MPa. Cumple la cuantía mínima: %.0f mm2/m, se piden %.0f. ' ...
                'Traslapo de la malla: 300 (2 cuadros de la malla).'], sl.hd + sl.tc, As, 0.0018*sl.tc*1000))}, ...
       {blk_draw(dr_tube(P), 69, 'DETALLE 5.2 - TUBO Y ANCLA A2 (CORTE POR LA VIGA)', ...
-         'En las dos filas la varilla va apoyada en el fondo del tubo. Fila superior: tubo apoyado en las barras superiores. Fila inferior: tubo 2.5 más alto que la varilla. Ver notas 18 y 19.')}});
+         'Fila superior: tubo apoyado en las barras superiores. Fila inferior: tubo centrado en el ancla. La varilla puede quedar en cualquier posición dentro del tubo; el epóxico rellena. Ver notas 18 y 19.')}});
 
   % ---- column 2: C4 and sandwich ---------------------------------------------------------
   c2{end+1} = blk_h(2, '2. Unión placa extremo - columna (C4; igual en B4, D4X, D4Y, D3)');
@@ -64,14 +64,14 @@ function file = make_sheet(outdir, opts)
       {blk_draw(dr_tie4(P), 39, 'DETALLE 4.3 - OPCIÓN: Ø10 EN 4 PIEZAS', ...
          '4 piezas rectas con ganchos de 135° a las barras de esquina, una por cara.')}});
   c3{end+1} = blk_row([0.5 0.5], { ...
-      {blk_draw(dr_rod(P, 1), 45, 'DETALLE 4.4 - ANCLAJE A1 (COLUMNAS)', ...
+      {blk_draw(dr_rod(P, 1), 40, 'DETALLE 4.4 - ANCLAJE A1 (COLUMNAS)', ...
          'Desde la cara de la columna. Placa de cabeza P1, arandela y tuerca: antes. Tuercas de nivelación (dentro del grout) y exterior: después.')}, ...
-      {blk_draw(dr_rod(P, 2), 45, 'DETALLE 4.5 - ANCLAJE A2 (SÁNDWICH)', ...
+      {blk_draw(dr_rod(P, 2), 40, 'DETALLE 4.5 - ANCLAJE A2 (SÁNDWICH)', ...
          'Pasante, dentro de un tubo PVC 3/4" (se mete después). Sin tuercas de nivelación. Grout 25, placas P3 y tuercas exteriores: después.')}});
   c3{end+1} = blk_row([0.25 0.375 0.375], { ...
-      {blk_draw(dr_plates(P, 1), 46, 'P1 - PL 50x50x12', 'Agujero Ø18.')}, ...
-      {blk_draw(dr_plates(P, 2), 46, 'P2 - PL 140x260x12 A36', 'Columnas. 4 agujeros Ø18.')}, ...
-      {blk_draw(dr_plates(P, 3), 46, 'P3 - PL 140x220x12 A36', 'Sándwich. 4 agujeros Ø18.')}});
+      {blk_draw(dr_plates(P, 1), 43, 'P1 - PL 50x50x12', 'Agujero Ø18.')}, ...
+      {blk_draw(dr_plates(P, 2), 43, 'P2 - PL 140x260x12 A36', 'Columnas. 4 agujeros Ø18.')}, ...
+      {blk_draw(dr_plates(P, 3), 43, 'P3 - PL 140x220x12 A36', 'Sándwich. 4 agujeros Ø18.')}});
   c3{end+1} = blk_h(3, '**Cantidades (solo lo que se añade)**');
   c3{end+1} = blk_table({'Marca', 'Elemento', 'Descripción', 'Por conexión', 'Total'}, quantities(P), ...
                         [0.08 0.17 0.53 0.12 0.10], [4 5], []);
@@ -120,7 +120,7 @@ function P = params()
   P.jt  = [110 155 230 305];                                        % joint ties Ø10 (below the top of the beams)
   P.tt  = [14 28];                                                  % ties Ø14 above the top of the beams
   P.cv  = 40;                                                       % cover: ties, and top of the column to the Ø16 hooks
-  P.tube = struct('D', 24, 't', 1.5, 'top', 50);                    % sleeve for A2 (3/4"); top bars' top at 50
+  P.tube = struct('D', 26, 't', 2.5, 'top', 50);   % drawn; limits: OD <= 27, ID >= 20, wall <= 3                    % sleeve for A2 (3/4"); top bars' top at 50
   % sandwich
   P.sw = struct('gr', 25, 't', 12, 'b', 140, 'H', 220, 'g', 55, 'yT', 40, 'yS', 150, 's', 110, 'xe', 46);
 end
@@ -582,11 +582,11 @@ function it = dr_sw_front(P)
   I = [-ip.b/2 0; ip.b/2 0; ip.b/2 -ip.tf; ip.tw/2 -ip.tf; ip.tw/2 -ip.h + ip.tf; ip.b/2 -ip.h + ip.tf; ip.b/2 -ip.h; ...
        -ip.b/2 -ip.h; -ip.b/2 -ip.h + ip.tf; -ip.tw/2 -ip.h + ip.tf; -ip.tw/2 -ip.tf; -ip.b/2 -ip.tf];
   it{end+1} = d_poly(I, 'r_ipe');
-  tb = P.tube;  vt = [-(tb.top - tb.D/2), -sw.yS + (tb.D - 2*tb.t - P.rod.d)/2];   % sleeve centres: top on the bars, bottom raised
+  tb = P.tube;  vt = [-(tb.top - tb.D/2), -sw.yS];   % sleeve centres: top on the bars, bottom centred on the rod
   for v = vt, for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, tb.D/2, 'r_tube'); end, end
   for v = -[sw.yT sw.yS], for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, P.rod.d/2, 'r_anc'); end, end
   it{end+1} = d_text(sw.b/2 + 20, -sw.H - 40, 'P3 + IPE 200 (después)', 'small', 'start');
-  it{end+1} = d_text(L - 20, -h + 22, 'tubos PVC 3/4" (pared ≤ 2 mm)', 'small', 'end');
+  it{end+1} = d_text(L - 20, -h + 22, 'tubos PVC 3/4" (pared ≤ 3 mm)', 'small', 'end');
   for v = vt, it = [it, d_arrow(L - 150, -h + 35, sw.g/2 + tb.D/2 - 1, v - 3)]; end
   it{end+1} = d_text(-L + 20, -h + 75, 'estribos Ø10', 'tie', 'start');
   it{end+1} = d_dim(-sw.g/2, 0, sw.g/2, 0, 60, sprintf('%g', sw.g));
@@ -646,7 +646,7 @@ function it = dr_sw_plan(P)
     q = T{k,1};  it{end+1} = d_text(q(1) + 10, q(2) - 8, T{k,3}, iif(k == 4, 'anc', 'small'), 'start');
     it = [it, d_arrow(q(1), q(2), T{k,2}(1), T{k,2}(2))];
   end
-  it{end+1} = d_text(-xl - 10, 235, 'tubos PVC 3/4", pared ≤ 2 mm', 'small', 'end');
+  it{end+1} = d_text(-xl - 10, 235, 'tubos PVC 3/4", pared ≤ 3 mm', 'small', 'end');
   it = [it, d_arrow(-xl, 227, -sw.g/2 - P.tube.D/2, 100)];
   it{end+1} = d_dim(-L, b/2, -L, b/2 + sw.gr, 60, sprintf('%g', sw.gr));
   it{end+1} = d_dim(L, -b/2, L, b/2, -60, sprintf('%g', b));
@@ -730,7 +730,7 @@ function it = dr_tube(P)
   for x = [-1 1]*xs                                                         % stirrups, between them the tubes
     it{end+1} = d_path([x -40; x vg1 + 2], 10, 'r_tieS');  it{end+1} = d_path([x vg2 - 2; x vb], 10, 'r_tieS');
   end
-  vt = [-(tb.top - tb.D/2), -sw.yS + (2*ri - r.d)/2];
+  vt = [-(tb.top - tb.D/2), -sw.yS];
   for s = [-1 1], for k = 1:2
     x = s*sw.g/2;
     it{end+1} = d_circle(x, vt(k), tb.D/2, 'r_tube');
@@ -744,10 +744,10 @@ function it = dr_tube(P)
   it{end+1} = d_dim(-sw.g/2, 0, sw.g/2, 0, 12, sprintf('%g', sw.g));
   % labels
   xl = X + 30;  a = 7;
-  T = {[xl, -15], [sw.g/2 + tb.D/2, vt(1) + 3], sprintf('tubo Ø %g mm,\npared ≤ %g mm', tb.D, 2), 'small';
-       [xl, -50], [sw.g/2, -sw.yT], sprintf('A2 apoyada\nen el fondo'), 'anc';
+  T = {[xl, -15], [sw.g/2 + tb.D/2, vt(1) + 3], sprintf('tubo 3/4": Ø ext. ≤ 27,\nØ int. ≥ 20, pared ≤ 3 mm'), 'small';
+       [xl, -50], [sw.g/2, -sw.yT], 'A2 Ø16', 'anc';
        [xl, -80], [X - 8, -tb.top - 6], 'barras superiores', 'small';
-       [xl, -150], [sw.g/2 + tb.D/2, vt(2)], sprintf('A2 apoyada\nen el fondo'), 'anc';
+       [xl, -150], [sw.g/2 + ri - 1, vt(2) + 2], sprintf('epóxico entre\nvarilla y tubo'), 'small';
        [xl, 15], [xs + 4, -42], 'estribo', 'tie'};
   for k = 1:size(T, 1)
     q = T{k,1};  it{end+1} = d_text(q(1) + 4, q(2) - 3, T{k,3}, T{k,4}, 'start');
@@ -916,7 +916,7 @@ function rows = quantities(P)
     'E14', 'Estribo columna', 'Ø14 cerrado, ganchos 135°, L ≈ 1450; 2 por columna, las 16 columnas', '2', '32'
     'E10', 'Estribo del nudo', 'Ø10 cerrado (o 4 piezas), L ≈ 1400; cada 75 aprox. en el nudo, las 16 columnas', '4', '64'
     'G', 'Grout', sprintf('sin contracción, espesor %g, bajo P2 (5) y P3 (20); ver nota 13', P.ep.gr), '1 o 2', '25'
-    'TU', 'Tubo para A2', 'PVC conduit 3/4" de pared ≤ 2 mm (Ø ext. ≤ 24 mm) o EMT 3/4" (23.4 x 1.2 mm), L = 400 (se corta al ras), uno por A2 (nota 18)', '4', '40'
+    'TU', 'Tubo para A2', 'PVC conduit 3/4" o EMT 3/4" con Ø ext. ≤ 27 mm, Ø int. ≥ 20 mm, pared ≤ 3 mm; L = 400 (se corta al ras), uno por A2 (nota 18)', '4', '40'
     'SE', 'Separador', 'taco de acero 25 x 25 x 40, en el espacio del grout: 2 por placa P3 (quedan dentro del grout)', '4', '40'
     'EP', 'Epóxico', 'de inyección, baja viscosidad, similar a Sikadur-52: relleno de los tubos, ≈ 45 ml por tubo', '-', '3 kg'};
   rows = {};
@@ -947,11 +947,11 @@ function N = notes(P)
     'La columna se funde hasta el fondo de las vigas; nudo, vigas y cabeza de columna en una sola fundida.'
     '**Losa: verter el hormigón simultáneamente a ambos lados de las vigas de los ejes 4 y D**, avanzando parejo a cada lado, para no cargar esas vigas en torsión.'
     '**Anclas preinstaladas (se funden con el hormigón): solo las A1 de las columnas** (B4, C4, D4X, D4Y, D3). **Las A2 del sándwich no:** se funden los tubos y las varillas A2 se meten después de colocar la IPE 200.'
-    ['**Tubos para las A2:** PVC conduit 3/4" de pared ≤ 2 mm (Ø ext. ≤ 24 mm) o EMT 3/4", uno por ancla, de 400: atraviesa el encofrado por agujeros hechos con la plantilla; cortar al ras al desencofrar. ' ...
-     'Fila superior: tubo apoyado sobre las barras superiores de la viga, ancla a 40. Fila inferior: tubo 2.5 más alto que el ancla. En las dos filas la varilla apoya en el fondo del tubo. Tapar los extremos al fundir. ' ...
+    ['**Tubos para las A2:** PVC conduit 3/4" o EMT 3/4" (Ø ext. ≤ 27 mm, Ø int. ≥ 20 mm, pared ≤ 3 mm), uno por ancla, de 400: atraviesa el encofrado por agujeros hechos con la plantilla; cortar al ras al desencofrar. ' ...
+     'Fila superior: tubo apoyado sobre las barras superiores de la viga. Fila inferior: tubo centrado en el ancla. La varilla puede quedar en cualquier posición dentro del tubo; si un agujero de P3 no coincide con su tubo, subir o bajar la IPE unos mm con los puntales. Tapar los extremos al fundir. ' ...
      'Sándwich sin tuercas de nivelación: IPE 200 apuntalada y nivelada, 2 separadores de acero de 25 entre cada placa y la viga; meter las varillas (entran sueltas) y apretar a mano las tuercas exteriores, que aprietan las 2 placas contra los separadores. ' ...
      'Rellenar el tubo con epóxico de inyección de baja viscosidad (similar a Sikadur-52), por un extremo hasta que salga por el otro. Luego el grout.']
-    '**Al comprar los tubos pedir tubo "conduit" (eléctrico) de pared delgada, no tubo de presión ni roscable para agua:** su pared es más gruesa y la varilla no entra con la holgura necesaria. Verificar Ø ext. ≤ 24 mm y pared ≤ 2 mm.'};
+    '**Al comprar los tubos pedir tubo "conduit" (eléctrico), no tubo roscable para agua:** su pared es más gruesa y no deja espacio para la varilla y el epóxico. Verificar Ø ext. ≤ 27 mm, Ø int. ≥ 20 mm y pared ≤ 3 mm (con Ø int. 20 quedan unos 2 mm alrededor de la varilla para el epóxico).'};
 end
 
 % =====================================================================
