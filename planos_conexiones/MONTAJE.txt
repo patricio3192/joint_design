@@ -1,0 +1,63 @@
+MONTAJE DE LAS VIGAS DE ACERO - lista por tipo de colocación   (borrador 2026-10-07)
+==========================================================================
+
+Supuestos (del usuario, 2026-10-07)
+  - Uniones a CORTE: A10, B10, C10, A11, B11, C11 (sándwich), F11 y G11 (IPE 200 a IPE 200),
+    todas las de la IPE 160 de borde y la llegada de las IPE 200 de 10 y 11 al eje E.
+  - Uniones a MOMENTO: columnas B4, C4, D4X, D4Y, D3 (placa P2); sándwich D10, D11, F4, G4 (placa P3).
+
+Geometría que manda (anclas A2, L = 470, viga de hormigón 300)
+  - La varilla sale 85 de la cara del hormigón; la placa queda de 25 (grout) a 37; la tuerca
+    exterior termina a 57 y la punta de la varilla a 85: 28 dentro del perfil de la IPE.
+  - Extremo a MOMENTO (placa soldada a la viga en el suelo): la placa tiene que entrar de punta
+    sobre las varillas. Recorrido axial = 85 - 25 = 60, más tolerancia: ~70.
+  - Por eso el OTRO extremo de esa viga tiene que poder moverse 70 en su eje: punta libre, o una
+    unión a corte que se hace DESPUÉS de colocar la viga (holgura de ~70 entre el extremo de la
+    viga y lo que la recibe).
+  - Ninguna viga tiene dos extremos a momento: con esa regla, todas se pueden montar.
+
+Propuesta para las uniones a corte (idea del usuario, ajustada)
+  - Placa de corte nueva (P4) con las anclas separadas por fuera del ancho de la IPE (por ejemplo
+    a ±85 del eje, fuera de alas, tuercas y arandelas): el centro de la placa queda libre.
+  - El extremo de la viga queda a ~70 de la placa (o del alma de la viga que la recibe) y la unión
+    se hace con una platina de corte suelta (aleta) que se mete de costado junto al alma, entre las
+    alas, y se suelda en obra a la placa P4 (o al alma de la viga que recibe) y al alma de la viga.
+  - Así la viga entra bajando desde arriba (o de costado), sin tocar las anclas, y la holgura de 70
+    deja meter de punta el extremo a momento cuando lo hay.
+  - Soldar las aletas solo cuando todas las vigas de ese paño estén colocadas y apuntaladas.
+
+Lista de vigas
+  Tipo I   - Voladizo: momento en la columna + punta libre. Entra de punta sobre las anclas A1.
+             IPE 240: B4-B9, C4-C9, D4-D9 (D4Y), D4-E4 (D4X), D3-E3 (D3).            5 vigas
+  Tipo II  - Momento en sándwich + punta libre (voladizo de 1270). Entra de punta hacia el norte.
+             IPE 200: F 4-9, G 4-9.                                                    2 vigas
+  Tipo III - Momento en sándwich + corte en el otro extremo (holgura 70, aleta suelta).
+             Entra de punta hacia el extremo a momento, el otro extremo queda a 70.
+             IPE 200: 10 C-D, 11 C-D (momento en D, corte en C)
+                      10 D-E, 11 D-E (momento en D, corte en la IPE 160 del eje E)
+                      F 11-4, G 11-4 (momento en 4, corte en la IPE 200 del eje 11)    6 vigas
+  Tipo IV  - Corte en los dos extremos. Baja desde arriba entre dos placas P4 o vigas.
+             IPE 200: 10 A-B, 11 A-B, 10 B-C, 11 B-C                                   4 vigas
+             IPE 160: eje 9 B-F, F-C, C-G, G-D, D-E; eje E 9-4, 4-3                    7 vigas
+             (esquina E9: ver PENDIENTE.txt, punto 1)
+
+Secuencia de montaje propuesta
+  1. Tipo I, los 5 voladizos IPE 240, apuntalados en la punta.
+  2. Tipo II, F 4-9 y G 4-9, apuntalados en la punta.
+  3. Ejes 10 y 11: A-B y B-C (tipo IV) bajando desde arriba.
+  4. Ejes 10 y 11: C-D y D-E (tipo III). En D, cada una entra de punta desde su lado del sándwich.
+  5. F 11-4 y G 11-4 (tipo III): entran de punta hacia el sur sobre las anclas de F4 / G4.
+  6. IPE 160 (tipo IV): eje 9 y eje E.
+  7. Revisar niveles y plomos, soldar todas las aletas de corte, luego grout (nota 13).
+  El orden 3-6 es flexible: la holgura de 70 en los extremos a corte evita que una viga bloquee a
+  otra. Lo único fijo: cada viga tipo II/III entra de punta antes de soldar sus aletas.
+
+Lo que esto cambia en el diseño (POR HACER)
+  - Releases nuevos en el modelo (A, B, C, F11, G11 articulados): recalcular fuerzas en D10, D11,
+    F4, G4 y en las vigas.
+  - Diseñar la placa P4 (anclas separadas, corte en las anclas y el hormigón, estribos de la viga
+    entre anclas) y la aleta suelta (espesor, largo ~150, soldaduras a la placa y al alma,
+    excentricidad de ~110).
+  - Unión IPE 200 a IPE 200 (F11, G11) e IPE 200 / IPE 160 a las puntas de los voladizos con la
+    misma aleta suelta.
+  - Actualizar la lámina: planta (marcar momento / corte), detalles 3.x, 4.5, tabla y nota 13.
