@@ -102,6 +102,48 @@ def _init(self, fs):
 
 J.Style.__init__ = _init
 
+# weld symbol: "groove": "bevel" draws the single-bevel groove symbol (arrow side) instead of
+# the fillet triangle; arrow, reference line, field flag and tail are joint_pdf's
+_weld0 = J._weld
+
+
+def _weld(d, xt, yt, xe, ye, it):
+    if it.get("groove") != "bevel":
+        return _weld0(d, xt, yt, xe, ye, it)
+    import math
+    f = J.S.fs
+    blk = J._c("#222222")
+    dr = 1 if it.get("dir", 1) >= 0 else -1
+    xr = xe + dr * J._WREF * f
+    d.add(J.Line(xe, ye, xt, yt, strokeColor=blk, strokeWidth=0.6))
+    L = max(math.hypot(xt - xe, yt - ye), 1e-6)
+    ux, uy = (xt - xe) / L, (yt - ye) / L
+    al, aw = 5.5 * f, 1.8 * f
+    d.add(J.Polygon([xt, yt, xt - ux * al - uy * aw, yt - uy * al + ux * aw,
+                     xt - ux * al + uy * aw, yt - uy * al - ux * aw],
+                    fillColor=blk, strokeColor=blk, strokeWidth=0.3))
+    d.add(J.Line(xe, ye, xr, ye, strokeColor=blk, strokeWidth=0.8))
+    if it.get("field"):
+        top = ye + 10 * f
+        d.add(J.Line(xe, ye, xe, top, strokeColor=blk, strokeWidth=0.6))
+        d.add(J.Polygon([xe, top, xe + dr * 6 * f, top - 2 * f, xe, top - 4 * f],
+                        fillColor=blk, strokeColor=blk, strokeWidth=0.3))
+    if it.get("tail"):
+        tw = 4 * f
+        size = 6 * f
+        d.add(J.Line(xr, ye, xr + dr * tw, ye + tw, strokeColor=blk, strokeWidth=0.6))
+        d.add(J.Line(xr, ye, xr + dr * tw, ye - tw, strokeColor=blk, strokeWidth=0.6))
+        d.add(J.String(xr + dr * (tw + 1.5 * f), ye - size * 0.35, it["tail"], fontName=J.BASE,
+                       fontSize=size, fillColor=blk, textAnchor="start" if dr > 0 else "end"))
+    h = 6 * f
+    xs = xe + 13 * f if dr > 0 else xe - 13 * f - h
+    # perpendicular leg on the left, bevel leg from its foot up to the line
+    d.add(J.Line(xs, ye, xs, ye - h, strokeColor=blk, strokeWidth=0.8))
+    d.add(J.Line(xs, ye - h, xs + h, ye, strokeColor=blk, strokeWidth=0.8))
+
+
+J._weld = _weld
+
 # **bold** inside table cells and paragraphs
 import re  # noqa: E402
 

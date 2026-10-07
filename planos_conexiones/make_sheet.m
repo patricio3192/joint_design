@@ -11,10 +11,11 @@ function file = make_sheet(outdir, opts)
   % ---- column 1: location plan and sections -------------------------------------------
   c1{end+1} = blk_h(1, 'Conexiones de vigas de acero a vigas y columnas de hormigón');
   c1{end+1} = blk_h(2, '1. Planta de ubicación');
-  c1{end+1} = blk_draw(dr_keyplan(P), 330, 'PLANTA DE UBICACIÓN', ...
+  c1{end+1} = blk_draw(dr_keyplan(P), 300, 'PLANTA DE UBICACIÓN', ...
       ['**Rojo: unión placa extremo-columna** (B4, C4, D4X, D4Y, D3), con 2 bastones Ø12 (naranja) en la viga en línea; ' ...
        'punto naranja: pata hacia abajo. **Círculos: conexión sándwich (10)**, con los 2 anclajes que atraviesan la viga. ' ...
-       'Viga D entre 3 y 4: estribos Ø10 cada 110 / 140 / 110. Ejes 4 (B-C y C-D): **VCS+1Ø12**, varilla extra abajo (celeste).']);
+       'Viga D entre 3 y 4: estribos Ø10 cada 110 / 140 / 110. Ejes 4 (B-C y C-D): **VCS+1Ø12**, varilla extra abajo (celeste). ' ...
+       'Azul: vigas de acero IPE 240 (voladizos) e IPE 160 (bordes en los ejes 9 y E).']);
   c1{end+1} = blk_row([1 1 1]/3, { ...
       {blk_draw(dr_beamsec(P, 'vcs1'), 95, 'CORTE A-A: VCS+1Ø12 (EJE 4)', ...
          '3Ø12 arriba, 4Ø12 abajo (1-2-1). **Varilla extra Ø12, L = 1500, centrada en el cruce con la IPE 200 (ejes F y G).**')}, ...
@@ -22,6 +23,14 @@ function file = make_sheet(outdir, opts)
          'B4, C4, D4Y. VCM 5Ø12 + 5Ø12 (pares en las esquinas). **Bastones Ø12 junto al par de esquina, a 80 de arriba.**')}, ...
       {blk_draw(dr_beamsec(P, 'vcs'), 95, 'CORTE C-C: VCS CON BASTONES', ...
          'D4X y D3. VCS 3Ø12 + 3Ø12. **Bastones Ø12 contra el estribo, debajo de las esquinas, a 80 de arriba (en D4X: a 98).**')}});
+  c1{end+1} = blk_h(2, '5. Soldadura de las vigas a las placas (IPE 240 a P2, IPE 200 a P3)');
+  c1{end+1} = blk_row([0.58 0.42], { ...
+      {blk_draw(dr_weld_front(P), 68, 'DETALLE 5.1 - SOLDADURAS VIGA - PLACA, VISTA DE FRENTE', ...
+         ['Mismo detalle para IPE 240 + P2 e IPE 200 + P3 (dibujada la IPE 240). **Todas en obra, E70XX.** Largos de los filetes de 6: ' ...
+          'IPE 240: alma 2 x 190, ala inferior 120 por fuera y 2 x 42 por dentro; IPE 200: alma 2 x 159, ala inferior 100 por fuera y 2 x 35 por dentro. ' ...
+          '**No soldar en los radios entre ala y alma.**'])}, ...
+      {blk_draw(dr_weld_side(P), 68, 'DETALLE 5.2 - CORTE POR EL ALMA', ...
+         'Bandera: soldadura en obra. Ala superior: CJP con bisel en el ala, junta precalificada AWS D1.1, sin agujeros de acceso.')}});
 
   % ---- column 2: C4 and sandwich ---------------------------------------------------------
   c2{end+1} = blk_h(2, '2. Unión placa extremo - columna (C4; igual en B4, D4X, D4Y, D3)');
@@ -67,6 +76,13 @@ function file = make_sheet(outdir, opts)
   c3{end+1} = blk_h(3, '**Notas**');
   N = notes(P);
   for i = 1:numel(N), c3{end+1} = blk_note(sprintf('%d. %s', i, N{i})); end
+  sl = P.sl;  Am = pi*sl.dm^2/4;  As = Am*1000/sl.sm;
+  c3{end+1} = blk_draw(dr_deck(P), 50, 'DETALLE 4.6 - LOSA: NOVALOSA 55 + 5 CM DE HORMIGÓN (GENÉRICO)', ...
+      sprintf(['Geometría de la placa según el fabricante. Nivel terminado %g sobre la cara superior de las vigas (igual a la cabeza de las columnas). ' ...
+               '**Malla electrosoldada 4.5-15** (Ø4.5 c/150 en ambos sentidos): As = %.1f x 1000 / %g = %.0f mm2/m ≥ 0.0018 x %g x 1000 = %.0f mm2/m ' ...
+               '(ACI 318-19, 24.4.3.2, sobre el espesor de hormigón encima de la placa) y ≥ 0.00075 x %g x 1000 = %.0f mm2/m (SDI C-2017). ' ...
+               'Traslapo de la malla: una cuadrícula + 50 (200) como mínimo.'], ...
+              sl.hd + sl.tc, Am, sl.sm, As, sl.tc, 0.0018*sl.tc*1000, sl.tc, 0.00075*sl.tc*1000));
 
   B = {blk_row([0.38 0.35 0.27], {c1, c2, c3})};
   doc = struct('title', 'Conexiones de vigas de acero', 'page', opts.page, 'fs', opts.fs, 'blocks', {B}, ...
@@ -92,10 +108,16 @@ function P = params()
   P.bm  = struct('b', 300, 'h', 350, 'rc', 56, 'db', 12);           % beams 30x35
   P.ipe = struct('h', 240, 'b', 120, 'tf', 9.8, 'tw', 6.2);
   P.ip2 = struct('h', 200, 'b', 100, 'tf', 8.5, 'tw', 5.6);
+  P.ip6 = struct('h', 160, 'b', 82, 'tf', 7.4, 'tw', 5.0);
+  % slab: Novalosa 55 (steel deck 1 mm) + 50 of concrete = 105 over the top of the beams; mesh 4.5-15
+  P.sl = struct('hd', 55, 'tc', 50, 'e', 1, 'dm', 4.5, 'sm', 150);
   % end plate on column
   P.ep = struct('t', 12, 'b', 140, 'H', 260, 'g', 80, 'yT', 42, 'yS', 198, 'gr', 25);
-  P.rod = struct('d', 16, 'tip', 345, 'L1', 470, 'L2', 470, 'nut', 16, 'wsh', 3, 'dw', 30, 'hole', 18);
+  P.rod = struct('d', 16, 'L1', 470, 'L2', 470, 'nut', 16, 'nw', 27, 'wsh', 4, 'dw', 33, 'hole', 18, 'pr', 5);
+  % 5/8"-11 UNC: heavy hex nut A194 2H (27 across flats, 16 high); F436 washer (OD 33, ID 17.5, 3.1-4.5 thick)
+  % pr: rod past the nut, 2 threads (pitch 2.3)
   P.hd  = struct('a', 50, 't', 12, 'z', 309);                       % head plate: bearing face at z = hef
+  P.rod.tip = P.hd.z + P.hd.t + P.rod.wsh + P.rod.nut + P.rod.pr;  % 346: rod tip from the column face
   P.bas = struct('d', 12, 'x', 82, 'y', 80, 'yX', 98, 'zh', 66, 'Ls', 1220, 'pata', 200);
   P.jt  = [110 155 230 305];                                        % joint ties Ø10 (below the top of the beams)
   P.tt  = [14 28];                                                  % ties Ø14 above the top of the beams
@@ -151,7 +173,10 @@ function it = dr_keyplan(P)
   bf = P.ipe.b;
   for x = [xB xC xD], it{end+1} = d_rectxy(x - bf/2, y9, x + bf/2, y4 - c, 'plate'); end
   for y = [y4 y3], it{end+1} = d_rectxy(xD + c, y - bf/2, xE, y + bf/2, 'plate'); end
-  it{end+1} = d_line(xB - bw/2, y9, xE, y9, 'edge');  it{end+1} = d_line(xE, y9, xE, y3 + 60, 'edge');
+  % edge beams IPE 160 on grids 9 (B to E) and E (9 to 3)
+  b6 = P.ip6.b;
+  it{end+1} = d_rectxy(xB - bf/2, y9 - b6/2, xE + b6/2, y9 + b6/2, 'plate');
+  it{end+1} = d_rectxy(xE - b6/2, y9 + b6/2, xE + b6/2, y3 + bf/2, 'plate');
   % extra bar of VCS+1Ø12 (drawn just south of the beam), centred on F and G
   for x = [xF xG]
     it{end+1} = d_path([x - 750, y4 - bw/2 - 90; x + 750, y4 - bw/2 - 90], 45, 'r_bm2');
@@ -197,7 +222,8 @@ function it = dr_keyplan(P)
     it{end+1} = struct('t', 'text', 'p', [x + 200, (y9 + y4)/2 - 150], 'txt', 'IPE 240', 's', 'code', 'a', 'middle', 'r', 90);
   end
   it{end+1} = d_text((xD + c + xE)/2, y3 - 300, 'IPE 240', 'code', 'middle');
-  it{end+1} = d_text((xB + xC)/2, y9 - 280, 'borde de losa', 'small', 'middle');
+  it{end+1} = d_text((xB + xC)/2, y9 - 280, 'IPE 160 (viga de borde, eje 9)', 'code', 'middle');
+  it{end+1} = struct('t', 'text', 'p', [xE + 200, (y4 + y11)/2], 'txt', 'IPE 160 (borde, eje E)', 's', 'code', 'a', 'middle', 'r', 90);
   it{end+1} = d_text(xB - 260, y4 - 700, 'B4', 'red', 'end');
   it{end+1} = d_text(xC - 260, y4 - 700, 'C4', 'red', 'end');
   it{end+1} = d_text(xD - 260, y4 - 700, 'D4Y', 'red', 'end');
@@ -302,12 +328,12 @@ function it = dr_c4_elev(P)
   for v = -[ep.yT ep.yS]
     it{end+1} = d_bar(r.tip - r.L1, v, r.tip, v, r.d, 'r_anc');
     it{end+1} = d_rectxy(hd.z, v - hd.a/2, hd.z + hd.t, v + hd.a/2, 'r_bp');
-    z = hd.z + hd.t;  it{end+1} = d_rectxy(z, v - 15, z + r.wsh, v + 15, 'r_nut');
-    it{end+1} = d_rectxy(z + r.wsh, v - 12, z + r.wsh + r.nut, v + 12, 'r_nut');
-    it{end+1} = d_rectxy(-ep.gr, v - 15, -ep.gr + r.wsh, v + 15, 'r_ancg');
-    it{end+1} = d_rectxy(-ep.gr + r.wsh, v - 12, -ep.gr + r.wsh + r.nut, v + 12, 'r_ancg');
-    it{end+1} = d_rectxy(zi - r.wsh, v - 15, zi, v + 15, 'r_ancg');
-    it{end+1} = d_rectxy(zi - r.wsh - r.nut, v - 12, zi - r.wsh, v + 12, 'r_ancg');
+    z = hd.z + hd.t;  it{end+1} = d_rectxy(z, v - r.dw/2, z + r.wsh, v + r.dw/2, 'r_nut');
+    it{end+1} = d_rectxy(z + r.wsh, v - r.nw/2, z + r.wsh + r.nut, v + r.nw/2, 'r_nut');
+    it{end+1} = d_rectxy(-ep.gr, v - r.dw/2, -ep.gr + r.wsh, v + r.dw/2, 'r_ancg');
+    it{end+1} = d_rectxy(-ep.gr + r.wsh, v - r.nw/2, -ep.gr + r.wsh + r.nut, v + r.nw/2, 'r_ancg');
+    it{end+1} = d_rectxy(zi - r.wsh, v - r.dw/2, zi, v + r.dw/2, 'r_ancg');
+    it{end+1} = d_rectxy(zi - r.wsh - r.nut, v - r.nw/2, zi - r.wsh, v + r.nw/2, 'r_ancg');
   end
   % labels on the right: short horizontal landing, inclined leader, dot on the element.
   % Ordered so that the leaders do not cross.
@@ -449,9 +475,9 @@ function it = dr_c4_plan(P)
     x = s*ep.g/2;
     it{end+1} = d_bar(x, r.tip - r.L1, x, r.tip, r.d, 'r_anc');
     it{end+1} = d_rectxy(x - hd.a/2, hd.z, x + hd.a/2, hd.z + hd.t, 'r_bp');
-    z = hd.z + hd.t;  it{end+1} = d_rectxy(x - 15, z, x + 15, z + r.wsh, 'r_nut');
-    it{end+1} = d_rectxy(x - 12, z + r.wsh, x + 12, z + r.wsh + r.nut, 'r_nut');
-    it{end+1} = d_rectxy(x - 12, zi - r.wsh - r.nut, x + 12, zi - r.wsh, 'r_ancg');
+    z = hd.z + hd.t;  it{end+1} = d_rectxy(x - r.dw/2, z, x + r.dw/2, z + r.wsh, 'r_nut');
+    it{end+1} = d_rectxy(x - r.nw/2, z + r.wsh, x + r.nw/2, z + r.wsh + r.nut, 'r_nut');
+    it{end+1} = d_rectxy(x - r.nw/2, zi - r.wsh - r.nut, x + r.nw/2, zi - r.wsh, 'r_ancg');
   end
   it{end+1} = d_text(0, zi - 260, 'IPE 240 (después)', 'small', 'middle');
   it{end+1} = d_text(0, zL + 30, 'VCM', 'label', 'middle');
@@ -541,9 +567,14 @@ function it = dr_sw_front(P)
   it{end+1} = d_text(-L + 20, -h + 75, 'estribos Ø10', 'tie', 'start');
   it{end+1} = d_dim(-sw.g/2, 0, sw.g/2, 0, 60, sprintf('%g', sw.g));
   it{end+1} = d_dim(-sw.b/2, 0, sw.b/2, 0, 130, sprintf('%g', sw.b));
-  it{end+1} = d_dim(-sw.b/2, 0, -sw.b/2, -sw.yT, 60, sprintf('%g', sw.yT));
-  it{end+1} = d_dim(-sw.b/2, -sw.yT, -sw.b/2, -sw.yS, 60, sprintf('%g', sw.yS - sw.yT));
-  it{end+1} = d_dim(-sw.b/2, -sw.yS, -sw.b/2, -sw.H, 60, sprintf('%g', sw.H - sw.yS));
+  % anchor rows: dashed axes out to a chain on the left of the beam, and a label with arrows
+  xc = -L - 50;
+  for v = -[sw.yT sw.yS], it{end+1} = d_line(-sw.g/2, v, xc, v, 'cut'); end
+  it{end+1} = d_dim(-L, 0, -L, -sw.yT, -50, sprintf('%g', sw.yT), 'before');
+  it{end+1} = d_dim(-L, -sw.yT, -L, -sw.yS, -50, sprintf('%g', sw.yS - sw.yT));
+  it{end+1} = d_dim(-L, -sw.yS, -L, -h, -50, sprintf('%g', h - sw.yS));
+  it{end+1} = d_text(-260, 95, 'A2 (anclajes)', 'anc', 'end');
+  for v = -[sw.yT sw.yS], it = [it, d_arrow(-255, 85, -sw.g/2 - 9, v + 5)]; end
   xp = xs(xs >= 0);
   for k = 1:numel(xp) - 1, it{end+1} = d_dim(xp(k), -h, xp(k+1), -h, -60, sprintf('%g', xp(k+1) - xp(k))); end
   it{end+1} = d_dim(-xp(1), -h, xp(1), -h, -60, sprintf('%g', 2*xp(1)));
@@ -572,18 +603,125 @@ function it = dr_sw_plan(P)
     it{end+1} = d_bar(x, -b/2 - e, x, b/2 + e, r.d, 'r_anc');
     for s = [-1 1]
       w0 = s*(b/2 + sw.gr + sw.t);
-      it{end+1} = d_rectxy(x - 15, w0, x + 15, w0 + s*r.wsh, 'r_ancg');
-      it{end+1} = d_rectxy(x - 12, w0 + s*r.wsh, x + 12, w0 + s*(r.wsh + r.nut), 'r_ancg');
+      it{end+1} = d_rectxy(x - r.dw/2, w0, x + r.dw/2, w0 + s*r.wsh, 'r_ancg');
+      it{end+1} = d_rectxy(x - r.nw/2, w0 + s*r.wsh, x + r.nw/2, w0 + s*(r.wsh + r.nut), 'r_ancg');
       w1 = s*(b/2 + sw.gr);
-      it{end+1} = d_rectxy(x - 15, w1, x + 15, w1 - s*r.wsh, 'r_ancg');
+      it{end+1} = d_rectxy(x - r.dw/2, w1, x + r.dw/2, w1 - s*r.wsh, 'r_ancg');
+      it{end+1} = d_rectxy(x - r.nw/2, w1 - s*r.wsh, x + r.nw/2, w1 - s*(r.wsh + r.nut), 'r_ancg');
     end
   end
-  it{end+1} = d_text(0, b/2 + sw.gr + sw.t + 280, 'IPE 200 (después)', 'small', 'middle');
+  wp = b/2 + sw.gr + sw.t;  xl = 190;
+  T = {[xl, 400], [P.ip2.b/2 - 5, 390], 'IPE 200 (después)';
+       [xl, 300], [sw.b/2 - 10, wp - sw.t/2], sprintf('P3 140x220x12 (después)');
+       [xl, 235], [sw.b/2 + 2, b/2 + sw.gr/2], sprintf('grout %g (después)', sw.gr);
+       [xl, -260], [sw.g/2 + r.d/2 + 2, -b/2 - e + 10], sprintf('A2, L = %g', r.L2);
+       [xl, -330], [sw.g/2 + r.nw/2 + 2, -wp - r.wsh - r.nut/2], 'tuerca y arandela exteriores';
+       [xl, -400], [P.ip2.b/2 - 5, -390], 'IPE 200 (después)'};
+  for k = 1:size(T, 1)
+    q = T{k,1};  it{end+1} = d_text(q(1) + 10, q(2) - 8, T{k,3}, iif(k == 4, 'anc', 'small'), 'start');
+    it = [it, d_arrow(q(1), q(2), T{k,2}(1), T{k,2}(2))];
+  end
   it{end+1} = d_dim(-L, b/2, -L, b/2 + sw.gr, 60, sprintf('%g', sw.gr));
-  it{end+1} = d_text(sw.g/2 + 30, -b/2 - e - 20, 'A2', 'anc', 'start');
   it{end+1} = d_dim(L, -b/2, L, b/2, -60, sprintf('%g', b));
-  it{end+1} = d_dim(-sw.g/2, -b/2 - e, -sw.g/2, b/2 + e, 90, sprintf('%g', r.L2));
+  it{end+1} = d_dim(-sw.g/2, -b/2 - e, -sw.g/2, b/2 + e, 73, sprintf('%g', r.L2));
   it{end+1} = d_dim(-sw.g/2, b/2 + 60, sw.g/2, b/2 + 60, 0, sprintf('%g', sw.g));
+end
+
+% =====================================================================
+%  5. Welds of the beam to the plate (generic: IPE 240 on P2 drawn). x across, v up (0 = top)
+% =====================================================================
+function it = dr_weld_front(P)
+  ip = P.ipe;  ep = P.ep;  w = 6;  rr = 15;  b = ip.b;  h = ip.h;  tf = ip.tf;  tw = ip.tw;  it = {};
+  it{end+1} = d_rectxy(-ep.b/2, -ep.H, ep.b/2, 0, 'r_eplate');
+  it{end+1} = d_poly(ishape_r(ip, rr), 'r_ipe');
+  it{end+1} = d_rectxy(-b/2, -tf, b/2, 0, 'weldf');                                % CJP: the whole flange
+  it{end+1} = d_rectxy(-b/2, -h - w, b/2, -h, 'weldf');                            % bottom flange, outside
+  for s = [-1 1]
+    it{end+1} = d_rectxy(s*(tw/2 + rr), -h + tf, s*b/2, -h + tf + w, 'weldf');    % bottom flange, inside
+    it{end+1} = d_rectxy(s*tw/2, -tf - rr, s*(tw/2 + w), -h + tf + rr, 'weldf');  % web, straight part
+  end
+  xl = b/2 + 45;
+  T = {[xl, 10], [b/2 - 8, -tf/2], 'CJP ala superior (todo el ancho)';
+       [xl, -55], [tw/2 + 5, -tf - 5], 'radios: sin soldadura';
+       [xl, -120], [tw/2 + w, -h/2], sprintf('filete %g alma, ambos lados,\nen la parte recta', w);
+       [xl, -200], [b/2 - 8, -h + tf + w/2], sprintf('filete %g ala inferior, por dentro,\nde la punta al radio', w);
+       [xl, -265], [b/2 - 8, -h - w/2], sprintf('filete %g ala inferior, por fuera,\ntodo el ancho', w)};
+  for k = 1:size(T, 1)
+    q = T{k,1};  it{end+1} = d_text(q(1) + 8, q(2) - 6, T{k,3}, iif(k == 2, 'code', 'small'), 'start');
+    it = [it, d_arrow(q(1), q(2), T{k,2}(1), T{k,2}(2))];
+  end
+  it = [it, d_arrow(xl, -55, tw/2 + 5, -h + tf + 5)];
+  it{end+1} = d_text(-ep.b/2 - 60, -40, sprintf('placa\nP2 o P3'), 'small', 'end');
+  it{end+1} = d_dim(-b/2, -tf - rr, -b/2, -h + tf + rr, -25, sprintf('%.0f (alma)', h - 2*(tf + rr)));
+  it{end+1} = d_dim(-b/2, -h + tf, -tw/2 - rr, -h + tf, -(tf + 2*P.ep.H - 2*h + 20), sprintf('%.0f', (b - tw - 2*rr)/2), 'before');
+  it{end+1} = d_dim(-b/2, -h - w, b/2, -h - w, -(P.ep.H - h - w + 50), sprintf('%g', b));
+end
+
+function I = ishape_r(ip, r)
+  % I section with the root radii
+  b = ip.b;  h = ip.h;  tf = ip.tf;  t = ip.tw/2;
+  I = [-b/2 0; b/2 0; b/2 -tf; arcp([t + r, -tf - r], r, 90, 180); arcp([t + r, -h + tf + r], r, 180, 270); ...
+       b/2 -h + tf; b/2 -h; -b/2 -h; -b/2 -h + tf; arcp([-t - r, -h + tf + r], r, 270, 360); ...
+       arcp([-t - r, -tf - r], r, 0, 90); -b/2 -tf];
+end
+
+% Section through the web: z horizontal (0 = beam face of the plate), v up (0 = top)
+function it = dr_weld_side(P)
+  ip = P.ipe;  ep = P.ep;  w = 6;  rr = 15;  h = ip.h;  tf = ip.tf;  Lb = 230;  it = {};
+  it{end+1} = d_rectxy(-ep.t, -ep.H, 0, 0, 'r_eplate');
+  it{end+1} = d_rectxy(0, -h, Lb, 0, 'r_ipe');
+  it{end+1} = d_rectxy(0, -tf, Lb, 0, 'r_ipef');  it{end+1} = d_rectxy(0, -h, Lb, -h + tf, 'r_ipef');
+  it{end+1} = d_line(Lb, 0, Lb, -h, 'edge');
+  it{end+1} = d_poly([0 0; tf 0; 0 -tf], 'weldf');                                   % bevel, filled
+  it{end+1} = d_poly([0 -h; w -h; 0 -h - w], 'weldf');                               % bottom flange outside
+  it{end+1} = d_poly([0 -h + tf; w -h + tf; 0 -h + tf + w], 'weldf');                % bottom flange inside
+  it{end+1} = d_rectxy(0, -tf - rr, w, -h + tf + rr, 'weldf');                       % web
+  it{end+1} = d_weld(3, -tf/2, 70, 70, 1, 'arrow', '', '', 0, 1, 'CJP', 'weldf', 'bevel');
+  it{end+1} = d_weld(w, -h/2, 70, -60, 1, 'both', sprintf('%g', w), '', 0, 1, 'alma, parte recta', 'weldf', '');
+  it{end+1} = d_weld(2, -h - 2, 70, -h - 60, 1, 'both', sprintf('%g', w), '', 0, 1, 'ala inferior', 'weldf', '');
+  it{end+1} = d_text(-ep.t - 8, -ep.H + 10, 'placa', 'small', 'end');
+  it{end+1} = d_text(Lb/2 + 40, -h/2 - 50, 'IPE', 'small', 'middle');
+end
+
+function it = d_weld(xt, yt, xe, ye, dr, side, sz, len, all, field, tail, s, groove)
+  % AWS weld symbol (joint_pdf.py; groove 'bevel' from pour_pdf.py)
+  it = struct('t', 'weld', 'p', [xt yt xe ye], 'dir', dr, 'side', side, 'size', sz, ...
+              'len', len, 'all', all, 'field', field, 'tail', tail, 's', s, 'groove', groove);
+end
+
+% =====================================================================
+%  4.6 Slab on steel deck, section across the ribs: x along, v up (0 = top of the beams)
+% =====================================================================
+function it = dr_deck(P)
+  sl = P.sl;  H = sl.hd + sl.tc;  p = 230;  a = 55;  c = 105;  sp = (p - a - c)/2;  n = 3;  X = n*p;  it = {};
+  Q = [];
+  for k = 0:n-1
+    x = k*p;  Q = [Q; x 0; x + a 0; x + a + sp, sl.hd; x + a + sp + c, sl.hd];
+  end
+  Q = [Q; X 0];
+  it{end+1} = d_poly([Q; X H; 0 H], 'r_conc');
+  it{end+1} = d_rectxy(0, -P.ip6.h, X, 0, 'r_ipe');  it{end+1} = d_rectxy(0, -P.ip6.tf, X, 0, 'r_ipef');
+  it{end+1} = d_path(Q, 3, 'r_bp');                                                  % deck, 1 mm (drawn thicker)
+  vm = H - 20 - sl.dm*1.5;                                                            % lower wires, cover 20 on top
+  it{end+1} = d_path([0 vm; X vm], sl.dm, 'r_bm1');
+  for x = 40:sl.sm:X, it{end+1} = d_circle(x, vm + sl.dm, sl.dm/2 + 0.5, 'r_bm1'); end
+  for x = [0 X], it{end+1} = d_line(x, -P.ip6.h, x, H, 'edge'); end
+  % labels
+  xl = X + 40;
+  T = {[xl, H + 60], [X - 70, H - 8], 'hormigón fc 240', 'small';
+       [xl, H + 5], [X - 40, vm + 2], sprintf('malla %g-%g', sl.dm, sl.sm/10), 'bsm';
+       [xl, -10], [X - p + a + sp/2 + 4, sl.hd/2], sprintf('Novalosa 55, e = %g mm', sl.e), 'code';
+       [xl, -90], [X - 30, -P.ip6.h/2], 'viga de acero', 'small'};
+  for k = 1:size(T, 1)
+    q = T{k,1};  it{end+1} = d_text(q(1) + 10, q(2) - 6, T{k,3}, T{k,4}, 'start');
+    it = [it, d_arrow(q(1), q(2), T{k,2}(1), T{k,2}(2))];
+  end
+  % dimensions on the left
+  it{end+1} = d_dim(0, 0, 0, sl.hd, 40, sprintf('%g', sl.hd));
+  it{end+1} = d_dim(0, sl.hd, 0, H, 40, sprintf('%g', sl.tc));
+  it{end+1} = d_dim(0, 0, 0, H, 95, sprintf('%g', H));
+  it{end+1} = d_dim(p + 40, vm + sl.dm*1.5, p + 40, H, -25, 'rec. 20');
+  it{end+1} = d_text(-110, -25, sprintf('cara superior\nde las vigas'), 'small', 'end');
 end
 
 % =====================================================================
@@ -627,14 +765,14 @@ function it = dr_rod(P, k)
     it{end+1} = d_rectxy(xF, -45, L + 15, 45, 'r_concb');
     it{end+1} = d_bar(0, 0, L, 0, r.d, 'r_anc');
     xh = xF + hd.z;  it{end+1} = d_rectxy(xh, -hd.a/2, xh + hd.t, hd.a/2, 'r_bp');
-    it{end+1} = d_rectxy(xh + hd.t, -15, xh + hd.t + r.wsh, 15, 'r_nut');
-    it{end+1} = d_rectxy(xh + hd.t + r.wsh, -12, xh + hd.t + r.wsh + r.nut, 12, 'r_nut');
+    it{end+1} = d_rectxy(xh + hd.t, -r.dw/2, xh + hd.t + r.wsh, r.dw/2, 'r_nut');
+    it{end+1} = d_rectxy(xh + hd.t + r.wsh, -r.nw/2, xh + hd.t + r.wsh + r.nut, r.nw/2, 'r_nut');
     xp = xF - ep.gr - ep.t;
     it{end+1} = d_rectxy(xp, -ep.H/4, xp + ep.t, ep.H/4, 'r_eplate');
-    it{end+1} = d_rectxy(xp + ep.t, -15, xp + ep.t + r.wsh, 15, 'r_ancg');
-    it{end+1} = d_rectxy(xp + ep.t + r.wsh, -12, xp + ep.t + r.wsh + r.nut, 12, 'r_ancg');
-    it{end+1} = d_rectxy(xp - r.wsh, -15, xp, 15, 'r_ancg');
-    it{end+1} = d_rectxy(xp - r.wsh - r.nut, -12, xp - r.wsh, 12, 'r_ancg');
+    it{end+1} = d_rectxy(xp + ep.t, -r.dw/2, xp + ep.t + r.wsh, r.dw/2, 'r_ancg');
+    it{end+1} = d_rectxy(xp + ep.t + r.wsh, -r.nw/2, xp + ep.t + r.wsh + r.nut, r.nw/2, 'r_ancg');
+    it{end+1} = d_rectxy(xp - r.wsh, -r.dw/2, xp, r.dw/2, 'r_ancg');
+    it{end+1} = d_rectxy(xp - r.wsh - r.nut, -r.nw/2, xp - r.wsh, r.nw/2, 'r_ancg');
     it{end+1} = d_text(xF + 10, 105, 'cara de la columna', 'small', 'start');
     it{end+1} = d_dim(0, -50, L, -50, -50, sprintf('L = %g', L));
     it{end+1} = d_dim(xF, 55, xh, 55, 0, sprintf('%g', hd.z));
@@ -649,9 +787,9 @@ function it = dr_rod(P, k)
       xp = iif(s == 0, x0 - gr - t, x0 + b + gr);
       it{end+1} = d_rectxy(xp, -P.sw.H/4, xp + t, P.sw.H/4, 'r_eplate');
       xo = iif(s == 0, xp - r.wsh, xp + t);
-      it{end+1} = d_rectxy(xo, -15, xo + r.wsh, 15, 'r_ancg');
+      it{end+1} = d_rectxy(xo, -r.dw/2, xo + r.wsh, r.dw/2, 'r_ancg');
       xn = iif(s == 0, xo - r.nut, xo + r.wsh);
-      it{end+1} = d_rectxy(xn, -12, xn + r.nut, 12, 'r_ancg');
+      it{end+1} = d_rectxy(xn, -r.nw/2, xn + r.nut, r.nw/2, 'r_ancg');
     end
     it{end+1} = d_dim(0, -50, L, -50, -50, sprintf('L = %g', L));
     it{end+1} = d_dim(x0, 55, x0 + b, 55, 0, sprintf('%g (viga)', b));
@@ -689,8 +827,8 @@ function rows = quantities(P)
     'P1', 'Placa de cabeza', 'PL 50x50x12 A36, agujero Ø18 (una por A1)', '4', '20'
     'P2', 'Placa extremo', 'PL 140x260x12 A36, 4 agujeros Ø18 (después)', '1', '5'
     'P3', 'Placa sándwich', 'PL 140x220x12 A36, 4 agujeros Ø18 (después)', '2', '20'
-    'T', 'Tuerca', '5/8"-11 UNC grado 8 o A194 2H: 3 por A1 (cabeza, nivelación, exterior), 4 por A2 (2 de nivelación, 2 exteriores)', '-', '220'
-    'W', 'Arandela', 'plana Ø30 x 3: 3 por A1, 4 por A2', '-', '220'
+    'T', 'Tuerca', 'hexagonal pesada 5/8"-11 UNC ASTM A194 2H (27 entre caras, 16 de alto): 3 por A1 (cabeza, nivelación, exterior), 4 por A2 (2 de nivelación, 2 exteriores)', '-', '220'
+    'W', 'Arandela', 'endurecida ASTM F436 para 5/8" (Ø ext. 33, int. 17.5, espesor 4): 3 por A1, 4 por A2', '-', '220'
     'BA', 'Bastón', sprintf('Ø12, L = %g (recto %g + pata %g hacia abajo)', Lb, P.bas.Ls, P.bas.pata), '2', '10'
     'VE', 'Varilla extra VCS', 'Ø12, L = 1500, recta, abajo, centrada en F y G (eje 4)', '-', '2'
     'E14', 'Estribo columna', 'Ø14 cerrado, ganchos 135°, L ≈ 1450; 2 por columna, las 16 columnas', '2', '32'
@@ -705,9 +843,9 @@ function N = notes(P)
     'Medidas en mm. Cotas desde la cara superior de las vigas (= cara superior de las IPE).'
     'Hormigón fc = 240 kg/cm2. Acero de refuerzo fy = 4200 kg/cm2.'
     'Recubrimiento libre 40 a los estribos en vigas y columnas, y 40 sobre los ganchos Ø16 en la cara superior de la columna.'
-    '**Anclajes A1 y A2: varilla roscada ASTM A193 B7 con certificado del proveedor.** Tuercas grado 8 o A194 2H. Apretar a mano (sin torque).'
+    '**Anclajes A1 y A2: varilla roscada ASTM A193 B7 con certificado del proveedor.** Tuercas hexagonales pesadas ASTM A194 2H y arandelas endurecidas ASTM F436 (no usar tuercas ni arandelas comunes). Apretar a mano (sin torque).'
     '**Colocar A1 y A2 antes de fundir, con una plantilla de acero perforada igual a la placa** (agujeros Ø18). Proteger las roscas con cinta.'
-    'A1: placa de cabeza P1 dentro de la jaula de estribos de la columna, punta a 345 de la cara. Si choca con una barra, inclinarla o correrla unos mm.'
+    sprintf('A1: placa de cabeza P1 dentro de la jaula de estribos de la columna, punta a %g de la cara. Si choca con una barra, inclinarla o correrla unos mm.', P.rod.tip)
     '**Bastones Ø12 (2 por unión):** pata de 200 hacia abajo a 66 de la cara del voladizo, tramo recto de 1220 hacia la viga en línea, junto al par de esquina.'
     '**D4: los A1 de D4X van a 62 y 173 (debajo de los de D4Y) y sus bastones a 98.** Correr los estribos del nudo lo necesario.'
     'Estribos del nudo Ø10 en las 16 columnas, cada 75 aprox. (se pueden mover ± 20 para acomodar las barras); deben quedar a 13 o más de anclajes y bastones.'
@@ -715,7 +853,10 @@ function N = notes(P)
     'Sándwich: un estribo Ø10 a cada lado de los anclajes A2; los demás cada 110 desde ellos. A2 entre estribos, paralelos a sus ramas.'
     'Viga D entre 3 y 4: estribos Ø10 cada 110 de 3 a 10 y de 11 a 4; cada 140 entre 10 y 11.'
     '**Después de fundir:** placas P2 y P3, IPE, tuercas de nivelación y exteriores, grout sin contracción (ASTM C1107, mínimo 280 kg/cm2) similar a SikaGrout-212, 25 bajo P2 y P3.'
-    'Soldadura E70XX: ala superior de penetración completa; ala inferior y alma, filete de 6.'
+    ['**Soldaduras viga - placa (detalle 5), todas en obra:** electrodo E70XX de bajo hidrógeno (E7018), soldador calificado según AWS D1.1. ' ...
+     'Ala superior: penetración completa (CJP) en todo el ancho, con bisel en el ala, junta precalificada AWS D1.1 (con respaldo, o resanando la raíz por debajo y rematando), sin agujeros de acceso. ' ...
+     'Ala inferior: filete de 6 por fuera en todo el ancho y por dentro de la punta del ala al inicio del radio. Alma: filete de 6 a ambos lados en la parte recta. ' ...
+     '**No soldar en los radios entre ala y alma.** Limpiar óxido y pintura antes de soldar. Inspección visual del 100 %; la CJP, además con tintes penetrantes o ultrasonido.']
     'La columna se funde hasta el fondo de las vigas; nudo, vigas y cabeza de columna en una sola fundida.'};
 end
 
