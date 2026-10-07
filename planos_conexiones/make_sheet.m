@@ -778,18 +778,20 @@ function it = dr_rod(P, k)
     xp = xF - ep.gr - ep.t;
     it{end+1} = d_rectxy(xF - ep.gr, -ep.H/4, xF, ep.H/4, 'r_grout');
     it{end+1} = d_rectxy(xp, -ep.H/4, xp + ep.t, ep.H/4, 'r_eplate');
-    it{end+1} = d_rectxy(xp + ep.t, -r.dw/2, xp + ep.t + r.wsh, r.dw/2, 'r_ancg');
-    it{end+1} = d_rectxy(xp + ep.t + r.wsh, -r.nw/2, xp + ep.t + r.wsh + r.nut, r.nw/2, 'r_ancg');
-    it{end+1} = d_rectxy(xp - r.wsh, -r.dw/2, xp, r.dw/2, 'r_ancg');
-    it{end+1} = d_rectxy(xp - r.wsh - r.nut, -r.nw/2, xp - r.wsh, r.nw/2, 'r_ancg');
+    it{end+1} = d_rectxy(xp + ep.t, -r.dw/2, xp + ep.t + r.wsh, r.dw/2, 'r_nut');
+    it{end+1} = d_rectxy(xp + ep.t + r.wsh, -r.nw/2, xp + ep.t + r.wsh + r.nut, r.nw/2, 'r_nut');
+    it{end+1} = d_rectxy(xp - r.wsh, -r.dw/2, xp, r.dw/2, 'r_nut');
+    it{end+1} = d_rectxy(xp - r.wsh - r.nut, -r.nw/2, xp - r.wsh, r.nw/2, 'r_nut');
     it{end+1} = d_text(xF + 10, 105, 'cara de la columna', 'small', 'start');
-    it{end+1} = d_dim(0, -50, L, -50, -95, sprintf('L = %g', L));
+    it{end+1} = d_dim(0, -50, L, -50, -165, sprintf('L = %g', L));
     it{end+1} = d_dim(xF - ep.gr, -ep.H/4, xF, -ep.H/4, -20, sprintf('%g grout', ep.gr));
     it{end+1} = d_text(xF - ep.gr/2 - 70, 115, 'grout', 'small', 'end');
     it = [it, d_arrow(xF - ep.gr/2 - 65, 110, xF - ep.gr/2, 35)];
     it{end+1} = d_dim(xF, 55, xh, 55, 0, sprintf('%g', hd.z));
     it{end+1} = d_dim(xp, 55, xF, 55, 0, sprintf('%g', xF - xp));
     it{end+1} = d_text(xh + 6, -hd.a/2 - 35, 'P1', 'anc', 'middle');
+    it{end+1} = d_text(xF + 110, -122, 'tuerca de nivelación', 'small', 'start');
+    it = [it, d_arrow(xF + 105, -115, xp + ep.t + r.wsh + r.nut/2, -r.nw/2 - 2)];
   else
     L = r.L2;  b = P.bm.b;  x0 = (L - b)/2;  t = P.sw.t;
     it{end+1} = d_rectxy(x0, -45, x0 + b, 45, 'r_concb');
@@ -801,19 +803,23 @@ function it = dr_rod(P, k)
       it{end+1} = d_rectxy(xg, -P.sw.H/4, xg + gr, P.sw.H/4, 'r_grout');
       it{end+1} = d_rectxy(xp, -P.sw.H/4, xp + t, P.sw.H/4, 'r_eplate');
       xw = iif(s == 0, xp + t, xp - r.wsh);                                    % leveling washer and nut
-      it{end+1} = d_rectxy(xw, -r.dw/2, xw + r.wsh, r.dw/2, 'r_ancg');
+      it{end+1} = d_rectxy(xw, -r.dw/2, xw + r.wsh, r.dw/2, 'r_nut');
       xl = iif(s == 0, xw + r.wsh, xw - r.nut);
-      it{end+1} = d_rectxy(xl, -r.nw/2, xl + r.nut, r.nw/2, 'r_ancg');
+      it{end+1} = d_rectxy(xl, -r.nw/2, xl + r.nut, r.nw/2, 'r_nut');
       it{end+1} = d_dim(xg, -P.sw.H/4, xg + gr, -P.sw.H/4, -20, sprintf('%g', gr), iif(s == 0, 'before', 'after'));
       it = [it, d_arrow(L/2, 115, xg + gr/2, 35)];
       xo = iif(s == 0, xp - r.wsh, xp + t);
-      it{end+1} = d_rectxy(xo, -r.dw/2, xo + r.wsh, r.dw/2, 'r_ancg');
+      it{end+1} = d_rectxy(xo, -r.dw/2, xo + r.wsh, r.dw/2, 'r_nut');
       xn = iif(s == 0, xo - r.nut, xo + r.wsh);
-      it{end+1} = d_rectxy(xn, -r.nw/2, xn + r.nut, r.nw/2, 'r_ancg');
+      it{end+1} = d_rectxy(xn, -r.nw/2, xn + r.nut, r.nw/2, 'r_nut');
     end
-    it{end+1} = d_dim(0, -50, L, -50, -95, sprintf('L = %g', L));
+    it{end+1} = d_dim(0, -50, L, -50, -165, sprintf('L = %g', L));
     it{end+1} = d_dim(x0, 55, x0 + b, 55, 0, sprintf('%g (viga)', b));
     it{end+1} = d_text(L/2, 122, sprintf('grout %g', gr), 'small', 'middle');
+    it{end+1} = d_text(L/2, -125, 'tuercas de nivelación', 'small', 'middle');
+    for xn = [x0 - gr + r.wsh + r.nut/2, x0 + b + gr - r.wsh - r.nut/2]
+      it = [it, d_arrow(L/2 + sign(xn - L/2)*40, -108, xn, -r.nw/2 - 2)];
+    end
   end
 end
 
