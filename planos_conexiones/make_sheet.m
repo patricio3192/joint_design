@@ -32,7 +32,7 @@ function file = make_sheet(outdir, opts)
                'Malla 4.5-15, lisa o corrugada, fy ≥ 490 MPa. Cumple la cuantía mínima: %.0f mm2/m, se piden %.0f. ' ...
                'Traslapo de la malla: 300 (2 cuadros de la malla).'], sl.hd + sl.tc, As, 0.0018*sl.tc*1000))}, ...
       {blk_draw(dr_tube(P), 69, 'DETALLE 5.2 - TUBO Y ANCLA A2 (CORTE POR LA VIGA)', ...
-         'Fila superior: tubo apoyado en las barras superiores. Fila inferior: tubo centrado en el ancla. La varilla puede quedar en cualquier posición dentro del tubo; el epóxico rellena. Ver notas 18 y 19.')}});
+         'Fila superior: tubo apoyado en las barras superiores. Fila inferior: tubo unos 2.5 más alto que el ancla. De preferencia la varilla apoyada en el fondo del tubo; el epóxico rellena el resto. Ver notas 18 y 19.')}});
 
   % ---- column 2: C4 and sandwich ---------------------------------------------------------
   c2{end+1} = blk_h(2, '2. Unión placa extremo - columna (C4; igual en B4, D4X, D4Y, D3)');
@@ -582,7 +582,7 @@ function it = dr_sw_front(P)
   I = [-ip.b/2 0; ip.b/2 0; ip.b/2 -ip.tf; ip.tw/2 -ip.tf; ip.tw/2 -ip.h + ip.tf; ip.b/2 -ip.h + ip.tf; ip.b/2 -ip.h; ...
        -ip.b/2 -ip.h; -ip.b/2 -ip.h + ip.tf; -ip.tw/2 -ip.h + ip.tf; -ip.tw/2 -ip.tf; -ip.b/2 -ip.tf];
   it{end+1} = d_poly(I, 'r_ipe');
-  tb = P.tube;  vt = [-(tb.top - tb.D/2), -sw.yS];   % sleeve centres: top on the bars, bottom centred on the rod
+  tb = P.tube;  vt = [-(tb.top - tb.D/2), -sw.yS + (tb.D - 2*tb.t - P.rod.d)/2];   % sleeve centres: top on the bars, bottom raised (rod on its bottom)
   for v = vt, for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, tb.D/2, 'r_tube'); end, end
   for v = -[sw.yT sw.yS], for s = [-1 1], it{end+1} = d_circle(s*sw.g/2, v, P.rod.d/2, 'r_anc'); end, end
   it{end+1} = d_text(sw.b/2 + 20, -sw.H - 40, 'P3 + IPE 200 (después)', 'small', 'start');
@@ -730,7 +730,7 @@ function it = dr_tube(P)
   for x = [-1 1]*xs                                                         % stirrups, between them the tubes
     it{end+1} = d_path([x -40; x vg1 + 2], 10, 'r_tieS');  it{end+1} = d_path([x vg2 - 2; x vb], 10, 'r_tieS');
   end
-  vt = [-(tb.top - tb.D/2), -sw.yS];
+  vt = [-(tb.top - tb.D/2), -sw.yS + (2*ri - r.d)/2];
   for s = [-1 1], for k = 1:2
     x = s*sw.g/2;
     it{end+1} = d_circle(x, vt(k), tb.D/2, 'r_tube');
@@ -948,7 +948,7 @@ function N = notes(P)
     '**Losa: verter el hormigón simultáneamente a ambos lados de las vigas de los ejes 4 y D**, avanzando parejo a cada lado, para no cargar esas vigas en torsión.'
     '**Anclas preinstaladas (se funden con el hormigón): solo las A1 de las columnas** (B4, C4, D4X, D4Y, D3). **Las A2 del sándwich no:** se funden los tubos y las varillas A2 se meten después de colocar la IPE 200.'
     ['**Tubos para las A2:** PVC conduit 3/4" o EMT 3/4" (Ø ext. ≤ 27 mm, Ø int. ≥ 20 mm, pared ≤ 3 mm), uno por ancla, de 400: atraviesa el encofrado por agujeros hechos con la plantilla; cortar al ras al desencofrar. ' ...
-     'Fila superior: tubo apoyado sobre las barras superiores de la viga. Fila inferior: tubo centrado en el ancla. La varilla puede quedar en cualquier posición dentro del tubo; si un agujero de P3 no coincide con su tubo, subir o bajar la IPE unos mm con los puntales. Tapar los extremos al fundir. ' ...
+     'Fila superior: tubo apoyado sobre las barras superiores de la viga. Fila inferior: tubo unos 2.5 más alto que el ancla. De preferencia la varilla apoyada en el fondo del tubo (así la IPE queda al nivel de la viga); si un agujero de P3 no coincide con su tubo, subir o bajar la IPE unos mm con los puntales. Tapar los extremos al fundir. ' ...
      'Sándwich sin tuercas de nivelación: IPE 200 apuntalada y nivelada, 2 separadores de acero de 25 entre cada placa y la viga; meter las varillas (entran sueltas) y apretar a mano las tuercas exteriores, que aprietan las 2 placas contra los separadores. ' ...
      'Rellenar el tubo con epóxico de inyección de baja viscosidad (similar a Sikadur-52), por un extremo hasta que salga por el otro. Luego el grout.']
     '**Al comprar los tubos pedir tubo "conduit" (eléctrico), no tubo roscable para agua:** su pared es más gruesa y no deja espacio para la varilla y el epóxico. Verificar Ø ext. ≤ 27 mm, Ø int. ≥ 20 mm y pared ≤ 3 mm (con Ø int. 20 quedan unos 2 mm alrededor de la varilla para el epóxico).'};
