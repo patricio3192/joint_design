@@ -55,15 +55,15 @@ function file = make_sheet(outdir, opts)
   % ---- column 3: pieces, quantities, notes ------------------------------------------------------
   c3{end+1} = blk_h(2, '4. Piezas, cantidades y notas');
   c3{end+1} = blk_row([1 1 1]/3, { ...
-      {blk_draw(dr_tie(P, 14), 60, 'DETALLE 4.1 - ESTRIBO Ø14', ...
+      {blk_draw(dr_tie(P, 14), 56, 'DETALLE 4.1 - ESTRIBO Ø14', ...
          'Cabeza de la columna (105 sobre las vigas): 2 por columna, juntos. Recubrimiento 36 (barras de la columna a 58).')}, ...
-      {blk_draw(dr_tie(P, 10), 60, 'DETALLE 4.2 - ESTRIBO DEL NUDO Ø10', ...
+      {blk_draw(dr_tie(P, 10), 56, 'DETALLE 4.2 - ESTRIBO DEL NUDO Ø10', ...
          'Cada 75 aprox. en el nudo; se pueden mover ± 20 para acomodar las barras longitudinales.')}, ...
-      {blk_draw(dr_tie4(P), 60, 'DETALLE 4.3 - OPCIÓN: Ø10 EN 4 PIEZAS', ...
+      {blk_draw(dr_tie4(P), 56, 'DETALLE 4.3 - OPCIÓN: Ø10 EN 4 PIEZAS', ...
          '4 piezas rectas con ganchos de 135° a las barras de esquina, una por cara.')}});
   c3{end+1} = blk_row([0.5 0.5], { ...
       {blk_draw(dr_rod(P, 1), 45, 'DETALLE 4.4 - ANCLAJE A1 (COLUMNAS)', ...
-         'Desde la cara de la columna. Placa de cabeza P1, arandela y tuerca: antes. Tuercas de nivelación y exterior: después.')}, ...
+         'Desde la cara de la columna. Placa de cabeza P1, arandela y tuerca: antes. Tuercas de nivelación (dentro del grout) y exterior: después.')}, ...
       {blk_draw(dr_rod(P, 2), 45, 'DETALLE 4.5 - ANCLAJE A2 (SÁNDWICH)', ...
          'Pasante. Grout 25, placas P3, tuercas de nivelación y exteriores: después.')}});
   c3{end+1} = blk_row([0.25 0.375 0.375], { ...
@@ -78,11 +78,9 @@ function file = make_sheet(outdir, opts)
   for i = 1:numel(N), c3{end+1} = blk_note(sprintf('%d. %s', i, N{i})); end
   sl = P.sl;  Am = pi*sl.dm^2/4;  As = Am*1000/sl.sm;
   c3{end+1} = blk_draw(dr_deck(P), 41, 'DETALLE 4.6 - LOSA: NOVALOSA 55 + 5 CM DE HORMIGÓN (GENÉRICO)', ...
-      sprintf(['Geometría de la placa según el fabricante. Nivel terminado %g sobre la cara superior de las vigas (igual a la cabeza de las columnas). ' ...
-               '**Malla electrosoldada 4.5-15** (Ø4.5 c/150 en ambos sentidos; NTE INEN 2209, ASTM A185 lisa o A497 corrugada, fy ≥ 490 MPa; paneles de 2.40 x 6.25): As = %.1f x 1000 / %g = %.0f mm2/m ≥ 0.0018 x %g x 1000 = %.0f mm2/m ' ...
-               '(ACI 318-19, 24.4.3.2, sobre el espesor de hormigón encima de la placa) y ≥ 0.00075 x %g x 1000 = %.0f mm2/m (SDI C-2017). ' ...
-               'Malla lisa o corrugada; traslapo mínimo 300 (dos cuadrículas), vale para las dos (ACI 318-19, 25.5.4 y 25.5.5).'], ...
-              sl.hd + sl.tc, Am, sl.sm, As, sl.tc, 0.0018*sl.tc*1000, sl.tc, 0.00075*sl.tc*1000));
+      sprintf(['Placa según el fabricante. Nivel terminado: %g sobre las vigas. ' ...
+               'Malla 4.5-15, lisa o corrugada, fy ≥ 490 MPa. Cumple la cuantía mínima: %.0f mm2/m, se piden %.0f. ' ...
+               'Traslapo de la malla: 300.'], sl.hd + sl.tc, As, 0.0018*sl.tc*1000));
 
   B = {blk_row([0.38 0.35 0.27], {c1, c2, c3})};
   doc = struct('title', 'Conexiones de vigas de acero', 'page', opts.page, 'fs', opts.fs, 'blocks', {B}, ...
@@ -702,25 +700,27 @@ end
 %  4.6 Slab on steel deck, section across the ribs: x along, v up (0 = top of the beams)
 % =====================================================================
 function it = dr_deck(P)
-  sl = P.sl;  H = sl.hd + sl.tc;  p = 230;  a = 55;  c = 105;  sp = (p - a - c)/2;  n = 3;  X = n*p;  it = {};
+  sl = P.sl;  H = sl.hd + sl.tc;  p = 230;  a = 55;  c = 105;  sp = (p - a - c)/2;  n = 2;  X = n*p;  it = {};
   Q = [];
   for k = 0:n-1
     x = k*p;  Q = [Q; x 0; x + a 0; x + a + sp, sl.hd; x + a + sp + c, sl.hd];
   end
   Q = [Q; X 0];
   it{end+1} = d_poly([Q; X H; 0 H], 'r_conc');
-  it{end+1} = d_rectxy(0, -P.ip6.h, X, 0, 'r_ipe');  it{end+1} = d_rectxy(0, -P.ip6.tf, X, 0, 'r_ipef');
+  hb = 45;                                                                          % beam drawn cut
+  it{end+1} = d_rectxy(0, -hb, X, 0, 'r_ipe');  it{end+1} = d_rectxy(0, -P.ip6.tf, X, 0, 'r_ipef');
+  it{end+1} = d_line(0, -hb, X, -hb, 'edge');
   it{end+1} = d_path(Q, 3, 'r_bp');                                                  % deck, 1 mm (drawn thicker)
   vm = H - 20 - sl.dm*1.5;                                                            % lower wires, cover 20 on top
   it{end+1} = d_path([0 vm; X vm], sl.dm, 'r_bm1');
   for x = 40:sl.sm:X, it{end+1} = d_circle(x, vm + sl.dm, sl.dm/2 + 0.5, 'r_bm1'); end
-  for x = [0 X], it{end+1} = d_line(x, -P.ip6.h, x, H, 'edge'); end
+  for x = [0 X], it{end+1} = d_line(x, -hb, x, H, 'edge'); end
   % labels
   xl = X + 40;
   T = {[xl, H + 60], [X - 70, H - 8], 'hormigón fc 210', 'small';
        [xl, H + 5], [X - 40, vm + 2], sprintf('malla %g-%g', sl.dm, sl.sm/10), 'bsm';
        [xl, -10], [X - p + a + sp/2 + 4, sl.hd/2], sprintf('Novalosa 55, e = %g mm', sl.e), 'code';
-       [xl, -90], [X - 30, -P.ip6.h/2], 'viga de acero', 'small'};
+       [xl, -55], [X - 30, -hb/2], 'viga de acero', 'small'};
   for k = 1:size(T, 1)
     q = T{k,1};  it{end+1} = d_text(q(1) + 10, q(2) - 6, T{k,3}, T{k,4}, 'start');
     it = [it, d_arrow(q(1), q(2), T{k,2}(1), T{k,2}(2))];
@@ -728,9 +728,8 @@ function it = dr_deck(P)
   % dimensions on the left
   it{end+1} = d_dim(0, 0, 0, sl.hd, 40, sprintf('%g', sl.hd));
   it{end+1} = d_dim(0, sl.hd, 0, H, 40, sprintf('%g', sl.tc));
-  it{end+1} = d_dim(0, 0, 0, H, 95, sprintf('%g', H));
+  it{end+1} = d_dim(0, 0, 0, H, 110, sprintf('%g', H));
   it{end+1} = d_dim(p + 40, vm + sl.dm*1.5, p + 40, H, -25, 'rec. 20');
-  it{end+1} = d_text(-110, -25, sprintf('cara superior\nde las vigas'), 'small', 'end');
 end
 
 % =====================================================================
@@ -777,13 +776,17 @@ function it = dr_rod(P, k)
     it{end+1} = d_rectxy(xh + hd.t, -r.dw/2, xh + hd.t + r.wsh, r.dw/2, 'r_nut');
     it{end+1} = d_rectxy(xh + hd.t + r.wsh, -r.nw/2, xh + hd.t + r.wsh + r.nut, r.nw/2, 'r_nut');
     xp = xF - ep.gr - ep.t;
+    it{end+1} = d_rectxy(xF - ep.gr, -ep.H/4, xF, ep.H/4, 'r_grout');
     it{end+1} = d_rectxy(xp, -ep.H/4, xp + ep.t, ep.H/4, 'r_eplate');
     it{end+1} = d_rectxy(xp + ep.t, -r.dw/2, xp + ep.t + r.wsh, r.dw/2, 'r_ancg');
     it{end+1} = d_rectxy(xp + ep.t + r.wsh, -r.nw/2, xp + ep.t + r.wsh + r.nut, r.nw/2, 'r_ancg');
     it{end+1} = d_rectxy(xp - r.wsh, -r.dw/2, xp, r.dw/2, 'r_ancg');
     it{end+1} = d_rectxy(xp - r.wsh - r.nut, -r.nw/2, xp - r.wsh, r.nw/2, 'r_ancg');
     it{end+1} = d_text(xF + 10, 105, 'cara de la columna', 'small', 'start');
-    it{end+1} = d_dim(0, -50, L, -50, -50, sprintf('L = %g', L));
+    it{end+1} = d_dim(0, -50, L, -50, -95, sprintf('L = %g', L));
+    it{end+1} = d_dim(xF - ep.gr, -ep.H/4, xF, -ep.H/4, -20, sprintf('%g grout', ep.gr));
+    it{end+1} = d_text(xF - ep.gr/2 - 70, 115, 'grout', 'small', 'end');
+    it = [it, d_arrow(xF - ep.gr/2 - 65, 110, xF - ep.gr/2, 35)];
     it{end+1} = d_dim(xF, 55, xh, 55, 0, sprintf('%g', hd.z));
     it{end+1} = d_dim(xp, 55, xF, 55, 0, sprintf('%g', xF - xp));
     it{end+1} = d_text(xh + 6, -hd.a/2 - 35, 'P1', 'anc', 'middle');
@@ -794,14 +797,23 @@ function it = dr_rod(P, k)
     gr = P.sw.gr;
     for s = [0 1]
       xp = iif(s == 0, x0 - gr - t, x0 + b + gr);
+      xg = iif(s == 0, x0 - gr, x0 + b);
+      it{end+1} = d_rectxy(xg, -P.sw.H/4, xg + gr, P.sw.H/4, 'r_grout');
       it{end+1} = d_rectxy(xp, -P.sw.H/4, xp + t, P.sw.H/4, 'r_eplate');
+      xw = iif(s == 0, xp + t, xp - r.wsh);                                    % leveling washer and nut
+      it{end+1} = d_rectxy(xw, -r.dw/2, xw + r.wsh, r.dw/2, 'r_ancg');
+      xl = iif(s == 0, xw + r.wsh, xw - r.nut);
+      it{end+1} = d_rectxy(xl, -r.nw/2, xl + r.nut, r.nw/2, 'r_ancg');
+      it{end+1} = d_dim(xg, -P.sw.H/4, xg + gr, -P.sw.H/4, -20, sprintf('%g', gr), iif(s == 0, 'before', 'after'));
+      it = [it, d_arrow(L/2, 115, xg + gr/2, 35)];
       xo = iif(s == 0, xp - r.wsh, xp + t);
       it{end+1} = d_rectxy(xo, -r.dw/2, xo + r.wsh, r.dw/2, 'r_ancg');
       xn = iif(s == 0, xo - r.nut, xo + r.wsh);
       it{end+1} = d_rectxy(xn, -r.nw/2, xn + r.nut, r.nw/2, 'r_ancg');
     end
-    it{end+1} = d_dim(0, -50, L, -50, -50, sprintf('L = %g', L));
+    it{end+1} = d_dim(0, -50, L, -50, -95, sprintf('L = %g', L));
     it{end+1} = d_dim(x0, 55, x0 + b, 55, 0, sprintf('%g (viga)', b));
+    it{end+1} = d_text(L/2, 122, sprintf('grout %g', gr), 'small', 'middle');
   end
 end
 
@@ -861,7 +873,8 @@ function N = notes(P)
     '2 estribos Ø14 juntos en los 105 de la columna sobre las vigas, en las 16 columnas. Ganchos Ø16 de la columna hacia el centro, con 40 de recubrimiento a la cara superior.'
     'Sándwich: un estribo Ø10 a cada lado de los anclajes A2; los demás cada 110 desde ellos. A2 entre estribos, paralelos a sus ramas.'
     'Viga D entre 3 y 4: estribos Ø10 cada 110 de 3 a 10 y de 11 a 4; cada 140 entre 10 y 11.'
-    '**Después de fundir:** placas P2 y P3, IPE, tuercas de nivelación y exteriores, grout sin contracción (ASTM C1107, mínimo 280 kg/cm2) similar a SikaGrout-212, 25 bajo P2 y P3.'
+    ['**Después de fundir:** placas P2 y P3, IPE, tuercas de nivelación y exteriores, grout sin contracción (ASTM C1107, mínimo 280 kg/cm2) similar a SikaGrout-212, 25 bajo P2 y P3. ' ...
+     '**Grout y no mortero:** el mortero se retrae al secar y deja la placa sin apoyo; el grout no se contrae, es fluido y llena los 25 sin vacíos, y gana resistencia rápido.']
     ['**Soldaduras viga - placa (detalle 5), todas en obra:** electrodo E70XX de bajo hidrógeno (E7018), soldador calificado según AWS D1.1. ' ...
      'Ala superior: penetración completa (CJP) en todo el ancho, con bisel en el ala, junta precalificada AWS D1.1 (con respaldo, o resanando la raíz por debajo y rematando), sin agujeros de acceso. ' ...
      'Ala inferior: filete de 6 por fuera en todo el ancho y por dentro de la punta del ala al inicio del radio. Alma: filete de 6 a ambos lados en la parte recta. ' ...
