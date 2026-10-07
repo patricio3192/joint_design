@@ -15,9 +15,12 @@ PENDIENTES - planos_conexiones   (actualizado 2026-10-07)
           9-4 del eje E se apoya en él a corte.
        b. Eje E continuo de 3 a 9 sobre la punta de D4X; el eje 9 se apoya en él.
        c. Esquina E9 rígida: unión soldada a momento entre los dos tramos.
-   - POR HACER: elegir la opción, verificar la IPE 160 en voladizo (flexión,
+   - ELEGIDO 2026-10-07 (planta): IPE 160 del eje 9 continua de G a E sobre D9; el voladizo
+     de D llega a ella y el tramo 9-4 del eje E se apoya en ella a corte.
+   - POR HACER: verificar la IPE 160 en voladizo (flexión,
      flecha, pandeo lateral), la punta del voladizo IPE 240 que la recibe
      (carga y torsión) y la unión de continuidad. Detallar la unión en la lámina.
+     Confirmar en el ETABS que la IPE 160 del eje 9 está continua en D.
 
 2. Montaje de las IPE 200 con sándwich en los dos extremos   [RESUELTO 2026-10-07: tubos]
    - Ejes 10 y 11, tramos A-B, B-C y C-D (6 tramos). Las A2 sobresalen ~50 de

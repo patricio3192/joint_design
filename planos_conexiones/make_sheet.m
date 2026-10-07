@@ -170,14 +170,15 @@ function it = dr_keyplan(P)
   end
   % cantilevers IPE 240 and slab edge
   bf = P.ipe.b;
-  for x = [xB xC xD], it{end+1} = d_rectxy(x - bf/2, y9, x + bf/2, y4 - c, 'plate'); end
+  for x = [xB xC xD], it{end+1} = d_rectxy(x - bf/2, y9 + iif(x == xD, P.ip6.b/2, 0), x + bf/2, y4 - c, 'plate'); end
   for y = [y4 y3], it{end+1} = d_rectxy(xD + c, y - bf/2, xE, y + bf/2, 'plate'); end
   % edge beams IPE 160 on grids 9 (B to E) and E (9 to 3)
   b6 = P.ip6.b;
   % cut between the beams they frame into (shear connections): on 9 between the IPE 240 / IPE 200 tips,
   % on E between 9, the D4X cantilever (4) and the D3 cantilever (3)
   gp = 25;                                                                    % gap drawn at each shear connection
-  xs = [xB xF xC xG xD];  ws = [bf P.ip2.b bf P.ip2.b bf];
+  % continuous over D9 (G to E): it carries the corner E9; the D cantilever frames into it
+  xs = [xB xF xC xG];  ws = [bf P.ip2.b bf P.ip2.b];
   for k = 1:numel(xs)
     xa = xs(k) + ws(k)/2 + gp;
     if k < numel(xs), xb = xs(k+1) - ws(k+1)/2 - gp; else, xb = xE + b6/2; end
