@@ -1,4 +1,4 @@
-EQUATIONS AND REFERENCES - casa_saav/sandwich_beam.m
+EQUATIONS AND REFERENCES - check_sandwich_beam.m
 ==================================================
 Units N, mm, MPa. "PDF p." = page index of the PDF file listed below (as opened
 in a PDF viewer), not the printed page number.

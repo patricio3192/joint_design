@@ -9,10 +9,10 @@ collar_joints.m        beam to HSS column, external diaphragm collars (lib/colla
                        Steps switched on at the top: build (ETABS -> database), check,
                        details (collar_details.pdf), sheets (planos_uniones.pdf, A2),
                        compare (direct weld vs collar), equilibrium (diagnosis).
-end_plate_column.m     IPE 240 cantilever, end plate on the concrete column C4
-                       (lib/end_plate_concrete). Input at the top.
-sandwich_beam.m        IPE 200 to both faces of a concrete beam, through-rods
-                       (lib/sandwich_concrete). Input at the top.
+end_plate_column.m     IPE 240 cantilever, end plate on the concrete column C4: the input P,
+                       checked by lib/end_plate_concrete/check_end_plate_column.m
+sandwich_beam.m        IPE 200 to both faces of a concrete beam, through-rods: the input P,
+                       checked by lib/sandwich_concrete/check_sandwich_beam.m
 concrete_sheet.m       the A1 sheet of the two concrete connections
                        (planos_conexiones.pdf); drawing in sheets/make_concrete_sheet.m
 ```
