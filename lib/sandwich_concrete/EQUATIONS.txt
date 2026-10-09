@@ -1,0 +1,162 @@
+EQUATIONS AND REFERENCES - casa_saav/sandwich_beam.m
+==================================================
+Units N, mm, MPa. "PDF p." = page index of the PDF file listed below (as opened
+in a PDF viewer), not the printed page number.
+
+Files (C:\Users\winpat\Desktop\Bibliography4structures\02 NORMATIVAS\):
+  [A360] AISC\AISC 360-16 Specification for Structural Steel Buildings.pdf
+  [DG39] AISC\guias de diseno\pdfcoffee.com_aisc-design-guide-39-end-plate-moment-connections-2023-4-pdf-free.pdf
+  [DG1]  AISC\guias de diseno\design-guide-1-base-plate-and-anchor-rod-design-second-edition.pdf
+  [ACI]  ACI\ACI 318-19.pdf  (in-lb edition; SI coefficients from its Appendix C, PDF p. 587-595)
+  Not in the folder: ASTM A193 (rod Fu), EN 1993-1-8 (idea behind the strict-strip model).
+
+---------------------------------------------------------------------------
+MODULE 1 - DG 39 tested geometry range
+---------------------------------------------------------------------------
+Table 5-1 tested ranges, +/-10 % (Sec. 5.2.1)              [DG39] PDF p. 69
+  pf 1 5/16-2 1/4 in, g 2 1/4-4 1/2 in, d 16-24 in (two-bolt flush: 8 in),
+  bp 5-14 in, tf 3/16-3/4 in
+
+---------------------------------------------------------------------------
+MODULE 2 - Compression side
+---------------------------------------------------------------------------
+fp(max) = phi*0.85 f'c sqrt(A2/A1), sqrt(A2/A1) <= 2      [ACI] 22.8.3.2, Table 22.8.3.2, PDF p. 431
+  A1 = loaded area; A2 = base of largest frustum (1V:2H) inside the support
+phi = 0.65 bearing                                          [ACI] Table 21.2.1, PDF p. 393
+Uniform bearing over Y x B                                  [DG1] Sec. 3.3.1, PDF p. 31
+Large moment: T = qmax Y - Pr                               [DG1] Eq. 3.4.2, PDF p. 33
+Y = (f+N/2) - sqrt((f+N/2)^2 - 2Pr(e+f)/qmax), Pr e = Mr    [DG1] Eq. 3.4.3 (exists if Eq. 3.4.4), PDF p. 33
+  here: f + N/2 = D (tension row to plate bottom edge), Pr = 0
+Plate strip: tp,req = 1.49 m sqrt(fp/Fy)       (Y >= m)     [DG1] Eq. 3.3.14a-1, PDF p. 32
+             tp,req = 2.11 sqrt(fp Y (m - Y/2)/Fy) (Y < m)  [DG1] Eq. 3.3.15a-1, PDF p. 32
+  (1.49 = sqrt(2/0.9): unit-width cantilever, Mpl = fp l^2/2, phi Mn = 0.9 Fy t^2/4, Eq. 3.3.13a)
+n = (B - 0.8 bf)/2                                          [DG1] Sec. 3.1.2, PDF p. 22
+Strict strips: c = tp sqrt(phi Fy/(2 fp))  (= Eq. 3.3.14a-1 solved for l)   bearing_strips.m
+  Concept of an effective bearing width c around the section:
+  EN 1993-1-8 Sec. 6.2.5, Eq. (6.5) (not AISC). Lower-bound theorem of plasticity.
+DG 39 lever arm h1 = d - tf/2 - (distance to tension row)  [DG39] Table 5-2, PDF p. 70
+
+---------------------------------------------------------------------------
+MODULE 3 - Rod tension
+---------------------------------------------------------------------------
+A193 approved for threaded rods                             [A360] Sec. A3.4, PDF p. 65
+Fnt = 0.75 Fu (threaded parts)                              [A360] Table J3.2, PDF p. 185
+phi Rn = 0.75 Fnt Ab                                        [A360] Eq. J3-1, PDF p. 187
+Bolt rupture without prying phi Mnp = phi 2 Pt h1           [DG39] Table 5-2, PDF p. 70
+Fu = 860 MPa (125 ksi), B7, d <= 2.5 in                     ASTM A193 Table 2 (not in folder)
+
+---------------------------------------------------------------------------
+MODULE 4 - End plate, tension side
+---------------------------------------------------------------------------
+s = sqrt(bp g)/2; pfi = s if pfi > s                        [DG39] Table 5-2, PDF p. 70
+Yp = bp/2 [h1 (1/pfi + 1/s)] + 2/g [h1 (pfi + s)]           [DG39] Table 5-2, PDF p. 70
+phi Mn = phi_b Fyp tp^2 Yp, phi_b = 0.90                    [DG39] Table 5-2, PDF p. 70
+gamma_r = 0.80 flush                                        [DG39] Eq. 5-1, PDF p. 65
+tp,req = sqrt(1.10 Mu/(gamma_r phi_b Fyp Yp))  thick plate  [DG39] Eq. 5-4a, PDF p. 66
+tp,req = sqrt(Mu/(gamma_r phi_b Fyp Yp))       thin plate   [DG39] Eq. 5-5a, PDF p. 66
+
+---------------------------------------------------------------------------
+MODULE 5 - Rod shear and plate bearing
+---------------------------------------------------------------------------
+Fnv = 0.450 Fu (threads not excluded)                       [A360] Table J3.2, PDF p. 185
+phi Rn = 0.75 Fnv Ab                                        [A360] Eq. J3-1, PDF p. 187
+Standard hole M16 = 18 mm                                   [A360] Table J3.3M, PDF p. 186
+Bearing Rn = 2.4 d t Fu; tearout Rn = 1.2 lc t Fu; phi 0.75 [A360] Eqs. J3-6a, J3-6c, PDF p. 192
+
+---------------------------------------------------------------------------
+MODULE 6/7 - Concrete breakout in shear (and shear-row sweep)
+---------------------------------------------------------------------------
+Vcbg = AVc/AVco psi_ec psi_ed psi_c psi_h Vb                [ACI] Eq. 17.7.2.1b, PDF p. 263
+AVc: projected area, critical row; AVc <= n AVco            [ACI] 17.7.2.1.1, PDF p. 264
+Narrow members (not triggered, ca2 = inf)                   [ACI] 17.7.2.1.2, PDF p. 264-265
+AVco = 4.5 ca1^2                                            [ACI] Eq. 17.7.2.1.3, PDF p. 264/269
+Vb = 0.6 (le/da)^0.2 sqrt(da) lambda_a sqrt(f'c) ca1^1.5    [ACI] Eq. 17.7.2.2.1a, PDF p. 269; SI PDF p. 590
+Vb <= 3.7 lambda_a sqrt(f'c) ca1^1.5                        [ACI] Eq. 17.7.2.2.1b, PDF p. 269; SI PDF p. 590
+le = hef <= 8 da                                            [ACI] 17.7.2.2.1, PDF p. 269
+psi_c,V = 1.0 cracked, edge bar < No. 4 (12 mm < 12.7 mm)   [ACI] Table 17.7.2.5.1, PDF p. 271
+psi_h,V = sqrt(1.5 ca1/ha) >= 1                             [ACI] Eq. 17.7.2.6.1, PDF p. 271
+phi = 0.70 cast-in, no supplementary reinforcement          [ACI] Table 17.5.3(b), PDF p. 248
+Two-face loading (model B): own interpretation, see PENDIENTE.txt
+
+---------------------------------------------------------------------------
+MODULE 8 - Spacing and edge distances
+---------------------------------------------------------------------------
+s >= 2 2/3 d (3d preferred)                                 [A360] J3.3, PDF p. 187
+Min edge distance M16 = 22 mm                               [A360] Table J3.4M, PDF p. 188
+Splitting: requirements waived with supplementary reinf.    [ACI] 17.9.1, PDF p. 272
+Min spacing 4da (cast-in, not torqued) / 6da (torqued);     [ACI] Table 17.9.2(a), PDF p. 273
+  min edge = specified cover (not torqued) / 6da (torqued)
+Specified cover, beams not exposed: 1.5 in (40 mm)          [ACI] Table 20.5.1.3.1, PDF p. 384
+
+---------------------------------------------------------------------------
+MODULE 9 - IPE 200
+---------------------------------------------------------------------------
+Compactness bf/2tf <= 0.38 sqrt(E/Fy); h/tw <= 3.76 sqrt(E/Fy)   [A360] Table B4.1b
+Cb = 1.0 permitted (conservative); Cb Eq. F1-1              [A360] F1, PDF p. 102
+Mn = Mp = Fy Zx                                             [A360] Eq. F2-1, PDF p. 103
+Mn = Cb[Mp - (Mp - 0.7 Fy Sx)(Lb-Lp)/(Lr-Lp)] <= Mp         [A360] Eq. F2-2, PDF p. 103
+Mn = Fcr Sx <= Mp                                           [A360] Eq. F2-3, PDF p. 103
+Fcr = Cb pi^2 E/(Lb/rts)^2 sqrt(1 + 0.078 Jc/(Sx ho)(Lb/rts)^2)   [A360] Eq. F2-4, PDF p. 103
+Lp = 1.76 ry sqrt(E/Fy)                                     [A360] Eq. F2-5, PDF p. 104
+Lr = 1.95 rts E/(0.7Fy) sqrt(Jc/(Sx ho) + sqrt((Jc/(Sx ho))^2 + 6.76(0.7Fy/E)^2))  [A360] Eq. F2-6, PDF p. 104
+rts^2 = sqrt(Iy Cw)/Sx; c = 1; Cw = Iy ho^2/4 (User Note)   [A360] Eqs. F2-7, F2-8a, PDF p. 104
+Top flange braced, bottom flange in compression (not used, Cb = 1 passes):
+  Cb = 3.0 - 2/3 (M1/Mo) - 8/3 MCL/(Mo + M1)*               [A360] Commentary Eq. C-F1-5, PDF p. 383
+Vn = 0.6 Fy Aw Cv1, Aw = d tw                               [A360] Eq. G2-1, PDF p. 126
+phi_v = 1.00, Cv1 = 1.0 if h/tw <= 2.24 sqrt(E/Fy)          [A360] G2.1(a), Eq. G2-2, PDF p. 126-127
+
+---------------------------------------------------------------------------
+MODULE 10 - Welds
+---------------------------------------------------------------------------
+Flange weld demand Ru = max(Mu/(d-tf) + Tu/2, 0.60 Fy bf tf)        [DG39] Eq. 3-38a, PDF p. 54
+CJP tension normal to axis: joint strength = base metal (matching filler)   [A360] Table J2.5, PDF p. 179
+  phi Rn = 0.90 Fy bf tf (tensile yielding)                 [A360] Eq. J4-1, PDF p. 193
+PJP option (not used):
+PJP effective throat, 45 deg bevel: E = S (GMAW/FCAW, F/H);         [A360] Table J2.1, PDF p. 173
+  E = S - 3 mm (SMAW all positions; GMAW/FCAW V/OH)
+PJP minimum effective throat (thinner part 6-13 mm: 5 mm)           [A360] Table J2.3, PDF p. 174
+PJP tension normal to axis: weld phi 0.80, 0.60 FEXX;               [A360] Table J2.5, PDF p. 179-180
+  base metal phi 0.75, Fu (J4)
+Tensile rupture Rn = Fu Ae                                  [A360] Eq. J4-2, PDF p. 193
+Fillet: Rn = Fnw Awe, Fnw = 0.60 FEXX (1 + 0.5 sin^1.5 theta)   [A360] Eqs. J2-4, J2-5, PDF p. 178
+Minimum fillet size (thinner part 6-13 mm: 5 mm)            [A360] Table J2.4, PDF p. 175
+Maximum fillet size along an edge t >= 6 mm: t - 2 mm       [A360] J2.2b
+Web near tension bolts: Tr,calc = Mr/(d - tbf) + Tr/2       [DG39] Eq. 3-39, PDF p. 54
+  Trw = (ntrib/n) Tr,calc                                   [DG39] Eq. 3-40, PDF p. 54
+  Tuwd = max(Tuw, 0.60 Fy tbw lwt)                          [DG39] Eq. 3-41a, PDF p. 54
+  lwt = pfi + 6 in; lwv = min(d - 2tbf - lwt, d/2 - tbf)    [DG39] Example 5.2-1, PDF p. 81-82
+Web tension yielding Rn = Fy Ag, phi 0.90                   [A360] Eq. J4-1, PDF p. 193
+Web shear rupture Rn = 0.60 Fu Anv, phi 0.75                [A360] Eq. J4-4, PDF p. 193
+Tension + shear on the web weld (lwv <= 0): resultant at angle theta with J2-5
+  (own approach for this shallow beam; see PENDIENTE.txt)
+
+---------------------------------------------------------------------------
+MODULE 11 - Concrete beam, shear and torsion (SI forms: [ACI] Appendix C)
+---------------------------------------------------------------------------
+phi = 0.75 shear and torsion; phi = 0.90 tension-controlled [ACI] Tables 21.2.1, 21.2.2, PDF p. 393-394
+Vc = (0.17 lambda sqrt(f'c) + Nu/6Ag) bw d  (Av >= Av,min)  [ACI] Table 22.5.5.1(a), PDF p. 406; SI PDF p. 591
+Vc <= 0.42 lambda sqrt(f'c) bw d                            [ACI] 22.5.5.1.1, SI PDF p. 591
+Vs = Av fyt d / s                                           [ACI] Eq. 22.5.8.5.3, PDF p. 411-412
+Section limit, shear only: Vu <= phi(Vc + 0.66 sqrt(f'c) bw d)   [ACI] 22.5.1.2, PDF p. 404
+Tth = 0.083 lambda sqrt(f'c) Acp^2/pcp                      [ACI] Table 22.7.4.1(a)(a), PDF p. 425; SI PDF p. 593
+Torsion neglected if Tu < phi Tth                           [ACI] 22.7.1.1, PDF p. 423
+Compatibility torsion: Tu may be reduced to phi Tcr         [ACI] 22.7.3.2, PDF p. 424
+Tcr = 0.33 lambda sqrt(f'c) Acp^2/pcp                       [ACI] 22.7.5.1(a), PDF p. 426; SI PDF p. 593
+Tn = 2 Ao At fyt cot(theta) / s                             [ACI] Eq. 22.7.6.1a, PDF p. 427
+Tn = 2 Ao Al fy tan(theta) / ph  -> Al = (At/s) ph (fyt/fy) cot^2(theta)   [ACI] Eq. 22.7.6.1b, PDF p. 427
+Ao = 0.85 Aoh; theta = 45 deg                               [ACI] 22.7.6.1.1, 22.7.6.1.2, PDF p. 428-429
+sqrt((Vu/bw d)^2 + (Tu ph/1.7 Aoh^2)^2) <= phi(Vc/bw d + 0.66 sqrt(f'c))   [ACI] Eq. 22.7.7.1a, PDF p. 429-430; SI PDF p. 593
+Shear and torsion steel added: (Av + 2At)/s                 [ACI] 9.5.4.3, PDF p. 136
+Av,min/s = max(0.062 sqrt(f'c) bw/fyt, 0.35 bw/fyt)         [ACI] Table 9.6.3.4, PDF p. 139-140; SI PDF p. 588
+(Av+2At)min/s = max(0.062 sqrt(f'c) bw/fyt, 0.35 bw/fyt)    [ACI] 9.6.4.2, PDF p. 140; SI PDF p. 588
+Al,min = lesser of 0.42 sqrt(f'c) Acp/fy - (At/s) ph fyt/fy   [ACI] 9.6.4.3(a),(b), PDF p. 140; SI PDF p. 588
+  At/s taken as PROVIDED (one stirrup leg / s); ACI does not specify (decision 2026-10-06)
+                  0.42 sqrt(f'c) Acp/fy - (0.175 bw/fyt) ph fyt/fy
+Long. torsion bars: spacing <= 300 mm around perimeter      [ACI] 9.7.5.1, PDF p. 147
+  db >= 0.042 s and >= No. 3                                [ACI] 9.7.5.2, PDF p. 147
+  extend (bt + d) beyond required point                     [ACI] 9.7.5.3, PDF p. 147-148
+Max stirrup spacing, shear: d/2, 600 mm (d/4, 300 if Vs > 0.33 sqrt(f'c) bw d)   [ACI] Table 9.7.6.2.2, PDF p. 149
+Max stirrup spacing, torsion: min(ph/8, 300 mm)             [ACI] 9.7.6.3.3, PDF p. 150
+Torsion stirrups extend (bt + d) beyond required point      [ACI] 9.7.6.3.2, PDF p. 150
+Closed stirrups with 135 deg hooks for torsion              [ACI] 25.7.1.6
+Flexure: 0.85 f'c rectangular block; beta1                  [ACI] 22.2.2.4.1, Table 22.2.2.4.3, PDF p. 400-401

@@ -1,0 +1,302 @@
+{
+ "titulo": "Conexiones de vigas de acero",
+ "hojas": [
+  {
+   "tamano": [
+    841.0,
+    594.0
+   ],
+   "papel": "papel_1.dxf",
+   "detalles": [
+    {
+     "archivo": "detalles/01_planta-de-ubicacion.dxf",
+     "escala": 75,
+     "base": [
+      4770.0,
+      3660.0
+     ],
+     "en": [
+      169.71,
+      421.915
+     ],
+     "ventana": [
+      304.6,
+      265.49
+     ]
+    },
+    {
+     "archivo": "detalles/02_corte-a-a-vcs-112-eje-4.dxf",
+     "escala": 10,
+     "base": [
+      -30.0,
+      149.588
+     ],
+     "en": [
+      68.177,
+      226.944
+     ],
+     "ventana": [
+      71.96,
+      95.0
+     ]
+    },
+    {
+     "archivo": "detalles/03_corte-b-b-vcm-con-bastones.dxf",
+     "escala": 10,
+     "base": [
+      -30.0,
+      149.588
+     ],
+     "en": [
+      169.71,
+      226.944
+     ],
+     "ventana": [
+      71.96,
+      95.0
+     ]
+    },
+    {
+     "archivo": "detalles/04_corte-c-c-vcs-con-bastones.dxf",
+     "escala": 10,
+     "base": [
+      -30.0,
+      149.588
+     ],
+     "en": [
+      271.243,
+      226.944
+     ],
+     "ventana": [
+      71.96,
+      95.0
+     ]
+    },
+    {
+     "archivo": "detalles/05_detalle-2-1-c4-corte-por-el-eje-del-voladizo.dxf",
+     "escala": 10,
+     "base": [
+      696.189,
+      -139.136
+     ],
+     "en": [
+      464.995,
+      517.507
+     ],
+     "ventana": [
+      280.33,
+      101.47
+     ]
+    },
+    {
+     "archivo": "detalles/06_detalle-2-2-c4-vista-desde-el-voladizo.dxf",
+     "escala": 15,
+     "base": [
+      177.77,
+      -161.139
+     ],
+     "en": [
+      394.913,
+      414.143
+     ],
+     "ventana": [
+      137.34,
+      75.8
+     ]
+    },
+    {
+     "archivo": "detalles/07_detalle-2-3-c4-planta-a-la-altura-de-los-a1.dxf",
+     "escala": 20,
+     "base": [
+      0.0,
+      591.5
+     ],
+     "en": [
+      535.077,
+      384.545
+     ],
+     "ventana": [
+      79.72,
+      135.0
+     ]
+    },
+    {
+     "archivo": "detalles/08_detalle-2-4-d4-vista-desde-el-sur.dxf",
+     "escala": 10,
+     "base": [
+      -271.5,
+      -217.5
+     ],
+     "en": [
+      464.995,
+      248.316
+     ],
+     "ventana": [
+      244.54,
+      108.0
+     ]
+    },
+    {
+     "archivo": "detalles/09_detalle-3-1-sandwich-vista-lateral-de-la-viga.dxf",
+     "escala": 10,
+     "base": [
+      0.0,
+      -140.0
+     ],
+     "en": [
+      394.913,
+      133.908
+     ],
+     "ventana": [
+      137.34,
+      77.25
+     ]
+    },
+    {
+     "archivo": "detalles/10_detalle-3-2-sandwich-planta-por-los-anclajes.dxf",
+     "escala": 15,
+     "base": [
+      0.0,
+      33.057
+     ],
+     "en": [
+      535.077,
+      125.032
+     ],
+     "ventana": [
+      114.33,
+      95.0
+     ]
+    },
+    {
+     "archivo": "detalles/11_detalle-4-1-estribo-14.dxf",
+     "escala": 10,
+     "base": [
+      27.0,
+      -27.0
+     ],
+     "en": [
+      643.916,
+      537.182
+     ],
+     "ventana": [
+      60.0,
+      60.0
+     ]
+    },
+    {
+     "archivo": "detalles/12_detalle-4-2-estribo-del-nudo-10.dxf",
+     "escala": 10,
+     "base": [
+      25.0,
+      -25.0
+     ],
+     "en": [
+      715.785,
+      537.182
+     ],
+     "ventana": [
+      60.0,
+      60.0
+     ]
+    },
+    {
+     "archivo": "detalles/13_detalle-4-3-opcion-10-en-4-piezas.dxf",
+     "escala": 10,
+     "base": [
+      0.0,
+      -30.0
+     ],
+     "en": [
+      787.654,
+      537.182
+     ],
+     "ventana": [
+      53.78,
+      60.0
+     ]
+    },
+    {
+     "archivo": "detalles/14_detalle-4-4-anclaje-a1-columnas.dxf",
+     "escala": 10,
+     "base": [
+      227.5,
+      13.539
+     ],
+     "en": [
+      661.883,
+      464.044
+     ],
+     "ventana": [
+      77.77,
+      45.0
+     ]
+    },
+    {
+     "archivo": "detalles/15_detalle-4-5-anclaje-a2-sandwich.dxf",
+     "escala": 5,
+     "base": [
+      220.0,
+      -22.5
+     ],
+     "en": [
+      769.687,
+      464.055
+     ],
+     "ventana": [
+      104.98,
+      44.98
+     ]
+    },
+    {
+     "archivo": "detalles/16_p1-pl-50x50x12.dxf",
+     "escala": 2,
+     "base": [
+      7.5,
+      -7.5
+     ],
+     "en": [
+      634.932,
+      400.218
+     ],
+     "ventana": [
+      51.08,
+      51.08
+     ]
+    },
+    {
+     "archivo": "detalles/17_p2-pl-140x260x12-a36.dxf",
+     "escala": 10,
+     "base": [
+      15.0,
+      -130.0
+     ],
+     "en": [
+      702.31,
+      398.258
+     ],
+     "ventana": [
+      35.01,
+      55.0
+     ]
+    },
+    {
+     "archivo": "detalles/18_p3-pl-140x220x12-a36.dxf",
+     "escala": 10,
+     "base": [
+      15.0,
+      -110.0
+     ],
+     "en": [
+      783.162,
+      398.258
+     ],
+     "ventana": [
+      38.24,
+      55.0
+     ]
+    }
+   ]
+  }
+ ]
+}
