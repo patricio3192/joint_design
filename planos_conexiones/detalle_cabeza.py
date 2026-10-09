@@ -135,9 +135,10 @@ def main():
 
     # concrete: column and joint, beam in line (right), slab over the cantilever (left)
     rect(c, 0, YB, B, TOP, "conc")
-    rect(c, B, YB, 640, SLAB, "conc")
+    rect(c, B, YB, 640, 0, "conc")
+    rect(c, B, 0, 640, SLAB, "conc")
     rect(c, -230, 0, 0, SLAB, "conc")
-    for x in range(-230, -10, 75):                                   # deck (Novalosa 55) under the topping
+    for x in list(range(-230, -10, 75)) + list(range(410, 570, 75)):   # deck (Novalosa 55) on both sides
         line(c, x, 0, x + 20, 55, 0.8, "#555555"); line(c, x + 20, 55, x + 45, 55, 0.8, "#555555")
         line(c, x + 45, 55, x + 65, 0, 0.8, "#555555"); line(c, x + 65, 0, x + 75, 0, 0.8, "#555555")
     # IPE 240, P2 and grout (later) under the slab on the cantilever side
@@ -148,10 +149,12 @@ def main():
     rect(c, 0, TOP, B, SLAB, "grout")
     rect(c, (B - PB) / 2, SLAB - TP, (B + PB) / 2, SLAB, "plate")
     rect(c, B / 2 - 75, SLAB, B / 2 + 75, SLAB + 70, "steel")
-    line(c, -260, SLAB, 640, SLAB, 0.4, "#555555", (2, 2))
+    line(c, -260, SLAB, 650, SLAB, 0.4, "#555555", (2, 2))
     line(c, -260, 0, 640, 0, 0.4, "#555555", (2, 2))
 
     # reinforcement
+    for x in (B + 50, B + 160):                                                          # VCM stirrups Ø10
+        bar(c, [(x, YB), (x, -45)], 10, "#7d3c98", "#4a235a")
     bar(c, [(45, -110), (B - 45, -110)], 10, "#7d3c98", "#4a235a")                     # joint tie Ø10
     for y in (-56, -80):                                                                 # VCM top bars, hooked down
         bar(c, [(640, y), (95, y), (70, y - 25), (70, YB)], 12, "#1a5276", "#0e2f44")
@@ -163,20 +166,13 @@ def main():
     bar(c, [(-60, YA), (346, YA)], DA, "#c0392b", "#7b241c")                             # A1, top row
     rect(c, 309, YA - 25, 321, YA + 25, "plate")                                         # P1
 
-    # dimensions: levels on the left, the free gap on the right of the column
+    # dimensions: grout, plate and cover only
     xl = -290
-    vdim(c, xl, 0, TOP, f"{TOP:g}", -1, ext_from=-240)
     vdim(c, xl, TOP, SLAB - TP, f"{GR:g}", -1, ext_from=-240)
     vdim(c, xl, SLAB - TP, SLAB, f"{TP:g}", -1, ext_from=-240)
-    vdim(c, xl - 45, 0, SLAB, f"{SLAB:g}", -1, ext_from=xl)
     line(c, -240, TOP, 0, TOP, 0.3, "#555555", (2, 2))
-    xr = 430
+    xr = 385
     vdim(c, xr, YH + DB / 2, TOP, f"rec. {CV:g}", 1, ext_from=B - XC - 140)
-    vdim(c, xr, GAP_HI, YT[1] + T14 / 2, f"{CLR:g}", 1, ext_from=B - 50)
-    vdim(c, xr, YT[0] - T14 / 2, YT[1] + T14 / 2, f"{2 * T14:g}", 1, ext_from=B - 50)
-    vdim(c, xr, GAP_LO, YT[0] - T14 / 2, f"{CLR:g}", 1, ext_from=B - 50)
-    vdim(c, xr, YA, 0, f"{-YA:g}", 1, ext_from=346)
-    vdim(c, xr + 40, GAP_LO, GAP_HI, f"{FREE:g} libres", 1, ext_from=xr + 4)
 
     # labels
     X = 720
@@ -187,14 +183,15 @@ def main():
     leader(c, X, 50, B - 70, YT[1], f"2 estribos Ø14 juntos, a {YT[1]:g} y {YT[0]:g}", "#145a32",
            [f"{CLR:g} libres al gancho y {CLR:g} al A1"])
     leader(c, X, 0, 250, YA, f"A1 fila superior a {YA:g}", "#7b241c")
-    leader(c, X, -40, 560, -56, "VCM: barras superiores", "#0e2f44")
+    leader(c, X, -40, 620, -56, "VCM: barras superiores", "#0e2f44")
     leader(c, X, -80, 200, -68, "VCS: barras superiores (cruzan)", "#1c2833")
     leader(c, X, -125, B - 70, -110, "Estribo Ø10 del nudo (el más alto)", "#4a235a")
+    leader(c, X, -165, B + 160, -120, "Estribos Ø10 de la VCM: el primero a 50 de la cara de la columna", "#4a235a")
     text(c, -60, -9.8 - 60, "IPE 240", 9, "#1f3347", anchor="end")
     text(c, -130, SLAB + 12, "Novalosa 55 + 50", 8.5, "#555555", anchor="middle")
+    text(c, 520, SLAB + 12, "Novalosa 55 + 50", 8.5, "#555555", anchor="middle")
     text(c, B / 2, SLAB + 75, "columna metálica", 8.5, "#1f3347", anchor="middle")
-    text(c, 495, 4, "cara superior de las vigas (0)", 8, "#555555")
-    text(c, 495, SLAB + 4, "losa terminada (+105)", 8, "#555555")
+    text(c, 470, -30, "cara superior de las vigas (0)", 8, "#555555")
 
     # title and notes
     text(c, 40, H - 40, "DETALLE - CABEZA DE COLUMNA CON PLACA BASE AL RAS DE LA LOSA (C4; corte por el eje del voladizo)",
