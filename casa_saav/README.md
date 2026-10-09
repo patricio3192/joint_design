@@ -9,8 +9,10 @@ collar_joints.m        beam to HSS column, external diaphragm collars (lib/colla
                        Steps switched on at the top: build (ETABS -> database), check,
                        details (collar_details.pdf), sheets (planos_uniones.pdf, A2),
                        compare (direct weld vs collar), equilibrium (diagnosis).
-end_plate_column.m     IPE 240 cantilever, end plate on the concrete column C4: the input P,
-                       checked by lib/end_plate_concrete/check_end_plate_column.m
+end_plate_column.m     IPE 240 cantilever, end plate on the concrete column C4: input
+                       data/end_plate_C4.m, checked by lib/end_plate_concrete/check_end_plate_column.m
+end_plate_model.m      the same input as a 3D model: clash list, quantities, three views
+                       (end_plate_model.pdf, A2; lib/joint_model)
 sandwich_beam.m        IPE 200 to both faces of a concrete beam, through-rods: the input P,
                        checked by lib/sandwich_concrete/check_sandwich_beam.m
 concrete_sheet.m       the A1 sheet of the two concrete connections
@@ -22,7 +24,7 @@ Save the output of the two concrete calculations when they change:
 
 ## Folders
 ```
-data/       project input: joint_classes.m (what arrives at each joint),
+data/       project input: end_plate_C4.m (end plate joint), joint_classes.m (what arrives at each joint),
             grid_lines.m (construction grid A B C D F / 5 1 6 2 3 7 4 8),
             gg.txt (ETABS export, NOT in git: copy it here), joint_db/ (generated)
 sheets/     drawing scripts of project sheets (make_concrete_sheet.m: base for a

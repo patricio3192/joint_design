@@ -13,6 +13,7 @@ lib/                     libraries: no project data inside
   end_plate_concrete/    steel end plate on a concrete column: check_end_plate_column(P)
   sandwich_concrete/     steel beams on both faces of a concrete beam: check_sandwich_beam(P)
   concrete_common/       helpers shared by the two concrete libraries
+  joint_model/           3D pieces of a joint: clash check, views, quantities
   sheets/                drawing items, components (grid, concrete sections, profiles,
                          plates, nuts, rebar...) and sheet blocks, for every sheet
   profiles/              steel catalog (IPE, HE A, HE B) and steel_profile()

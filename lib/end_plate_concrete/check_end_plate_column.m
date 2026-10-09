@@ -10,7 +10,8 @@ function R = check_end_plate_column(P)
 %
 % Prints the report (modules 2-15 and the summary) and returns
 %   R.checks {name, ratio; ...}, R.governing, R.ratio, R.hef, R.L_rod, R.arm,
-%   R.T_rod (per rod), R.k_conf (sqrt(A2/A1) used in bearing).
+%   R.T_rod (per rod), R.k_conf (sqrt(A2/A1) used in bearing), R.z_tip (rod tip),
+%   R.z_hook (baston hook face), R.L_bst (baston straight leg required from the hook face).
 % Units: N, mm, MPa (moments in P.load in kN*m, shears in kN).
 % Coordinates: x along the column face (0 = beam axis = column axis), y down
 % from the top of the beams (= top of the steel beam and of the end plate),
@@ -358,5 +359,6 @@ function R = check_end_plate_column(P)
   fprintf('  Governing: %s (%.2f)\n', S{imax,1}, rmax);
   fprintf('==============================================================\n');
   R = struct('checks', {S}, 'governing', S{imax,1}, 'ratio', rmax, 'hef', hef, 'L_rod', L_rod, ...
-             'arm', arm, 'T_rod', T_rod, 'k_conf', k_conf);
+             'arm', arm, 'T_rod', T_rod, 'k_conf', k_conf, 'z_tip', z_tip, 'z_hook', z_hook, ...
+             'L_bst', z_end - z_hook);
 end

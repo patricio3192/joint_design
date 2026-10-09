@@ -16,6 +16,11 @@
   breakout toward an edge below (the column continues), no interaction 17.8.
 - The joint (ACI Ch. 15) coefficient gamma is an input: the user must pick it
   from Table 15.4.2.3 for the actual confinement.
-- Verified 2026-10-09: casa_saav/end_plate_column.m (input) + this function
+- The 3D model (model_end_plate_column) adds the same fixed layout: beam behind
+  along z with hooked bars, crossing beams along x on both sides (3 bars per
+  layer by default), square ties without their 135 deg hooks. Its clash list
+  (lib/joint_model/jm_clash) is wider than module 2 of the check, which stays as
+  it was so the saved output does not change.
+- Verified 2026-10-09: casa_saav/end_plate_column.m (input in data/end_plate_C4.m) + this function
   reproduce casa_saav/reports/end_plate_column_output.txt byte for byte. Run it
   and compare after any change here.
