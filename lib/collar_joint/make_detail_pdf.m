@@ -1,26 +1,27 @@
-function file = make_detail_pdf(DB, M, J, outdir, opts)
+function file = make_detail_pdf(DB, M, J, C, outdir, opts)
 % MAKE_DETAIL_PDF  Collar detailing sheets: key plan, plate types, one
 % plan per joint, and a section of each connection type.
 %
-%   make_detail_pdf(DB, M, default_joint(), 'reports')
+%   make_detail_pdf(DB, M, default_joint(), C, 'reports')
 %
 % DB  joint database (load_joint_db), M  parsed model (joint_db/etabs_model.mat)
 % J   collar detail from dmj_lib default_joint (sizes, welds, shear tab)
+% C   the project's joint classes (see README.md)
 % opts.python  Python command (default 'python3')
 % opts.stab    stability plates on the cap for S beams, [t L depth clear] mm
 %              (default [8 60 25 3]); drawn, not checked
 %
 % All geometry is computed here from J and the joint classes
-% (joint_classes.m, joint_config.m, collar_types.m); joint_pdf.py only
+% (C, joint_config.m, collar_types.m); joint_pdf.py only
 % draws it.  Writes <outdir>/collar_details.json and .pdf.
 
-  if nargin < 5, opts = struct(); end
+  if nargin < 6, opts = struct(); end
+  if ~iscell(C), error('make_detail_pdf: give the joint classes C.'); end
   if ~isfield(opts, 'python'), opts.python = 'python3'; end
   if ~isfield(opts, 'stab'),   opts.stab   = [8 60 25 3]; end
   if ~exist(outdir, 'dir'), mkdir(outdir); end
   here = fileparts(mfilename('fullpath'));
 
-  C = joint_classes();
   T = collar_types(DB, J, C);
   tstyle = {'plate', 'plate2', 'plate3'};
   typeOf = containers.Map();
@@ -31,7 +32,7 @@ function file = make_detail_pdf(DB, M, J, outdir, opts)
   B = {blk_h(1, 'Collar details - double collar moment joints'), ...
        blk_p(sprintf(['Plates %g mm (cap) and %g mm (shelf), A36. Strip beyond the column: ' ...
        '%g mm where a beam laps (L_lap %g + gap %g), %g mm at the building edge. ' ...
-       'Joint classes from joint_classes.m; beams on each side from the ETABS model. ' ...
+       'Joint classes from the project; beams on each side from the ETABS model. ' ...
        'Sides are global: W = -X, N = +Y, E = +X, S = -Y.'], J.pl.t_cap, J.pl.t_shf, ...
        J.pl.L_lap + J.st.gap, J.pl.L_lap, J.st.gap, J.pl.w_back))};
 

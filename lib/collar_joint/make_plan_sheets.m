@@ -1,10 +1,12 @@
-function file = make_plan_sheets(DB, M, J, outdir, opts)
+function file = make_plan_sheets(DB, M, J, C, G, outdir, opts)
 % MAKE_PLAN_SHEETS  A2 sheets for the structural drawings, in Spanish:
 %   1  general plan of the joints and joint schedule
 %   2  collar plate types and connection details (M, C, LB, beam to beam)
 %   3+ plan of every joint, 8 per sheet
 %
-%   make_plan_sheets(DB, M, default_joint(), 'reports', opts)
+%   make_plan_sheets(DB, M, default_joint(), C, G, 'reports', opts)
+%
+% C, G  the project's joint classes and grid (see README.md)
 %
 % opts.titleblock  {label, value; ...} for the title block on every sheet;
 %                  values '@sheet' (sheet title + opts.subtitle) and '@page'
@@ -29,10 +31,10 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
 % opts.python Python command
 %
 % All geometry and text is produced here from J, the joint classes, the
-% grid (grid_lines.m) and the model; joint_pdf.py only prints it.
+% grid G and the model; joint_pdf.py only prints it.
 % Writes <outdir>/planos_uniones.json and .pdf.
 
-  if nargin < 5, opts = struct(); end
+  if nargin < 7, opts = struct(); end
   def = struct('python', 'python3', 'stab', [8 60 25 3], 'stab_leg', 5, 'gap', 10, 'proj', 10, ...
                'hole_r', 1.5*J.cl.t, 'extra', {{}}, ...
                'project', 'Estructura metálica - uniones de vigas y columnas', ...
@@ -47,9 +49,9 @@ function file = make_plan_sheets(DB, M, J, outdir, opts)
   if ~exist(outdir, 'dir'), mkdir(outdir); end
   here = fileparts(mfilename('fullpath'));
 
-  C  = joint_classes();
+  if ~iscell(C) || ~isstruct(G), error('make_plan_sheets: give the joint classes C and the grid G.'); end
   T  = collar_types(DB, J, C);
-  P  = plan_layout(M, DB);
+  P  = plan_layout(M, DB, G);
   tstyle = {'plate', 'plate2', 'plate3'};
   typeOf = containers.Map();
   for t = 1:numel(T)

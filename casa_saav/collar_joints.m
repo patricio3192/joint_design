@@ -18,8 +18,7 @@
 % =====================================================================
 here = fileparts(mfilename('fullpath'));
 lib  = fullfile(here, '..', 'lib');
-addpath(fullfile(lib, 'collar_joint'), fullfile(lib, 'direct_weld_joint'), ...
-        fullfile(lib, 'etabs'), fullfile(here, 'data'));
+addpath(fullfile(lib, 'collar_joint'), fullfile(lib, 'direct_weld_joint'), fullfile(lib, 'etabs'));
 source(fullfile(lib, 'collar_joint', 'dmj_lib.m'));
 out = fullfile(here, 'reports');
 dbd = fullfile(here, 'data', 'joint_db');
@@ -66,6 +65,12 @@ opts.titleblock = {
 opts.tbwidths = [15 11 12 15 29 9 9];   % relative column widths
 
 % ======================================================================
+% project data, passed to the libraries (data/ is not left on the path)
+addpath(fullfile(here, 'data'));
+C = joint_classes();                    % what arrives on each side of every joint
+G = grid_lines();                       % construction grid
+rmpath(fullfile(here, 'data'));
+
 if steps.build
   build_joint_db(fullfile(here, 'data', 'gg.txt'), dbd);
 end
@@ -84,7 +89,7 @@ if steps.check
     end
     jt  = DB.joints(k);
     % beams by class (joint_classes.m) and the collar strip on each side
-    [map, Jj, msg] = joint_config(jt, J);
+    [map, Jj, msg] = joint_config(jt, J, C);
     map.skip = 'RSA';                     % signed combinations only
     for m = 1:numel(msg), fprintf('WARNING %s\n', msg{m}); end
     if ~isempty(map.skew)
@@ -112,10 +117,10 @@ end
 % ---- details: collar plate types and detail sheets --------------------------
 if steps.details
   for k = 1:numel(DB.joints)
-    [~, ~, msg] = joint_config(DB.joints(k), J);
+    [~, ~, msg] = joint_config(DB.joints(k), J, C);
     for m = 1:numel(msg), fprintf('WARNING %s\n', msg{m}); end
   end
-  T = collar_types(DB, J);
+  T = collar_types(DB, J, C);
   fprintf('\nCOLLAR PLATE TYPES (cap and shelf share the outline)\n');
   for t = 1:numel(T)
     fprintf('  Type %s: PL %g x %g, strips along D %s, along B %s | %2d joints, %2d plates: %s\n', ...
@@ -123,37 +128,37 @@ if steps.details
             numel(T(t).joints), 2*numel(T(t).joints), strjoin(T(t).joints, ' '));
   end
   fprintf('\nDetail sheets:\n');
-  make_detail_pdf(DB, M, J, out, dopts);
+  make_detail_pdf(DB, M, J, C, out, dopts);
 end
 
 % ---- sheets: A2 plan sheets and beam-to-beam checks ---------------------------
 if steps.sheets
   for k = 1:numel(DB.joints)
-    [~, ~, msg] = joint_config(DB.joints(k), J);
+    [~, ~, msg] = joint_config(DB.joints(k), J, C);
     for m = 1:numel(msg), fprintf('WARNING %s\n', msg{m}); end
   end
   % beam to beam shear connections: every location, worst check
-  P = plan_layout(M, DB);
+  P = plan_layout(M, DB, G);
   fprintf('\nBEAM TO BEAM SHEAR CONNECTIONS (design V = max(model, %.0f kN))\n', J.vv.Vmin/1e3);
   fprintf('  %-5s %-5s %-4s %-12s %-10s %8s  %s\n', 'point', 'near', 'kind', 'cut beams', 'support', 'V (kN)', 'worst check');
   worst = 0;
   for v = P.vv
-    C = vv_checks(J, max(v.V), v.nsup);
-    d = cellfun(@(x) x{6}, C);  [w, i] = max(d);  worst = max(worst, w);
+    V = vv_checks(J, max(v.V), v.nsup);
+    d = cellfun(@(x) x{6}, V);  [w, i] = max(d);  worst = max(worst, w);
     fprintf('  %-5s %5.2f,%5.2f %-4s %-12s %-10s %8.2f  %s %s DCR %.2f\n', v.pt, v.xy, v.kind, ...
-            strjoin(v.coped, ','), strjoin(v.support, ','), max(v.V)/1e3, C{i}{1}, C{i}{2}, w);
+            strjoin(v.coped, ','), strjoin(v.support, ','), max(v.V)/1e3, V{i}{1}, V{i}{2}, w);
   end
   fprintf('  cope %g x %g mm (depth x length), web left %g mm, fillet %g mm both sides; worst DCR %.2f\n', ...
           J.vv.dc, J.vv.c, J.bm.h - 2*J.vv.dc, J.vv.leg, worst);
   fprintf('\nSheets:\n');
-  make_plan_sheets(DB, M, J, out, opts);
+  make_plan_sheets(DB, M, J, C, G, out, opts);
 end
 
 % ---- compare: direct weld vs collar ---------------------------------------
 if steps.compare
   source(fullfile(lib, 'direct_weld_joint', 'dwj_lib.m'));
   % J.wl.fl_type = 'cjp' in the direct-weld detail: flanges CJP instead of fillets
-  compare_direct_weld(DB, compare_joints, dwj_default_joint(), J, out);
+  compare_direct_weld(DB, compare_joints, dwj_default_joint(), J, C, out);
 end
 
 % ---- equilibrium: why a joint fails the equilibrium / mapping check -----------

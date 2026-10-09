@@ -1,8 +1,10 @@
-function files = make_joint_pdfs(DB, joints, kinds, outdir, opts)
+function files = make_joint_pdfs(DB, joints, kinds, C, outdir, opts)
 % MAKE_JOINT_PDFS  One PDF check sheet per connection type, covering a
 % list of joints, in the style of joint10_handcheck.pdf.
 %
-%   files = make_joint_pdfs(DB, {'10','13'}, kinds, 'reports')
+%   files = make_joint_pdfs(DB, {'10','13'}, kinds, C, 'reports')
+%
+%   C               the project's joint classes (see README.md)
 %
 %   kinds(k).type   'collar' (dmj_lib) or 'direct' (dwj_lib)
 %   kinds(k).J      the detail, from default_joint / dwj_default_joint
@@ -21,7 +23,8 @@ function files = make_joint_pdfs(DB, joints, kinds, outdir, opts)
 % lib/printing/joint_pdf.py only lays it out as
 % <outdir>/<type>_joints.pdf.
 
-  if nargin < 5, opts = struct(); end
+  if nargin < 6, opts = struct(); end
+  if ~iscell(C), error('make_joint_pdfs: give the joint classes C.'); end
   if ~isfield(opts, 'python'), opts.python = 'python3'; end
   if ~isfield(opts, 'seis'),   opts.seis   = 'E[xy]'; end
   if ~isfield(opts, 'skip'),   opts.skip   = 'RSA'; end
@@ -37,7 +40,7 @@ function files = make_joint_pdfs(DB, joints, kinds, outdir, opts)
     for n = 1:numel(joints)
       k = find(strcmp({DB.joints.joint}, joints{n}), 1);
       if isempty(k), error('Joint %s is not in the database.', joints{n}); end
-      recs{end+1} = joint_record(DB.joints(k), kd, opts);
+      recs{end+1} = joint_record(DB.joints(k), kd, C, opts);
     end
 
     B = front_blocks(DB, recs, ti, opts);
@@ -102,8 +105,8 @@ end
 % =====================================================================
 %  All checks of one joint, for every load case
 % =====================================================================
-function rec = joint_record(jt, kd, opts)
-  [map, Jc] = joint_config(jt, kd.J);   % beams by class, collar strips per side
+function rec = joint_record(jt, kd, C, opts)
+  [map, Jc] = joint_config(jt, kd.J, C);   % beams by class, collar strips per side
   map.skip = opts.skip;
   nside = [min(numel(map.strong),2) min(numel(map.weak),2)];
   if strcmp(kd.type, 'collar')

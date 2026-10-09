@@ -14,11 +14,12 @@
   size, the user must split the run by joint.
 - Forces: ETABS combinations only, RSA skipped. Units in the database: kN, m;
   dmj_lib converts to N, mm.
-- Project data comes from the path: joint_classes.m and grid_lines.m (not yet
-  passed as arguments). Make sure the project's data/ folder is on the path
-  and no other copy shadows it.
+- Project data is passed in: joint classes C and grid G (README.md has the
+  format). Never add project numbers to lib/. A joint missing from C is taken
+  as all-moment with a warning: tell the user when you see that warning.
 - make_plan_sheets.m and make_detail_pdf.m write Spanish sheets with fixed
   notes (A36, E70XX, IPE/HSS names from J): read the notes before reusing
   them on another project.
 - Verified: casa_saav/collar_joints.m reproduces the outputs from before the
-  reorganisation (2026-10-09) exactly. Run it again after any change here.
+  reorganisation exactly (2026-10-09, after C and G became arguments too).
+  Run every step again after any change here.

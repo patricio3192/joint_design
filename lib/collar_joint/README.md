@@ -22,22 +22,30 @@ make_joint_pdfs.m   PDF check sheets (index, data, demands, capacities), also fo
 ## Use
 ```
 lib = 'path/to/lib';
-addpath(fullfile(lib, 'collar_joint'), fullfile(lib, 'etabs'), 'path/to/project/data');
+addpath(fullfile(lib, 'collar_joint'), fullfile(lib, 'etabs'));
 source(fullfile(lib, 'collar_joint', 'dmj_lib.m'));   % defines every check function
 DB = load_joint_db('path/to/project/data/joint_db/joint_db.mat');
+C  = ...;  G = ...;                                    % project data, see below
 J  = default_joint();  J.pl.t_cap = 12;                % overrides
-[map, Jj] = joint_config(DB.joints(k), J);  map.skip = 'RSA';
+[map, Jj] = joint_config(DB.joints(k), J, C);  map.skip = 'RSA';
 E  = run_joint_res(Jj, DB.joints(k).res, map, 'JOINT 10');
 ```
 `casa_saav/collar_joints.m` is the complete example (checks, detail sheets,
 plan sheets, comparison with direct weld, equilibrium diagnosis).
 
-The project must provide on the path:
-- `joint_classes.m`: for every joint, what arrives on each global side
+The project passes its data as arguments (nothing is looked up on the path):
+- `C`, the joint classes: a cell array, one row per joint,
+  `{joint, W, N, E, S}`, telling what arrives on each global side
   (W = -X, N = +Y, E = +X, S = -Y): M moment beam, S shear only on the shelf,
   NL beam below the collar on a shear tab, N no beam (free strip), E no beam
-  at the building edge (strip limited to `w_back`).
-- `grid_lines.m`: the construction grid (for plan_layout and the sheets).
+  at the building edge (strip limited to `w_back`). A joint missing from C is
+  taken with all its beams as moment beams (with a warning).
+  Used by joint_config, collar_types, make_detail_pdf, make_plan_sheets,
+  make_joint_pdfs and compare_direct_weld.
+- `G`, the construction grid (plan_layout, make_plan_sheets): `G.v` lettered
+  lines `{name, [x1 y1], [x2 y2]; ...}` (two points, may be inclined),
+  `G.h` numbered lines `{name, y; ...}`, in the ETABS coordinates (m).
+casa_saav keeps them as functions in `casa_saav/data/` (joint_classes.m, grid_lines.m).
 
 Check sheets need Python 3 with ReportLab (`sudo apt install python3-reportlab`).
 Substituted formulas on them come from the library itself (8th field of each

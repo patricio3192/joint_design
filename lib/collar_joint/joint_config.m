@@ -1,10 +1,10 @@
 function [map, J, msg] = joint_config(jt, J, C)
 % JOINT_CONFIG  Frame map and collar geometry of one joint, from its class.
 %
-%   [map, J, msg] = joint_config(DB.joints(k), default_joint())
-%   [map, J, msg] = joint_config(DB.joints(k), J, joint_classes())
+%   [map, J, msg] = joint_config(DB.joints(k), J, C)
 %
-% Reads the joint's codes from joint_classes (W N E S) and the beam on
+% C: the project's joint classes, {joint, W, N, E, S; ...} (see README.md).
+% Reads the joint's codes from C (W N E S) and the beam on
 % each side from the database (map.at), then returns
 %   map.strong, map.weak   MOMENT beams only (code M), by column axis
 %   map.shear              beams on the shelf, shear only (code S)
@@ -23,11 +23,13 @@ function [map, J, msg] = joint_config(jt, J, C)
 % moment beams) and J unchanged, with a message.
 % J without a collar (dwj_lib) only gets the map.
 
-  if nargin < 3, C = joint_classes(); end
+  if nargin < 3 || ~iscell(C)
+    error('%s: give the joint classes C (the project''s joint_classes()).', mfilename);
+  end
   map = jt.map;  msg = {};
   k = find(strcmp(C(:,1), jt.joint), 1);
   if isempty(k)
-    msg{end+1} = sprintf('joint %s is not in joint_classes: all beams taken as moment beams', jt.joint);
+    msg{end+1} = sprintf('joint %s is not in the joint classes: all beams taken as moment beams', jt.joint);
     return
   end
   codes = C(k, 2:5);

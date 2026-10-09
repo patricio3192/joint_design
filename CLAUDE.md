@@ -29,8 +29,6 @@ of the folder you work in before opening code, and open only what you need.
 - Commit or push only when the user asks.
 
 ## Planned (not done yet)
-- collar_joint: the project data (joint_classes, grid_lines) is still found on
-  the path instead of being passed in as arguments.
 - end_plate_concrete, sandwich_concrete: the calculations are still project
   scripts (`casa_saav/end_plate_column.m`, `sandwich_beam.m`) with the input
   at the top; only the helper functions are in lib/. Turn them into functions

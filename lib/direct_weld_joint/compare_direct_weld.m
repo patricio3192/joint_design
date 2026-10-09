@@ -1,23 +1,25 @@
-function SUM = compare_direct_weld(DB, joints, J, Jc, outdir)
+function SUM = compare_direct_weld(DB, joints, J, Jc, C, outdir)
 % COMPARE_DIRECT_WELD  Beams welded DIRECTLY to the column (dwj_lib), optionally
 % side by side with the collar joint (dmj_lib) on the same joints.
 %
 %   source('lib/direct_weld_joint/dwj_lib.m');  source('lib/collar_joint/dmj_lib.m');
-%   compare_direct_weld(DB, {'10', '13'}, dwj_default_joint(), default_joint(), 'reports')
+%   compare_direct_weld(DB, {'10', '13'}, dwj_default_joint(), default_joint(), C, 'reports')
 %
 % DB      joint database (load_joint_db)
 % joints  point unique names, or {DB.joints.joint} for every joint
 % J       direct-weld detail: dwj_default_joint() plus overrides
 %         (J.wl.fl_type = 'cjp' for CJP flanges instead of fillets)
 % Jc      collar detail (default_joint()) to compare with; [] = no comparison
+% C       the project's joint classes (only M beams are moment beams)
 % outdir  folder for direct_joints.pdf (and collar_joints.pdf with Jc); '' = no PDF.
 %         make_joint_pdfs.m builds the content; lib/printing/joint_pdf.py prints it.
-% The joint classes (joint_classes.m) must be on the path: only M beams are
-% moment beams.  Prints the full direct-weld report and a summary with the
+% Prints the full direct-weld report and a summary with the
 % governing check of each joint (and of the collar joint with Jc).
 
-  if nargin < 4, Jc = []; end
-  if nargin < 5, outdir = ''; end
+  if nargin < 5 || ~iscell(C)
+    error('compare_direct_weld: give the joint classes C (the project''s joint_classes()).');
+  end
+  if nargin < 6, outdir = ''; end
   compare = ~isempty(Jc);
 
   SUM = {};
@@ -28,8 +30,8 @@ function SUM = compare_direct_weld(DB, joints, J, Jc, outdir)
             strjoin({DB.joints.joint}, ' '));
     end
     jt  = DB.joints(k);
-    % beams by class (joint_classes.m): only M beams are moment beams
-    [map, ~, msg] = joint_config(jt, J);
+    % beams by class: only M beams are moment beams
+    [map, ~, msg] = joint_config(jt, J, C);
     map.skip = 'RSA';                     % signed combinations only
     for m = 1:numel(msg), fprintf('WARNING %s\n', msg{m}); end
 
@@ -39,7 +41,7 @@ function SUM = compare_direct_weld(DB, joints, J, Jc, outdir)
     row = {jt.joint, f{i}, E.(f{i}).name, w, E.(f{i}).case};
 
     if compare
-      [mapc, Jcj] = joint_config(jt, Jc);  mapc.skip = 'RSA';
+      [mapc, Jcj] = joint_config(jt, Jc, C);  mapc.skip = 'RSA';
       evalc('Ec = run_joint_res(Jcj, jt.res, mapc, ''collar'');');
       fc = fieldnames(Ec);  dc = cellfun(@(t) Ec.(t).dcr, fc);
       [wc, ic] = max(dc);
@@ -72,6 +74,6 @@ function SUM = compare_direct_weld(DB, joints, J, Jc, outdir)
       kinds = struct('type', {'direct'}, 'J', {J});
     end
     fprintf('\nPDF check sheets:\n');
-    make_joint_pdfs(DB, joints, kinds, outdir);
+    make_joint_pdfs(DB, joints, kinds, C, outdir);
   end
 end

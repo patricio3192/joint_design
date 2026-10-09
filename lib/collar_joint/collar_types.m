@@ -1,7 +1,7 @@
 function T = collar_types(DB, J, C)
 % COLLAR_TYPES  Group the collar plates of all classified joints by outline.
 %
-%   T = collar_types(DB, default_joint())
+%   T = collar_types(DB, J, C)        C: the project's joint classes
 %
 % Two joints share a plate type when their strips beyond the column are
 % the same up to turning or flipping the plate: the two strips on the D
@@ -12,7 +12,9 @@ function T = collar_types(DB, J, C)
 % first), LD x LB (plate size along D and along B), t (thickness), and
 % per joint: joints, over ([W N E S] strips) and axis (strong axis, 'X'/'Y').
 
-  if nargin < 3, C = joint_classes(); end
+  if nargin < 3 || ~iscell(C)
+    error('%s: give the joint classes C (the project''s joint_classes()).', mfilename);
+  end
   keys = {};
   T = struct('name', {}, 'oD', {}, 'oB', {}, 'LD', {}, 'LB', {}, 't', {}, ...
              'joints', {}, 'over', {}, 'axis', {});

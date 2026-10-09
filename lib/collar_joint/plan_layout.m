@@ -2,7 +2,7 @@ function P = plan_layout(M, DB, G)
 % PLAN_LAYOUT  What the floor plan shows: grid names, IPE beams, correas
 % and the IPE to IPE shear connections.
 %
-%   P = plan_layout(M, DB)           grid from grid_lines.m
+%   P = plan_layout(M, DB, G)        G: the project's grid (see README.md)
 %
 % P.name       containers.Map, ETABS joint -> grid name ('10' -> 'C1')
 % P.ipe        frame indices (into M.fr) of the IPE beams
@@ -20,7 +20,9 @@ function P = plan_layout(M, DB, G)
 % Corner rule: the beam whose far end is not on a column is the one cut;
 % if neither (or both) are, the north-south one.
 
-  if nargin < 3, G = grid_lines(); end
+  if nargin < 3 || ~isstruct(G)
+    error('plan_layout: give the grid G (the project''s grid_lines()).');
+  end
   xy  = M.pt.xyz(:, 1:2);
   idx = containers.Map(M.pt.name, num2cell(1:numel(M.pt.name)));
   P.grid = G;

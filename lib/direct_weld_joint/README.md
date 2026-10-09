@@ -19,7 +19,7 @@ compare_direct_weld.m   direct weld on a list of joints, optionally side by side
 source(fullfile(lib, 'direct_weld_joint', 'dwj_lib.m'));
 source(fullfile(lib, 'collar_joint', 'dmj_lib.m'));      % only to compare
 J = dwj_default_joint();   % J.wl.fl_type = 'cjp' for CJP flanges
-compare_direct_weld(DB, {'10', '13'}, J, default_joint(), 'reports')
+compare_direct_weld(DB, {'10', '13'}, J, default_joint(), C, 'reports')
 ```
-Needs `lib/collar_joint` (joint_config, make_joint_pdfs) and the project's
-joint_classes.m on the path. Example: `casa_saav/collar_joints.m`, step `compare`.
+Needs `lib/collar_joint` (joint_config, make_joint_pdfs) on the path and the
+project's joint classes C (see lib/collar_joint/README.md). Example: `casa_saav/collar_joints.m`, step `compare`.
