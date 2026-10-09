@@ -31,8 +31,8 @@ PB = 340                # base plate drawn (size from the steel column)
 YB = -150               # crop
 
 S = 0.95                # pt per mm
-OX, OY = 360, 250       # page position of the model origin
-W, H = 1400, 560
+OX, OY = 360, 190       # page position of the model origin
+W, H = 1400, 500
 
 ST = {  # stroke, width, fill, fill opacity, dash
     "conc":  ("#6b6b6b", 0.8, "#ece9e2", 1.0, None),
@@ -193,17 +193,9 @@ def main():
     text(c, B / 2, SLAB + 75, "columna metálica", 8.5, "#1f3347", anchor="middle")
     text(c, 470, -30, "cara superior de las vigas (0)", 8, "#555555")
 
-    # title and notes
+    # title
     text(c, 40, H - 40, "DETALLE - CABEZA DE COLUMNA CON PLACA BASE AL RAS DE LA LOSA (C4; corte por el eje del voladizo)",
          12, bold=True, page=True)
-    notes = [
-        f"Placa {TP:g} + grout {GR:g}: el hormigón de la cabeza de la columna llega a +{TOP:g} (antes +105). Sobre la columna queda una cajuela de {SLAB - TOP:g} en la losa.",
-        f"Con rec. {CV:g}, los ganchos Ø16 quedan a +{YH:g} (cara inferior a +{GAP_HI:g}). La fila superior de A1 tiene la cara superior a {GAP_LO:g}: quedan {FREE:g} libres.",
-        f"Los 2 Ø14 juntos ocupan {2 * T14:g}: quedan {CLR:g} libres arriba y abajo. Están a {TOP - YT[0]:g} de la cara de la columna (≤ 125, ACI).",
-        "Sin cotas de la placa base ni del remate de las anclas Ø12 (pendiente).",
-    ]
-    for k, t in enumerate(notes):
-        text(c, 40, 52 - 13 * k, t, 9, page=True)
     c.save()
     print(out)
 
