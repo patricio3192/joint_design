@@ -25,7 +25,8 @@ joint_calculations/
   collar_types.m     groups the collar plates by outline
   make_detail_pdf.m  builds the detail drawings (all geometry, from J)
   make_joint_pdfs.m  builds the PDF check sheets (all content, from the libraries)
-  python_support_scripts/  joint_pdf.py: prints a sheet to PDF, nothing else
+  python_support_scripts/  joint_pdf.py: prints a sheet to PDF, nothing else;
+                     json_dxf.py, armar_lamina.py: the same sheet as editable DXF
   reports/           generated PDFs (and the JSON behind them)
   snap.sh            ./snap.sh "message" saves a git snapshot
   joint_db/          generated .mat files (safe to delete, rebuild below)
@@ -136,6 +137,42 @@ console lists every beam-to-beam connection with its checks (not shown on
 the sheets). Codes on the sheets: M moment, C shear on the collar, LB below
 the collar on a seat angle, — no beam. Correas (north-south members off the
 lettered grid lines) are not drawn.
+
+## Sheets as editable DXF (LibreCAD / AutoCAD)
+
+Any sheet JSON (the one next to each PDF in `reports/`) can be turned into
+DXF files to finish or correct by hand, without the agent. Needs
+`pip install ezdxf`.
+
+```
+python3 python_support_scripts/json_dxf.py reports/planos_uniones.json
+python3 python_support_scripts/json_dxf.py planos_conexiones/reports/planos_conexiones.json \
+        --printer planos_conexiones/pour_pdf.py      # sheets printed by pour_pdf.py
+```
+
+It writes `<sheet>_dxf/`:
+
+```
+detalles/NN_name.dxf   one drawing per file, 1:1 in real mm     <- edit these ("model space")
+papel_N.dxf            border, title block, titles, notes and tables of sheet N,
+                       in paper mm                               <- and these ("paper space")
+lamina.json            which detail goes where on the sheet, at what scale (1:N)
+lamina_librecad.dxf    the sheet assembled in model space: each detail a block at 1:N
+lamina_autocad.dxf     details 1:1 in model space + a layout per sheet with viewports
+```
+
+After editing, rebuild the two assembled sheets (never edit those):
+
+```
+python3 python_support_scripts/armar_lamina.py reports/planos_uniones_dxf/lamina.json
+```
+
+Layout and scales come from the PDF (each drawing gets the next standard
+scale at or below the PDF's). Layers follow the drawing styles (`G-` shapes,
+`T-` texts, `COTAS`, `SOLDADURA`, `LAMINA_*`). Dimensions are real DXF
+dimensions; in the LibreCAD sheet they show the real length although the
+detail is reduced. `json_dxf.py` will not overwrite an existing `_dxf`
+folder (hand edits) unless given `--overwrite`.
 
 ## Known limits
 

@@ -242,6 +242,7 @@ def drawing(b, width):
     X = lambda x: ox + pad + (x - x0) * k
     Y = lambda y: pad + (y - y0) * k
     d = Drawing(width, H)
+    d._map = (x0, y0, x1, y1, k, ox, pad)        # model -> points, for json_dxf.py
     texts = []
     for it in items:
         t, p, s = it["t"], aslist(it["p"]), it.get("s", "grid")
