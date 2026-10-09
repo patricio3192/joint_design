@@ -4,7 +4,9 @@ function file = make_concrete_sheet(outdir, opts)
 %   column (C4) and sandwich connection. Column 3: pieces, quantities, notes.
 % Transparent: what is placed after the pour (end plates, IPE, grout, outer
 % nuts). Solid: everything placed before the pour.
-% Item and block helpers copied from ../cantilever_anchor_bolted_plate/make_pour_sheets.m.
+% Drawing items (d_*), components (c_*) and blocks (blk_*): lib/sheets.
+  lib = fullfile(fileparts(mfilename('fullpath')), '..', '..', 'lib');
+  addpath(fullfile(lib, 'sheets'), fullfile(lib, 'profiles'));   % d_*, blk_*, c_* components; steel_profile
   P = params();
   c1 = {};  c2 = {};  c3 = {};
 
@@ -90,11 +92,11 @@ function P = params()
   P.col = struct('b', 400, 'db', 16, 'rc', 58, 'top', 105);        % 40x40, bars 58 from the faces
   P.xc  = P.col.b/2 - P.col.rc;                                     % 142
   P.bm  = struct('b', 300, 'h', 350, 'rc', 56, 'db', 12);           % beams 30x35
-  P.ipe = struct('h', 240, 'b', 120, 'tf', 9.8, 'tw', 6.2);
-  P.ip2 = struct('h', 200, 'b', 100, 'tf', 8.5, 'tw', 5.6);
+  P.ipe = steel_profile('IPE 240');
+  P.ip2 = steel_profile('IPE 200');
   % end plate on column
   P.ep = struct('t', 12, 'b', 140, 'H', 260, 'g', 80, 'yT', 42, 'yS', 198, 'gr', 25);
-  P.rod = struct('d', 16, 'tip', 345, 'L1', 440, 'L2', 440, 'nut', 16, 'wsh', 3, 'dw', 30, 'hole', 18);
+  P.rod = struct('d', 16, 'tip', 345, 'L1', 440, 'L2', 440, 'nut', 16, 'wsh', 3, 'dw', 30, 'nw', 24, 'hole', 18);
   P.hd  = struct('a', 50, 't', 12, 'z', 309);                       % head plate: bearing face at z = hef
   P.bas = struct('d', 12, 'x', 82, 'y', 80, 'yX', 98, 'zh', 66, 'Ls', 1220, 'pata', 200);
   P.jt  = [110 155 230 305];                                        % joint ties Ø10 (below the top of the beams)
@@ -107,13 +109,16 @@ end
 %  1. Location plan (origin at B4, x east, y north)
 % =====================================================================
 function G = grid_lines()
-  G.xn = {'B', 'F', 'C', 'G', 'D', 'E'};  G.x = [0 2390 4780 7170 9560 10830];
-  G.yn = {'9', '4', '11', '10', '3', '2', '1'};  G.y = [-1270 0 1443 2887 4330 5730 9750];
-  G.A = [-1780 0; -2400 9750];                      % grid A, inclined: points at grids 4 and 1
+  % lettered lines through two points (A is inclined: points at grids 4 and 1), numbered lines by y
+  G.v = {'A', [-1780 0], [-2400 9750];  'B', [0 0], [0 9750];  'F', [2390 0], [2390 9750];
+         'C', [4780 0], [4780 9750];  'G', [7170 0], [7170 9750];  'D', [9560 0], [9560 9750];
+         'E', [10830 0], [10830 9750]};
+  G.h = {'9', -1270;  '4', 0;  '11', 1443;  '10', 2887;  '3', 4330;  '2', 5730;  '1', 9750};
 end
 
 function x = xA(G, y)
-  x = G.A(1,1) + (G.A(2,1) - G.A(1,1))*(y - G.A(1,2))/(G.A(2,2) - G.A(1,2));
+  a = G.v{1,2};  b = G.v{1,3};
+  x = a(1) + (b(1) - a(1))*(y - a(2))/(b(2) - a(2));
 end
 
 function it = dr_keyplan(P)
@@ -122,16 +127,7 @@ function it = dr_keyplan(P)
   xB = 0;  xF = 2390;  xC = 4780;  xG = 7170;  xD = 9560;  xE = 10830;
   it = {};
   yb = y9 - ext;  yt = y1 + ext;  xr = xE + ext;  xl = xA(G, y1) - ext;
-  it{end+1} = d_line(xA(G, yb), yb, xA(G, yt), yt, 'axis');
-  it{end+1} = d_circle(xA(G, yb), yb - r, r, 'bubble');  it{end+1} = d_text(xA(G, yb), yb - r - 90, 'A', 'grid', 'middle');
-  for i = 1:numel(G.x)
-    it{end+1} = d_line(G.x(i), yb, G.x(i), yt, 'axis');
-    it{end+1} = d_circle(G.x(i), yb - r, r, 'bubble');  it{end+1} = d_text(G.x(i), yb - r - 90, G.xn{i}, 'grid', 'middle');
-  end
-  for j = 1:numel(G.y)
-    it{end+1} = d_line(xl, G.y(j), xr, G.y(j), 'axis');
-    it{end+1} = d_circle(xr + r, G.y(j), r, 'bubble');  it{end+1} = d_text(xr + r, G.y(j) - 90, G.yn{j}, 'grid', 'middle');
-  end
+  it = c_grid(G, [xl xr yb yt], struct('r', r, 'tdy', -90));
   % concrete beams 30x35
   for y = [y4 y3 y2 y1], it{end+1} = d_rectxy(xA(G, y), y - bw/2, xD, y + bw/2, 'beam'); end
   it{end+1} = d_poly([xA(G, y4) - bw/2, y4; xA(G, y1) - bw/2, y1; xA(G, y1) + bw/2, y1; xA(G, y4) + bw/2, y4], 'beam');
@@ -153,8 +149,8 @@ function it = dr_keyplan(P)
   it{end+1} = d_line(xB - bw/2, y9, xE, y9, 'edge');  it{end+1} = d_line(xE, y9, xE, y3 + 60, 'edge');
   % extra bar of VCS+1Ø12 (drawn just south of the beam), centred on F and G
   for x = [xF xG]
-    it{end+1} = d_path([x - 750, y4 - bw/2 - 90; x + 750, y4 - bw/2 - 90], 45, 'r_bm2');
-    it{end+1} = d_text(x, y4 - bw/2 - 330, '+1Ø12, L = 1500 (abajo)', 'bsm', 'middle');
+    it = [it, c_rebar([x - 750, y4 - bw/2 - 90; x + 750, y4 - bw/2 - 90], 45, 'r_bm2', ...
+                      struct('label', '+1Ø12, L = 1500 (abajo)', 'at', [x, y4 - bw/2 - 330]))];
   end
   % bastones: [column face point, direction into the beam in line]
   S = {[xB, y4 + c], [0 1];  [xC, y4 + c], [0 1];  [xD, y4 + c], [0 1];      % B4, C4, D4Y: VCM to the north
@@ -163,7 +159,7 @@ function it = dr_keyplan(P)
     p0 = S{k,1} - (P.col.b - P.bas.zh)*S{k,2};  e = S{k,2};  n = [-e(2) e(1)];   % hook face at 66 from the cantilever face
     for sg = [-1 1]
       q0 = p0 + sg*P.bas.x*n;
-      it{end+1} = d_path([q0; q0 + P.bas.Ls*e], 40, 'r_bas');
+      it = [it, c_rebar([q0; q0 + P.bas.Ls*e], 40, 'r_bas')];
       it{end+1} = d_circle(q0(1), q0(2), 45, 'r_bas');                       % pata, down
     end
   end
@@ -206,13 +202,14 @@ function it = dr_keyplan(P)
   it{end+1} = d_text(xD + 450, (y10 + y11)/2, 'Ø10 c/140', 'tie', 'start');
   it{end+1} = d_text(xD + 450, (y3 + y10)/2, 'Ø10 c/110', 'tie', 'start');
   % section marks
-  it = [it, cutmark([xF + 1100, y4], [1 0], 'A'), cutmark([xC, 700], [0 1], 'B'), cutmark([xD - 650, y3], [1 0], 'C')];
+  it = [it, c_cutmark([xF + 1100, y4], [1 0], 'A'), c_cutmark([xC, 700], [0 1], 'B'), c_cutmark([xD - 650, y3], [1 0], 'C')];
   % dimensions
   yd = yb - 2*r - 500;
   it{end+1} = d_dim(xA(G, y4), y4, xB, y4, -(y4 - yd), sprintf('%g', xB - xA(G, y4)));
-  for i = 1:numel(G.x) - 1, it{end+1} = d_dim(G.x(i), yd, G.x(i+1), yd, 0, sprintf('%g', G.x(i+1) - G.x(i))); end
+  xs = cellfun(@(p) p(1), G.v(2:end,2));  ys = cell2mat(G.h(:,2));
+  it = [it, c_dim_chain([xs, yd + 0*xs], 0)];
   xd = xr + 2*r + 450;
-  for j = 1:numel(G.y) - 1, it{end+1} = d_dim(xd, G.y(j), xd, G.y(j+1), 0, sprintf('%g', G.y(j+1) - G.y(j))); end
+  it = [it, c_dim_chain([xd + 0*ys, ys], 0)];
 end
 
 function y = stir(y0, y1, s)
@@ -220,53 +217,41 @@ function y = stir(y0, y1, s)
   y = y0:s:y1;
 end
 
-function it = cutmark(p, e, L)
-  % section cut across a beam: two short strokes and the letter, e = direction of the beam
-  n = [-e(2) e(1)];  it = {};
-  for sg = [-1 1]
-    a = p + sg*260*n;  b = p + sg*480*n;
-    it{end+1} = d_line(a(1), a(2), b(1), b(2), 'lead');
-    it{end+1} = d_text(b(1) + sg*n(1)*120 + 60*e(1), b(2) + sg*n(2)*120 - 60, L, 'code', 'middle');
-  end
-end
-
 % =====================================================================
 %  Beam sections (v = up from the bottom of the beam)
 % =====================================================================
 function it = dr_beamsec(P, kind)
   b = P.bm.b;  h = P.bm.h;  rc = P.bm.rc;  d = P.bm.db;  x1 = b/2 - rc;
-  it = {d_rectxy(-b/2, 0, b/2, h, 'r_conc')};
-  ct = 45;                                            % stirrup axis from the face
-  TL = [-b/2 + ct, h - ct];  w = 60*[1 -1]/sqrt(2);  m = [0, h - ct];
-  e1 = TL + [22 0];  e2 = TL + [0 -22];          % both 135 deg hooks wrap the corner bar and point inward
-  it{end+1} = d_path(fillet([e1 + w; e1; TL; -b/2 + ct, ct; b/2 - ct, ct; b/2 - ct, h - ct; m], 8), 10, 'r_tieS');
-  it{end+1} = d_path(fillet([m; TL; e2; e2 + w], 8), 10, 'r_tieS');
-  top = @(x, y, s) d_circle(x, h - y, d/2, s);
-  bot = @(x, y, s) d_circle(x, y, d/2, s);
+  S = struct('b', b, 'h', h, 'ct', 45, 'dst', 10);   % stirrup axis 45 from the faces
+  top = @(x, y) [x, h - y, d];  bot = @(x, y) [x, y, d];
   switch kind
     case 'vcs1'
-      for x = [-x1 0 x1], it{end+1} = top(x, rc, 'r_bm1'); end
       xs = [-x1, -6, 6, x1];
-      for k = 1:4, it{end+1} = bot(xs(k), rc, iif(k == 3, 'r_bm2', 'r_bm1')); end
+      S.bars = [top(-x1, rc); top(0, rc); top(x1, rc); bot(xs(1), rc); bot(xs(2), rc); bot(xs(3), rc); bot(xs(4), rc)];
+      S.bar_s = {'r_bm1', 'r_bm1', 'r_bm1', 'r_bm1', 'r_bm1', 'r_bm2', 'r_bm1'};
+      it = c_rc_section(S);
       it{end+1} = d_text(xs(3) + 15, rc + 25, '+1Ø12', 'bsm', 'start');
       it{end+1} = d_text(0, h + 30, '3Ø12', 'bsm', 'middle');  it{end+1} = d_text(0, -60, '4Ø12 (1-2-1)', 'bsm', 'middle');
     case 'vcm'
-      for x = [-x1 0 x1], it{end+1} = top(x, rc, 'r_bm1');  it{end+1} = bot(x, rc, 'r_bm1'); end
-      for x = [-x1 x1], it{end+1} = top(x, rc + 24, 'r_bm1');  it{end+1} = bot(x, rc + 24, 'r_bm1'); end
-      for x = [-1 1]*P.bas.x, it{end+1} = top(x, P.bas.y, 'r_bas'); end
+      S.bars = [top(-x1, rc); bot(-x1, rc); top(0, rc); bot(0, rc); top(x1, rc); bot(x1, rc);
+                top(-x1, rc + 24); bot(-x1, rc + 24); top(x1, rc + 24); bot(x1, rc + 24);
+                top(-P.bas.x, P.bas.y); top(P.bas.x, P.bas.y)];
+      S.bar_s = [repmat({'r_bm1'}, 1, 10), {'r_bas', 'r_bas'}];
+      it = c_rc_section(S);
       it{end+1} = d_text(0, h + 30, '5Ø12 + 2 bastones Ø12', 'bsm', 'middle');  it{end+1} = d_text(0, -60, '5Ø12', 'bsm', 'middle');
       it{end+1} = d_dim(-P.bas.x, h - P.bas.y, P.bas.x, h - P.bas.y, -60, sprintf('%g', 2*P.bas.x));
     case 'vcs'
-      for x = [-x1 0 x1], it{end+1} = top(x, rc, 'r_bm1');  it{end+1} = bot(x, rc, 'r_bm1'); end
-      for x = [-1 1]*x1, it{end+1} = top(x, P.bas.y, 'r_bas'); end
+      S.bars = [top(-x1, rc); bot(-x1, rc); top(0, rc); bot(0, rc); top(x1, rc); bot(x1, rc);
+                top(-x1, P.bas.y); top(x1, P.bas.y)];
+      S.bar_s = [repmat({'r_bm1'}, 1, 6), {'r_bas', 'r_bas'}];
+      it = c_rc_section(S);
       it{end+1} = d_text(0, h + 30, '3Ø12 + 2 bastones Ø12', 'bsm', 'middle');  it{end+1} = d_text(0, -60, '3Ø12', 'bsm', 'middle');
       it{end+1} = d_dim(-x1, h - P.bas.y, x1, h - P.bas.y, -60, sprintf('%g', 2*x1));
   end
   if ~strcmp(kind, 'vcs1')
     it{end+1} = d_dim(b/2, h, b/2, h - P.bas.y, -40, sprintf('%g', P.bas.y));
   end
-  it{end+1} = d_dim(-b/2, 0, b/2, 0, -100, sprintf('%g', b));
-  it{end+1} = d_dim(-b/2, 0, -b/2, h, 60, sprintf('%g', h));
+  it = [it, c_rc_dims(S)];
 end
 
 % =====================================================================
@@ -295,17 +280,12 @@ function it = dr_c4_elev(P)
   it{end+1} = d_rectxy(-ep.gr, -ep.H, 0, 0, 'r_grout');
   it{end+1} = d_rectxy(-ep.gr - ep.t, -ep.H, -ep.gr, 0, 'r_eplate');
   zi = -ep.gr - ep.t;  zo = zi - 330;
-  it{end+1} = d_rectxy(zo, -ip.h, zi, 0, 'r_ipe');
-  it{end+1} = d_rectxy(zo, -ip.tf, zi, 0, 'r_ipef');  it{end+1} = d_rectxy(zo, -ip.h, zi, -ip.h + ip.tf, 'r_ipef');
+  it = [it, c_ishape(ip, 'elevation', struct('x0', zo, 'x1', zi))];
   for v = -[ep.yT ep.yS]
     it{end+1} = d_bar(r.tip - r.L1, v, r.tip, v, r.d, 'r_anc');
     it{end+1} = d_rectxy(hd.z, v - hd.a/2, hd.z + hd.t, v + hd.a/2, 'r_bp');
-    z = hd.z + hd.t;  it{end+1} = d_rectxy(z, v - 15, z + r.wsh, v + 15, 'r_nut');
-    it{end+1} = d_rectxy(z + r.wsh, v - 12, z + r.wsh + r.nut, v + 12, 'r_nut');
-    it{end+1} = d_rectxy(-ep.gr, v - 15, -ep.gr + r.wsh, v + 15, 'r_ancg');
-    it{end+1} = d_rectxy(-ep.gr + r.wsh, v - 12, -ep.gr + r.wsh + r.nut, v + 12, 'r_ancg');
-    it{end+1} = d_rectxy(zi - r.wsh, v - 15, zi, v + 15, 'r_ancg');
-    it{end+1} = d_rectxy(zi - r.wsh - r.nut, v - 12, zi - r.wsh, v + 12, 'r_ancg');
+    N = struct('wsh', r.wsh, 'nut', r.nut, 'dw', r.dw, 'nw', r.nw);
+    it = [it, c_nut(hd.z + hd.t, v, 1, N, 'r_nut'), c_nut(-ep.gr, v, 1, N, 'r_ancg'), c_nut(zi, v, -1, N, 'r_ancg')];
   end
   % labels on the right, raised so the leaders are inclined
   xt = zL + 90;  up = P.bm.h/2;
@@ -317,8 +297,7 @@ function it = dr_c4_elev(P)
        -300, [200, -282], 'VCS: 3Ø12 + 3Ø12 (cruza)', 'bsm';
        -350, [600, -294], 'VCM: 5Ø12 abajo (2 líneas)', 'bsm'};
   for k = 1:size(L, 1)
-    it{end+1} = d_line(xt - 10, L{k,1} + up + 8, L{k,2}(1), L{k,2}(2), 'grid');
-    it{end+1} = d_text(xt, L{k,1} + up, L{k,3}, L{k,4}, 'start');
+    it = [it, c_leader(xt, L{k,1} + up, L{k,2}, L{k,3}, L{k,4})];
   end
   % A1 to the left, P1 to the right, with a leader to each pair
   it{end+1} = d_text(zo - 40, -120, 'A1', 'anc', 'end');
@@ -360,7 +339,7 @@ function it = dr_c4_front(P)
   end
   it{end+1} = d_rectxy(-ep.b/2 - 10, -ep.H - 10, ep.b/2 + 10, 0, 'r_grout');
   it{end+1} = d_rectxy(-ep.b/2, -ep.H, ep.b/2, 0, 'r_eplate');
-  it{end+1} = d_poly(ishape(ip), 'r_ipe');
+  it = [it, c_ishape(ip, 'section')];
   for v = -[ep.yT ep.yS], for s = [-1 1]
     it{end+1} = d_circle(s*ep.g/2, v, P.rod.dw/2, 'r_ancg');
     it{end+1} = d_circle(s*ep.g/2, v, P.rod.d/2, 'r_anc');
@@ -396,17 +375,6 @@ function it = vcm_patas(P)
     it{end+1} = d_path([B(k,1), -B(k,2); B(k,1), -B(k,2) + 150], 12, 'r_bm1');
     it{end+1} = d_half(B(k,1), -B(k,2), 6, -1, 'r_bm1');
   end
-end
-
-function it = d_half(x, y, r, up, s)
-  % half circle: the end of a bar that turns toward the viewer (up = 1: upper half)
-  a = linspace(0, pi, 13)';  if up < 0, a = a + pi; end
-  it = d_poly([x + r*cos(a), y + r*sin(a)], s);
-end
-
-function I = ishape(ip)
-  I = [-ip.b/2 0; ip.b/2 0; ip.b/2 -ip.tf; ip.tw/2 -ip.tf; ip.tw/2 -ip.h + ip.tf; ip.b/2 -ip.h + ip.tf; ip.b/2 -ip.h; ...
-       -ip.b/2 -ip.h; -ip.b/2 -ip.h + ip.tf; -ip.tw/2 -ip.h + ip.tf; -ip.tw/2 -ip.tf; -ip.b/2 -ip.tf];
 end
 
 % Plan at the level of the A1: x horizontal (0 = column axis), z up (0 = column face, VCM north)
@@ -475,7 +443,7 @@ function it = dr_d4_front(P)
     it{end+1} = d_rectxy(b/2 - hd.z - hd.t, v - hd.a/2, b/2 - hd.z, v + hd.a/2, 'r_bp');
   end
   for v = -[ep.yT ep.yS], for s = [-1 1], it{end+1} = d_circle(s*ep.g/2, v, r.d/2, 'r_anc'); end, end
-  it{end+1} = d_rectxy(-ep.b/2, -ep.H, ep.b/2, 0, 'r_eplate');  it{end+1} = d_poly(ishape(ip), 'r_ipe');
+  it{end+1} = d_rectxy(-ep.b/2, -ep.H, ep.b/2, 0, 'r_eplate');  it = [it, c_ishape(ip, 'section')];
   x0 = b/2;  it{end+1} = d_rectxy(x0, -ep.H, x0 + ep.gr, 0, 'r_grout');
   it{end+1} = d_rectxy(x0 + ep.gr, -ep.H, x0 + ep.gr + ep.t, 0, 'r_eplate');
   xi = x0 + ep.gr + ep.t;
@@ -568,20 +536,8 @@ end
 %  4. Pieces
 % =====================================================================
 function it = dr_tie(P, db)
-  c = P.xc;  r = P.col.db/2 + db/2;  e = max(6*db, 75);  w = [1 1]/sqrt(2);
-  BL = [-c -c];  BR = [c -c];  TR = [c c];  TL = [-c c];
-  a0 = arcp(BL, r, 135, 270);  a5 = arcp(BL, r, 180, 315);
-  Q1 = [a0(1,:) + e*w; a0; arcp(BR, r, -90, 0); arcp(TR, r, 0, 90); arcp(TL, r, 90, 180)];
-  Q2 = [Q1(end,:); a5; a5(end,:) + e*w];
-  st = iif(db == 14, 'r_new', 'r_tieS');
-  it = {d_rectxy(-P.col.b/2, -P.col.b/2, P.col.b/2, P.col.b/2, 'r_conc')};
-  for sx = [-1 0 1], for sy = [-1 0 1]
-    if sx ~= 0 || sy ~= 0, it{end+1} = d_circle(sx*c, sy*c, 8, 'r_col'); end
-  end, end
-  it{end+1} = d_path(Q1, db, st);  it{end+1} = d_path(Q2, db, st);
-  o = c + r + db/2;
-  it{end+1} = d_dim(-o, -o, o, -o, -90, sprintf('%.0f', 2*o));
-  it{end+1} = d_dim(o, -o, o, o, -90, sprintf('%.0f', 2*o));
+  it = c_column_tie(struct('b', P.col.b, 'xc', P.xc, 'db_col', P.col.db, 'db', db, ...
+                           's', iif(db == 14, 'r_new', 'r_tieS')));
 end
 
 function it = dr_tie4(P)
@@ -604,14 +560,11 @@ function it = dr_rod(P, k)
     it{end+1} = d_rectxy(xF, -45, L + 15, 45, 'r_concb');
     it{end+1} = d_bar(0, 0, L, 0, r.d, 'r_anc');
     xh = xF + hd.z;  it{end+1} = d_rectxy(xh, -hd.a/2, xh + hd.t, hd.a/2, 'r_bp');
-    it{end+1} = d_rectxy(xh + hd.t, -15, xh + hd.t + r.wsh, 15, 'r_nut');
-    it{end+1} = d_rectxy(xh + hd.t + r.wsh, -12, xh + hd.t + r.wsh + r.nut, 12, 'r_nut');
+    N = struct('wsh', r.wsh, 'nut', r.nut, 'dw', r.dw, 'nw', r.nw);
+    it = [it, c_nut(xh + hd.t, 0, 1, N, 'r_nut')];
     xp = xF - ep.gr - ep.t;
     it{end+1} = d_rectxy(xp, -ep.H/4, xp + ep.t, ep.H/4, 'r_eplate');
-    it{end+1} = d_rectxy(xp + ep.t, -15, xp + ep.t + r.wsh, 15, 'r_ancg');
-    it{end+1} = d_rectxy(xp + ep.t + r.wsh, -12, xp + ep.t + r.wsh + r.nut, 12, 'r_ancg');
-    it{end+1} = d_rectxy(xp - r.wsh, -15, xp, 15, 'r_ancg');
-    it{end+1} = d_rectxy(xp - r.wsh - r.nut, -12, xp - r.wsh, 12, 'r_ancg');
+    it = [it, c_nut(xp + ep.t, 0, 1, N, 'r_ancg'), c_nut(xp, 0, -1, N, 'r_ancg')];
     it{end+1} = d_text(xF + 10, 105, 'cara de la columna', 'small', 'start');
     it{end+1} = d_dim(0, -50, L, -50, -50, sprintf('L = %g', L));
     it{end+1} = d_dim(xF, 55, xh, 55, 0, sprintf('%g', hd.z));
@@ -625,10 +578,7 @@ function it = dr_rod(P, k)
     for s = [0 1]
       xp = iif(s == 0, x0 - gr - t, x0 + b + gr);
       it{end+1} = d_rectxy(xp, -P.sw.H/4, xp + t, P.sw.H/4, 'r_eplate');
-      xo = iif(s == 0, xp - r.wsh, xp + t);
-      it{end+1} = d_rectxy(xo, -15, xo + r.wsh, 15, 'r_ancg');
-      xn = iif(s == 0, xo - r.nut, xo + r.wsh);
-      it{end+1} = d_rectxy(xn, -12, xn + r.nut, 12, 'r_ancg');
+      it = [it, c_nut(iif(s == 0, xp, xp + t), 0, iif(s == 0, -1, 1), struct('wsh', r.wsh, 'nut', r.nut, 'dw', r.dw, 'nw', r.nw), 'r_ancg')];
     end
     it{end+1} = d_dim(0, -50, L, -50, -50, sprintf('L = %g', L));
     it{end+1} = d_dim(x0, 55, x0 + b, 55, 0, sprintf('%g (viga)', b));
@@ -644,13 +594,7 @@ function it = dr_plates(P, k)
       it{end+1} = d_dim(a/2, -a/2, a/2, a/2, -15, sprintf('%g', a));
     otherwise
       if k == 2, s = P.ep; else, s = P.sw; end
-      it{end+1} = d_rectxy(-s.b/2, -s.H, s.b/2, 0, 'r_eplate');
-      for v = -[s.yT s.yS], for x = [-1 1]*s.g/2, it{end+1} = d_circle(x, v, 9, 'void'); end, end
-      it{end+1} = d_dim(-s.b/2, -s.H, s.b/2, -s.H, -30, sprintf('%g', s.b));
-      it{end+1} = d_dim(-s.g/2, 0, s.g/2, 0, 30, sprintf('%g', s.g));
-      it{end+1} = d_dim(s.b/2, 0, s.b/2, -s.yT, 30, sprintf('%g', s.yT));
-      it{end+1} = d_dim(s.b/2, -s.yT, s.b/2, -s.yS, 30, sprintf('%g', s.yS - s.yT));
-      it{end+1} = d_dim(s.b/2, -s.yS, s.b/2, -s.H, 30, sprintf('%g', s.H - s.yS));
+      it = c_plate(struct('b', s.b, 'H', s.H, 'g', s.g, 'rows', [s.yT s.yS], 'dh', P.rod.hole));
   end
 end
 
@@ -696,7 +640,7 @@ function N = notes(P)
 end
 
 % =====================================================================
-%  Helpers (copied from ../cantilever_anchor_bolted_plate/make_pour_sheets.m)
+%  Small helpers (drawing items and blocks: lib/sheets)
 % =====================================================================
 function out = iif(c, a, b)
   if c, out = a; else, out = b; end
@@ -708,95 +652,3 @@ function F = title_fields(opts)
   for i = 1:size(T, 1), F{i} = {T{i,1}, strrep(T{i,2}, '\n', char(10))}; end
 end
 
-function Q = fillet(Q0, r, n)
-  if nargin < 3, n = 10; end
-  N = size(Q0, 1);  Q = Q0(1,:);
-  for i = 2:N-1
-    A = Q0(i-1,:);  Bv = Q0(i,:);  C = Q0(i+1,:);
-    u1 = (A - Bv)/norm(A - Bv);  u2 = (C - Bv)/norm(C - Bv);
-    th = acos(max(-1, min(1, u1*u2')));
-    if r <= 0 || th > pi - 1e-6, Q = [Q; Bv]; continue; end
-    t = r/tan(th/2);  T1 = Bv + u1*t;
-    Cc = Bv + (u1 + u2)/norm(u1 + u2)*r/sin(th/2);
-    T2 = Bv + u2*t;
-    a1 = atan2(T1(2) - Cc(2), T1(1) - Cc(1));  a2 = atan2(T2(2) - Cc(2), T2(1) - Cc(1));
-    da = mod(a2 - a1 + pi, 2*pi) - pi;
-    a = a1 + da*(0:n)'/n;
-    Q = [Q; Cc(1) + r*cos(a), Cc(2) + r*sin(a)];
-  end
-  Q = [Q; Q0(N,:)];
-end
-
-function Q = arcp(c, r, a1, a2, n)
-  if nargin < 5, n = 10; end
-  a = (a1 + (a2 - a1)*(0:n)'/n)*pi/180;  Q = [c(1) + r*cos(a), c(2) + r*sin(a)];
-end
-
-function Q = rotp(Q, deg, c)
-  a = deg*pi/180;  Rm = [cos(a) -sin(a); sin(a) cos(a)];
-  Q = (Q - c)*Rm' + c;
-end
-
-function it = d_path(Q, d, s)
-  k = [true; any(abs(diff(Q)) > 1e-9, 2)];  Q = Q(k,:);  N = size(Q, 1);
-  T = zeros(N, 2);
-  for i = 1:N
-    t = Q(min(i+1, N),:) - Q(max(i-1, 1),:);  T(i,:) = t/norm(t);
-  end
-  Nn = [-T(:,2) T(:,1)];  sc = ones(N, 1);
-  for i = 2:N-1
-    s1 = Q(i,:) - Q(i-1,:);  s1 = s1/norm(s1);
-    sc(i) = 1/max(Nn(i,:)*[-s1(2); s1(1)], 0.5);
-  end
-  it = d_poly([Q + Nn.*(d/2*sc); flipud(Q - Nn.*(d/2*sc))], s);
-end
-
-function it = d_bar(x0, y0, x1, y1, d, s)
-  it = d_path([x0 y0; x1 y1], d, s);
-end
-
-function it = d_poly(P, s)
-  it = struct('t', 'poly', 'p', reshape(P.', 1, []), 's', s);
-end
-
-function it = d_rectxy(x0, y0, x1, y1, s)
-  it = d_poly([x0 y0; x1 y0; x1 y1; x0 y1], s);
-end
-
-function it = d_line(x0, y0, x1, y1, s)
-  it = struct('t', 'line', 'p', [x0 y0 x1 y1], 's', s);
-end
-
-function it = d_circle(x, y, r, s)
-  it = struct('t', 'circle', 'p', [x y r], 's', s);
-end
-
-function it = d_text(x, y, txt, s, a)
-  it = struct('t', 'text', 'p', [x y], 'txt', txt, 's', s, 'a', a);
-end
-
-function it = d_dim(x0, y0, x1, y1, off, txt, pos)
-  if nargin < 7, pos = 'after'; end
-  it = struct('t', 'dim', 'p', [x0 y0 x1 y1], 'o', off, 'txt', txt, 'pos', pos);
-end
-
-function b = blk_draw(items, h, cap, note)
-  b = struct('k', 'drawing', 'items', {items}, 'h', h, 'cap', cap, 'note', note);
-end
-
-function b = blk_row(w, cols)
-  b = struct('k', 'row', 'w', w, 'cols', {cols});
-end
-
-function b = blk_h(level, text)
-  b = struct('k', sprintf('h%d', level), 't', text);
-end
-
-function b = blk_note(text)
-  b = struct('k', 'note', 't', text);
-end
-
-function b = blk_table(head, rows, widths, right, red)
-  b = struct('k', 'table', 'head', {head}, 'rows', {rows}, 'w', widths, ...
-             'right', {right}, 'red', {red});
-end

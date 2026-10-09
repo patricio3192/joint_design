@@ -30,6 +30,7 @@ function files = make_joint_pdfs(DB, joints, kinds, C, outdir, opts)
   if ~isfield(opts, 'skip'),   opts.skip   = 'RSA'; end
   if ~exist(outdir, 'dir'), mkdir(outdir); end
   here = fileparts(mfilename('fullpath'));
+  addpath(fullfile(fileparts(mfilename('fullpath')), '..', 'sheets'));   % d_* items, blk_* blocks
   printer = fullfile(here, '..', 'printing', 'joint_pdf.py');
 
   files = {};
@@ -433,27 +434,4 @@ function s = subtxt(info)
   if numel(info) >= 8 && ~isempty(info{8}), s = info{8}; else, s = '-'; end
 end
 
-% ---------------------------------------------------------------------
-%  blocks for joint_pdf.py.  Table columns and red cells are 1-based;
-%  red cells are {[row col], ...} counted in the table body.
-% ---------------------------------------------------------------------
-function b = blk_h(level, text)
-  b = struct('k', sprintf('h%d', level), 't', text);
-end
-
-function b = blk_p(text)
-  b = struct('k', 'p', 't', text);
-end
-
-function b = blk_note(text)
-  b = struct('k', 'note', 't', text);
-end
-
-function b = blk_page()
-  b = struct('k', 'page');
-end
-
-function b = blk_table(head, rows, widths, right, red)
-  b = struct('k', 'table', 'head', {head}, 'rows', {rows}, 'w', widths, ...
-             'right', {right}, 'red', {red});
-end
+% Blocks (blk_*) for joint_pdf.py: lib/sheets.

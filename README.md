@@ -10,9 +10,12 @@ lib/                     libraries: no project data inside
   direct_weld_joint/     beams welded straight to the HSS column (dwj_lib), and the
                          comparison with the collar joint
   etabs/                 ETABS text export -> joint database (forces at every joint)
-  end_plate_concrete/    helpers: steel end plate on a concrete column (anchors, bastones)
-  sandwich_concrete/     helpers: steel beams on both faces of a concrete beam, through-rods
+  end_plate_concrete/    steel end plate on a concrete column: check_end_plate_column(P)
+  sandwich_concrete/     steel beams on both faces of a concrete beam: check_sandwich_beam(P)
   concrete_common/       helpers shared by the two concrete libraries
+  sheets/                drawing items, components (grid, concrete sections, profiles,
+                         plates, nuts, rebar...) and sheet blocks, for every sheet
+  profiles/              steel catalog (IPE, HE A, HE B) and steel_profile()
   printing/              JSON sheet -> PDF (joint_pdf.py, pour_pdf.py) and -> DXF
                          (json_dxf.py, armar_lamina.py)
 casa_saav/               the project (Vivienda Ortega): data, one script per connection

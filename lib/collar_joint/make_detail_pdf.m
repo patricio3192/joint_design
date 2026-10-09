@@ -21,6 +21,7 @@ function file = make_detail_pdf(DB, M, J, C, outdir, opts)
   if ~isfield(opts, 'stab'),   opts.stab   = [8 60 25 3]; end
   if ~exist(outdir, 'dir'), mkdir(outdir); end
   here = fileparts(mfilename('fullpath'));
+  addpath(fullfile(fileparts(mfilename('fullpath')), '..', 'sheets'));   % d_* items, blk_* blocks
 
   T = collar_types(DB, J, C);
   tstyle = {'plate', 'plate2', 'plate3'};
@@ -404,64 +405,12 @@ function it = section_tab(J)
 end
 
 % ---------------------------------------------------------------------
-%  drawing items and blocks (see joint_pdf.py)
+%  small helpers (drawing items and blocks: lib/sheets)
 % ---------------------------------------------------------------------
 function s = dim_t(v)
   if abs(v - round(v)) < 1e-6, s = sprintf('%d', round(v)); else, s = sprintf('%.1f', v); end
 end
 
-function it = d_poly(P, s)
-  it = struct('t', 'poly', 'p', reshape(P.', 1, []), 's', s);
-end
-
-function it = d_rectxy(x0, y0, x1, y1, s)
-  it = d_poly([x0 y0; x1 y0; x1 y1; x0 y1], s);
-end
-
-function it = d_tri(x, y, sx, sy, s)
-  it = d_poly([x y; x + sx y; x y + sy], s);
-end
-
-function it = d_line(x0, y0, x1, y1, s)
-  it = struct('t', 'line', 'p', [x0 y0 x1 y1], 's', s);
-end
-
-function it = d_circle(x, y, r, s)
-  it = struct('t', 'circle', 'p', [x y r], 's', s);
-end
-
-function it = d_text(x, y, txt, s, a)
-  it = struct('t', 'text', 'p', [x y], 'txt', txt, 's', s, 'a', a);
-end
-
 % pos: where the text goes when it does not fit between the ticks,
 % 'after' (past the second point, default) or 'before' (before the first)
-function it = d_dim(x0, y0, x1, y1, off, txt, pos)
-  if nargin < 7, pos = 'after'; end
-  it = struct('t', 'dim', 'p', [x0 y0 x1 y1], 'o', off, 'txt', txt, 'pos', pos);
-end
 
-function b = blk_draw(items, h, cap)
-  b = struct('k', 'drawing', 'items', {items}, 'h', h, 'cap', cap);
-end
-
-function b = blk_h(level, text)
-  b = struct('k', sprintf('h%d', level), 't', text);
-end
-
-function b = blk_p(text)
-  b = struct('k', 'p', 't', text);
-end
-
-function b = blk_note(text)
-  b = struct('k', 'note', 't', text);
-end
-
-function b = blk_page()
-  b = struct('k', 'page');
-end
-
-function b = blk_table(head, rows, widths, right, red)
-  b = struct('k', 'table', 'head', {head}, 'rows', {rows}, 'w', widths, ...
-             'right', {right}, 'red', {red});
-end

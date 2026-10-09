@@ -48,6 +48,7 @@ function file = make_plan_sheets(DB, M, J, C, G, outdir, opts)
   end
   if ~exist(outdir, 'dir'), mkdir(outdir); end
   here = fileparts(mfilename('fullpath'));
+  addpath(fullfile(fileparts(mfilename('fullpath')), '..', 'sheets'));   % d_* items, blk_* blocks
 
   if ~iscell(C) || ~isstruct(G), error('make_plan_sheets: give the joint classes C and the grid G.'); end
   T  = collar_types(DB, J, C);
@@ -533,10 +534,6 @@ function s = wstyle(leg)
 end
 
 % AWS fillet weld symbol (see joint_pdf.py): arrow to (xt, yt), elbow (xe, ye)
-function it = d_weld(xt, yt, xe, ye, dr, side, sz, len, all, field, tail, s)
-  it = struct('t', 'weld', 'p', [xt yt xe ye], 'dir', dr, 'side', side, 'size', sz, ...
-              'len', len, 'all', all, 'field', field, 'tail', tail, 's', s);
-end
 
 function it = section_moment(J, opts)
   % test detail: AWS weld symbols, and colours by weld size
@@ -786,7 +783,7 @@ function it = side_line(d, r0, u0, r1, u1, s)
 end
 
 % ---------------------------------------------------------------------
-%  drawing items and blocks (see joint_pdf.py)
+%  small helpers (drawing items and blocks: lib/sheets)
 % ---------------------------------------------------------------------
 function s = gap_t(opts)
   if numel(opts.gap) > 1, s = sprintf('%g a %g mm', opts.gap(1), opts.gap(end));
@@ -797,70 +794,6 @@ function s = mm_t(v)
   if abs(v - round(v)) < 1e-6, s = sprintf('%d mm', round(v)); else, s = sprintf('%.1f mm', v); end
 end
 
-function it = d_poly(P, s)
-  it = struct('t', 'poly', 'p', reshape(P.', 1, []), 's', s);
-end
-
-function it = d_rectxy(x0, y0, x1, y1, s)
-  it = d_poly([x0 y0; x1 y0; x1 y1; x0 y1], s);
-end
-
-function it = d_tri(x, y, sx, sy, s)
-  it = d_poly([x y; x + sx y; x y + sy], s);
-end
-
-function it = d_line(x0, y0, x1, y1, s)
-  it = struct('t', 'line', 'p', [x0 y0 x1 y1], 's', s);
-end
-
-function it = d_circle(x, y, r, s)
-  it = struct('t', 'circle', 'p', [x y r], 's', s);
-end
-
 % several lines of text, first line at y, going down (spacing set by the
 % printer, in points; dy is not used any more)
-function it = d_lines(x, y, lines, s, a, dy)
-  it = {d_text(x, y, strjoin(lines, sprintf('\n')), s, a)};
-end
 
-function it = d_text(x, y, txt, s, a)
-  it = struct('t', 'text', 'p', [x y], 'txt', txt, 's', s, 'a', a);
-end
-
-function it = d_dim(x0, y0, x1, y1, off, txt, pos)
-  if nargin < 7, pos = 'after'; end
-  it = struct('t', 'dim', 'p', [x0 y0 x1 y1], 'o', off, 'txt', txt, 'pos', pos);
-end
-
-function b = blk_draw(items, h, cap, note)
-  b = struct('k', 'drawing', 'items', {items}, 'h', h, 'cap', cap, 'note', note);
-end
-
-function b = blk_row(w, cols)
-  b = struct('k', 'row', 'w', w, 'cols', {cols});
-end
-
-function b = blk_space(h)
-  b = struct('k', 'space', 'h', h);
-end
-
-function b = blk_h(level, text)
-  b = struct('k', sprintf('h%d', level), 't', text);
-end
-
-function b = blk_p(text)
-  b = struct('k', 'p', 't', text);
-end
-
-function b = blk_note(text)
-  b = struct('k', 'note', 't', text);
-end
-
-function b = blk_page()
-  b = struct('k', 'page');
-end
-
-function b = blk_table(head, rows, widths, right, red)
-  b = struct('k', 'table', 'head', {head}, 'rows', {rows}, 'w', widths, ...
-             'right', {right}, 'red', {red});
-end

@@ -29,5 +29,9 @@ of the folder you work in before opening code, and open only what you need.
 - Commit or push only when the user asks.
 
 ## Planned (not done yet)
-- One copy of the Octave sheet helpers (blk_*, items) in lib/, and a sheet
-  template, starting from `casa_saav/sheets/make_concrete_sheet.m`.
+- A geometric model per joint type (bars, rods, plates, profiles as 3D pieces,
+  built from the same P as the checks): views for the sheets, clash checks
+  (lib toolbox) and quantities from it. Pilot: end plate on concrete column.
+- A sheet template for joint details (views + sections + pieces + notes).
+- The collar sheets (lib/collar_joint) can move their grid and key plan to
+  c_grid / c_node.
