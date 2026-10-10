@@ -33,3 +33,12 @@ N/A, diseño estructural ING. PRUEBA, fecha OCTUBRE 2026, lámina 1/1."
   dimension sign, bar diameter in plans, cells vs items, c_rc_section ct (->
   README Conventions), no front view of a nut (-> c_nut_front), silent page
   overflow (-> printer WARNING).
+- 2026-10-10, run 2 (Haiku, 27 tool calls, ~5 min), request: "sándwich en
+  columna C2 35x35, IPE 200 a ambos lados, 18 y 10 kNm, 20 y 15 kN; cálculo +
+  lámina A2 con planta, sección de columna, vistas, choques, cantidades". It
+  found and used lib/sandwich_column + joint_model + sheet_pdf; check passed;
+  one-page sheet in 3 runs (first overflowed: its own duplicated table). Fixed
+  after it: addlib (one line for every path), aisc_beam (catalog -> AISC names,
+  the weak-axis Iy trap), tie spacing counted ties outside the beam depth (real
+  bug, sandwich_column), help on splitting_reinf and gamma, jm_tables use,
+  c_column_tie xc, sheet_pdf stops on overflow, page height guide.

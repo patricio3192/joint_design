@@ -8,12 +8,12 @@ for what" table).
 ## Start a sheet (copy this)
 ```
 lib = '/path/to/joint_design/lib';     % in the repo: fullfile(fileparts(mfilename('fullpath')), <..>, 'lib')
-addpath(fullfile(lib, 'sheets'), fullfile(lib, 'profiles'));
+addpath(lib);  addlib();                       % every library (or only sheets + profiles)
 it = c_grid(G, box);  it = [it, c_node(0, 0, 'B2')];          % build each drawing as a cell array
 B = {blk_h(1, 'Título'), ...
      blk_row([0.6 0.4], {{blk_draw(it, 180, 'PLANTA', 'nota')}, {blk_table(head, rows, widths, [], [])}})};
 o.tb = {'PROYECTO:', 'X';  'FECHA:', 'OCTUBRE 2026';  'LÁMINA:', '@page'};   % title block (frame)
-sheet_pdf(B, '/path/to/out/lamina', o);     % JSON + PDF (pour_pdf.py, A2 landscape), warns on overflow
+sheet_pdf(B, '/path/to/out/lamina', o);     % JSON + PDF (pour_pdf.py, A2 landscape); error if it overflows
 ```
 `help sheet_pdf` lists the page sizes (A2L, A1L, A4) and the title-block options.
 `examples/component_catalog.m` and `casa_saav/sheets/make_concrete_sheet.m` are full sheets.
@@ -21,7 +21,9 @@ sheet_pdf(B, '/path/to/out/lamina', o);     % JSON + PDF (pour_pdf.py, A2 landsc
 ## Conventions (read once)
 - Units are model mm; each drawing is scaled to fit its `blk_draw` height and its
   column width (no fixed scale is printed). A row that does not fit the page
-  moves to a new page: sheet_pdf / the printer print a WARNING; lower `h`.
+  moves to a new page: the printer prints a WARNING and sheet_pdf stops; lower `h`.
+  An A2 landscape page holds about 330 mm of drawing height in one column
+  (caption included) above a 30 mm title block; A1 about 480 mm.
 - Components return a cell array: join with `it = [it, c_leader(...)]`, never
   `{c_leader(...)}` (that nests it). Items (d_*) are single structs: `it{end+1} = d_line(...)`.
 - Bars are drawn with their real diameter in model mm (`d_path`, `c_rebar`):

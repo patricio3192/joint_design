@@ -2,6 +2,8 @@ function [tc, tq] = jm_tables(F, Q)
 % JM_TABLES  sheet blocks (lib/sheets, Spanish) for a clash list F (jm_clash)
 % and quantities Q (jm_quantities): tc = {heading, table} of clashes with
 % CHOQUE / separación rows in red, tq = {heading, table} of quantities.
+% Both are cell arrays of blocks: use them as columns, blk_row([0.56 0.44], {tc, tq}),
+% or stacked in one column, {tc{:}, tq{:}}.
   es = struct('CLASH', 'CHOQUE', 'spacing', 'separación', 'contact', 'contacto', 'tight', 'justo');
   rows = {};  red = zeros(0, 2);
   for k = 1:numel(F)

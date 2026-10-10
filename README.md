@@ -29,6 +29,7 @@ verification/            equation check against the code PDFs: instructions, aud
 snap.sh                  ./snap.sh "message" saves a git snapshot
 ```
 
+`addpath('<repo>/lib'); addlib();` puts every library on the Octave path.
 Each library has a `README.md` (how to use it, what it assumes) and a
 `CLAUDE.md` (its limits, so the agent warns before it is used outside them).
 Start a project the way `casa_saav/` does: a `data/` folder with the project

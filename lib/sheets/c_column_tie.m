@@ -4,6 +4,7 @@ function it = c_column_tie(T)
 % Origin at the column centre.
 %
 %   T.b       column side                 T.xc   bar centre to the column axis
+%             (= b/2 - cover - db - db_col/2, the same as the 3D models use)
 %   T.db_col  column bar diameter         T.db   tie diameter
 %   T.s       tie style (default 'r_tieS'), T.bs bar style ('r_col'), T.br bar dot radius (8)
 %   T.dim_off offset of the two dimensions (default -90)

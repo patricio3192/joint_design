@@ -27,6 +27,11 @@ the tolerance); iy, iz, ss agree with the catalog's truncation to 1 decimal; It 
 Only the standard series. The PDF also has IPE A / O / AA, IPE 750, HE AA and HE M;
 the extractor can be extended for these.
 
+## Use from Octave
+`steel_profile('IPE 240')` returns the row in mm (EN axes: y strong, z weak).
+`aisc_beam('IPE 200', Fy, Fu)` gives the same section with AISC names (x strong, y weak),
+as the `P.beam` of the connection libraries; only aisc_beam translates the axis names.
+
 ## Columns (same in all three files)
 
 EN convention: **y-y is the strong axis**, z-z the weak axis.

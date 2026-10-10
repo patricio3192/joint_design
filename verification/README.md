@@ -56,6 +56,13 @@ pages on <date>: verification/status_<library>.md".
 5. **sandwich_column** (new 2026-10-10): its own-model items (modules 6 and 10)
    need the user's engineering judgment, not only a page check.
 
+## Also add (asked by tests with a small model)
+- The rows of ACI Table 15.4.2.3 (joint shear coefficient) in SI, into
+  lib/end_plate_concrete/EQUATIONS.txt and lib/sandwich_column/EQUATIONS.txt,
+  so the user can pick gamma from the file.
+- What counts as supplementary reinforcement for the ACI 17.9.1 waiver
+  (splitting_reinf in the sandwich libraries), with its page.
+
 ## Worked examples as tests (worth more than reading)
 Reading confirms the transcription; reproducing a solved example confirms the
 code. Good candidates: DG 39 Example 5.2-1 (PDF p. 79-82, flush end plate:

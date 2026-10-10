@@ -75,7 +75,7 @@
   Vu,j = unbalanced flange force = 90.3 kN; Aj = 400 x 400 = 160000 mm2; gamma = 1.25 (input)
   Joint shear                                    D =    90.28  C =   687.39 kN   ratio =  0.13  OK     [ACI 15.4.2, T.15.4.2.3]
   Tie layers within the beam depth: 2 (>= 2) -> OK [ACI 15.3.1.3]
-  Joint tie spacing (incl. to top/bottom of beam) D =   120.00  C =   200.00 mm   ratio =  0.60  OK     [ACI 15.3.1.4 (8 in.)]
+  Joint tie spacing within the beam depth        D =   100.00  C =   200.00 mm   ratio =  0.50  OK     [ACI 15.3.1.4 (8 in.)]
   Unbalanced moment 11.5 kNm goes into the column (design it in the frame model).
 
 --- 11. NOT APPLICABLE / NOT CHECKED HERE ---
@@ -114,7 +114,7 @@
   Web weld, tension + shear (lower half)              0.32  OK
   Web shear rupture at weld (lower half)              0.23  OK
   Joint shear                                         0.13  OK
-  Joint tie spacing (incl. to top/bottom of beam)     0.60  OK
+  Joint tie spacing within the beam depth             0.50  OK
   Governing: Plate thickness, thick plate Eq. 5-4a (1.00)
 ==============================================================
 --- CLASH CHECK: 59 pieces, 0 findings ---

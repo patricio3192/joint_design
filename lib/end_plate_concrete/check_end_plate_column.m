@@ -333,7 +333,7 @@ function R = check_end_plate_column(P)
   % transverse reinforcement: not confined in x -> 15.3.1.2 to 15.3.1.4 apply
   n_in = sum(hoop_y > 0 & hoop_y < h_beam);
   fprintf('  Hoop layers within the beam depth: %d (>= 2 required) -> %s [ACI 15.3.1.3]\n', n_in, iif(n_in >= 2, 'OK', 'NOT OK'));
-  S(end+1,:) = print_check('Joint hoop spacing (incl. to top/soffit)', max(diff([0, sort(hoop_y), h_beam])), 200, 'mm', 'ACI 15.3.1.4 (8 in.)');
+  S(end+1,:) = print_check('Joint hoop spacing (incl. to top/soffit)', max(diff([0, sort(hoop_y(hoop_y > 0 & hoop_y < h_beam)), h_beam])), 200, 'mm', 'ACI 15.3.1.4 (8 in.)');
   fprintf('  Hoop levels must clear the rods (y = %.0f, %.0f) and bastones (y = %.0f) by >= %.0f mm\n', ...
           y_t, y_s, y_bst, (d_b + db_hoop)/2);
   fprintf('  Column bars phi%g end with standard hooks turned toward the column centre (15.3.3.2).\n\n', db_col);

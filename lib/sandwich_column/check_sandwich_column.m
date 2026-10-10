@@ -18,16 +18,20 @@ function R = check_sandwich_column(P)
 %
 % P fields (examples/example_sandwich_column.m is a complete input):
 %   load    Mu_A_kNm, Vu_A_kN, Mu_B_kNm, Vu_B_kN  both faces, top in tension (>= 0)
-%   beam    name, h, bf, tf, tw, r_fil, h_web, Zx, Sx, Iy, ry, J, Fy, Fu, E,
-%           L_span, L_brace  (same beam on both faces)
+%   beam    name, h, bf, tf, tw, r_fil, h_web, Zx, Sx, Iy (WEAK axis), ry, J, Fy, Fu,
+%           E, L_span, L_brace (same beam on both faces). Build it with
+%           aisc_beam('IPE 200', Fy, Fu) (lib/profiles) and add L_span, L_brace.
 %   column  b (face width, along the plates), h (depth = rod length in concrete),
 %           top (column top above the top of the beams; Inf if it continues),
 %           fc, fy_bar, lambda, cover (specified), db_hoop, db_bar, hoop_y (tie
 %           levels in the joint, y down from the top of the beams), gamma (ACI
-%           Table 15.4.2.3 coefficient, SI: the user picks it)
+%           Table 15.4.2.3 coefficient in SI = in-lb value x 0.083; the user
+%           picks the row: ask, do not assume)
 %   plate   tp, bp, ext (below the bottom flange; top flush), Fyp, Fup, t_grout
 %   rods    d_b, Fu, dh, dist_top (tension row), g (gage), dist_bot (shear row),
-%           torqued, splitting_reinf, t_wsh, h_nut, dw, nw, proj (nut data for the length)
+%           torqued, splitting_reinf (true only if ties or stirrups enclose the
+%           rods right next to them, ACI 17.9.1: then the 17.9.2 spacing is
+%           waived; engineer's call), t_wsh, h_nut, dw, nw, proj (nut data)
 %   weld    FEXX, top_cjp, S_pjp, pjp_flat, w_fl, w_web
 % Limits: lib/sandwich_column/CLAUDE.md.
 
@@ -185,7 +189,7 @@ function R = check_sandwich_column(P)
   if isfield(C, 'hoop_y') && ~isempty(C.hoop_y)
     n_in = sum(C.hoop_y > 0 & C.hoop_y < h);
     fprintf('  Tie layers within the beam depth: %d (>= 2) -> %s [ACI 15.3.1.3]\n', n_in, iif(n_in >= 2, 'OK', 'NOT OK'));
-    S(end+1,:) = print_check('Joint tie spacing (incl. to top/bottom of beam)', max(diff([0, sort(C.hoop_y), h])), 200, 'mm', 'ACI 15.3.1.4 (8 in.)');
+    S(end+1,:) = print_check('Joint tie spacing within the beam depth', max(diff([0, sort(C.hoop_y(C.hoop_y > 0 & C.hoop_y < h)), h])), 200, 'mm', 'ACI 15.3.1.4 (8 in.)');
     for y = C.hoop_y
       cl = min(abs(y - [dist_top dist_bot])) - (d_b + C.db_hoop)/2;
       if cl < 10, fprintf('  tie at y = %g: %.0f mm clear to a rod row (see the clash list of the model)\n', y, cl); end

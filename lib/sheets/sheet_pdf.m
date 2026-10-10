@@ -14,12 +14,15 @@ function file = sheet_pdf(B, base, o)
 %   sheets    {name of sheet 1, ...} for '@sheet' and the page count (default {title})
 %   subtitle  line under the sheet name
 %   python    python executable (default 'python3')
-% Stops with an error if the printer fails. The printer warns when the blocks
-% need more pages than o.sheets lists (a drawing too tall: lower its blk_draw h).
+%   overflow  'error' (default) | 'warn': what to do when the blocks need more
+%             pages than o.sheets lists (with a title block)
+% Stops with an error if the printer fails, and by default if the sheet
+% overflows: a row was taller than the page; lower the blk_draw h of the
+% tallest drawing in that row (or split the row).
   if nargin < 3, o = struct(); end
   [~, nm] = fileparts(base);
   d = struct('page', 'A2L', 'fs', 1.0, 'title', nm, 'widths', [], 'tbh', 30, 'tbk', 1.0, ...
-             'subtitle', '', 'python', 'python3');
+             'subtitle', '', 'python', 'python3', 'overflow', 'error');
   f = fieldnames(o);  for i = 1:numel(f), d.(f{i}) = o.(f{i}); end
   if ~isfield(d, 'sheets'), d.sheets = {d.title}; end
   doc = struct('title', d.title, 'page', d.page, 'fs', d.fs, 'blocks', {B});
@@ -36,6 +39,9 @@ function file = sheet_pdf(B, base, o)
   printer = fullfile(fileparts(mfilename('fullpath')), '..', 'printing', 'pour_pdf.py');
   [st, out] = system(sprintf('%s "%s" "%s.json" "%s.pdf"', d.python, printer, base, base));
   if st ~= 0, fprintf('%s', out);  error('PDF generation failed (see the message above).'); end
-  if ~isempty(strfind(out, 'WARNING')), fprintf('%s', out); end
+  if ~isempty(strfind(out, 'WARNING'))
+    fprintf('%s', out);
+    if strcmp(d.overflow, 'error'), error('sheet_pdf: the sheet overflowed (see the WARNING). The PDF was written anyway.'); end
+  end
   file = [base '.pdf'];
 end

@@ -14,6 +14,7 @@ top_band_bearing.m        bearing of the band of the opposite plate around the t
 model_sandwich_column.m   3D model from the same P and R (lib/joint_model)
 views_sandwich_column.m   section, front view and plan of the model, with dimensions
 examples/                 example_sandwich_column.m: made-up input, report, clash list, A2 sheet
+                          (copy its input part; it writes next to itself)
 ```
 Uses `lib/sandwich_concrete` (bearing_strips, conf_factor, aisc_f2_ltb,
 end_plate_welds), `lib/concrete_common`, and for the model `lib/joint_model`,
@@ -21,6 +22,8 @@ end_plate_welds), `lib/concrete_common`, and for the model `lib/joint_model`,
 
 ## Use
 ```
+addpath('/path/to/joint_design/lib');  addlib();     % every library on the path
+P.beam = aisc_beam('IPE 200', 250, 400);  P.beam.L_span = 4800;  P.beam.L_brace = 2400;
 P = ...;                                   % help check_sandwich_column; examples/ has a full input
 R = check_sandwich_column(P);              % report; R.checks, R.governing, R.ratio, R.L_rod, ...
 M = model_sandwich_column(P, R);  F = jm_clash(M);  Q = jm_quantities(M);

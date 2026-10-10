@@ -7,14 +7,11 @@
 % =====================================================================
 here = fileparts(mfilename('fullpath'));
 lib = fullfile(here, '..', '..');
-addpath(fullfile(lib, 'sandwich_column'), fullfile(lib, 'sandwich_concrete'), fullfile(lib, 'concrete_common'), ...
-        fullfile(lib, 'joint_model'), fullfile(lib, 'sheets'), fullfile(lib, 'profiles'));
+addpath(lib);  addlib();                       % every library on the path
 
 P.load = struct('Mu_A_kNm', 23.5, 'Vu_A_kN', 21.5, 'Mu_B_kNm', 12.0, 'Vu_B_kN', 14.0);
-ip = steel_profile('IPE 200');                 % catalog values, mm
-P.beam = struct('name', ip.name, 'h', ip.h, 'bf', ip.b, 'tf', ip.tf, 'tw', ip.tw, 'r_fil', ip.r, ...
-                'h_web', ip.d, 'Zx', ip.Wply, 'Sx', ip.Wely, 'Iy', ip.Iz, 'ry', ip.iz, 'J', ip.It, ...
-                'Fy', 250, 'Fu', 400, 'E', 200000, 'L_span', 4800, 'L_brace', 2400);
+P.beam = aisc_beam('IPE 200', 250, 400);       % catalog, AISC names (lib/profiles/aisc_beam.m)
+P.beam.L_span = 4800;  P.beam.L_brace = 2400;  % unbraced lengths checked for LTB
 P.column = struct('b', 400, 'h', 400, 'top', Inf, ...       % the column continues above
                   'fc', 21, 'fy_bar', 412, 'lambda', 1.0, 'cover', 40, ...
                   'db_hoop', 10, 'db_bar', 16, 'bars_side', 3, ...
