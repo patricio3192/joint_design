@@ -35,6 +35,10 @@ LÁMINA); give only the project fields you have. `help sheet_pdf` lists them.
 - `d_dim(x0, y0, x1, y1, off, txt)`: the dimension line sits `off` to the LEFT
   of the direction p0 -> p1. Horizontal left-to-right: off > 0 above, off < 0
   below. Vertical bottom-to-top: off > 0 to the left. `c_dim_chain` the same.
+- `c_rc_section`: any bar layout is just rows of `S.bars` [x y d] (second
+  layer, skin bars, mixed diameters; `S.bar_s` one style per bar); c_rc_labels
+  writes one callout per layer. One perimeter stirrup only (no crossties yet).
+  `c_rc_dims(S, struct('st', true))` adds the stirrup's outside size.
 - `c_rc_section`: `ct` is the stirrup AXIS from the faces = cover + dst/2; bar
   centres are yours: corner bar = cover + dst + db/2 from each face.
 - y is up in every drawing (a section's origin is its bottom centre).

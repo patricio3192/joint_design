@@ -39,10 +39,13 @@ pl = [pl, c_legend(5200, -1700, {'m_conc', 'Vigas de hormigón 25x40';  'm_col',
 % ---- 2. concrete sections with their reinforcement written out ---------------------
 S = struct('b', 250, 'h', 400, 'ct', 44, 'dst', 8);
 yb = 40 + 8 + 7;  xb = 125 - yb;
-S.bars = [-xb yb 14; 0 yb 14; xb yb 14; -xb 400-yb 14; 0 400-yb 14; xb 400-yb 14];
-bs = [c_rc_section(S), c_rc_dims(S), c_rc_labels(S, struct('st', 'Est. Ø8 c/15'))];
+S.bars = [-xb yb 14; 0 yb 14; xb yb 14; -xb 400-yb 14; 0 400-yb 14; xb 400-yb 14;
+          -xb 400-yb-38 12; xb 400-yb-38 12];            % a second top layer: just more rows in S.bars
+S.bar_s = [repmat({'r_bm1'}, 1, 6), {'r_bas', 'r_bas'}];   % one style per bar (extra bars in orange)
+bs = [c_rc_section(S), c_rc_dims(S, struct('st', true)), c_rc_labels(S, struct('st', 'Est. Ø8 c/15'))];
 T = struct('b', 300, 'xc', 150 - 40 - 10 - 8, 'db_col', 16, 'db', 10);
-cs = [c_column_tie(T), {d_dim(-150, 150, 150, 150, -40, '300')}];
+T.col_dims = true;
+cs = c_column_tie(T);
 B8 = [];  for sx = -1:1, for sy = -1:1, if sx || sy, B8(end+1,:) = [sx*T.xc sy*T.xc 16]; end, end, end
 cs = [cs, c_rc_labels(struct('b', 300, 'h', 300, 'ct', 45, 'bars', B8), ...
                       struct('kind', 'column', 'y0', -150, 'st', 'Est. Ø10 c/10 (nudo)'))];
@@ -82,8 +85,8 @@ notes = {'Medidas en mm.', 'Hormigón f''c 21 MPa; acero de refuerzo fy 412 MPa.
 c1 = {blk_h(2, '1. Planta de ubicación'), ...
       blk_draw(pl, 195, 'PLANTA DE UBICACIÓN', 'c_grid, c_member, c_column_mark, c_node, c_rebar, c_cutmark, c_dim_chain, c_legend', 'std')};
 c2 = {blk_h(2, '2. Secciones de hormigón'), ...
-      blk_row([0.5 0.5], {{blk_draw(bs, 175, 'CORTE A-A: V-2 25x40', 'c_rc_section + c_rc_dims + c_rc_labels', 'std')}, ...
-                          {blk_draw(cs, 175, 'COLUMNA C 30x30', 'c_column_tie (cota interior: estribo) + c_rc_labels', 'std')}})};
+      blk_row([0.5 0.5], {{blk_draw(bs, 175, 'CORTE A-A: V-2 25x40', '2.ª capa arriba = más filas en S.bars', 'std')}, ...
+                          {blk_draw(cs, 175, 'COLUMNA C 30x30', 'c_column_tie + c_rc_labels', 'std')}})};
 c3 = {blk_h(2, '3. Conexión placa extremo (D2)'), ...
       blk_row([0.42 0.58], {{blk_draw(fr, 160, 'VISTA DE FRENTE', 'c_plate + c_ishape + c_nut_front + c_leader', 'std')}, ...
                             {blk_draw(el, 160, 'ELEVACIÓN', 'c_ishape (elevación) + c_nut + c_leader', 'std')}})};

@@ -7,11 +7,14 @@ function it = c_column_tie(T)
 %             (= b/2 - cover - db - db_col/2, the same as the 3D models use)
 %   T.db_col  column bar diameter         T.db   tie diameter
 %   T.s       tie style (default 'r_tieS'), T.bs bar style ('r_col'), T.br bar dot radius (8)
-%   T.dim_off offset of the two dimensions (default -90)
+%   T.dim_off offset of the two tie dimensions (default -90); they are the tie's
+%             outside size, written "(est.)" when T.col_dims is true
+%   T.col_dims also the column size above and to the left (default false)
   if ~isfield(T, 's'), T.s = 'r_tieS'; end
   if ~isfield(T, 'bs'), T.bs = 'r_col'; end
   if ~isfield(T, 'br'), T.br = 8; end
   if ~isfield(T, 'dim_off'), T.dim_off = -90; end
+  if ~isfield(T, 'col_dims'), T.col_dims = false; end
   c = T.xc;  db = T.db;  r = T.db_col/2 + db/2;  e = max(6*db, 75);  w = [1 1]/sqrt(2);
   BL = [-c -c];  BR = [c -c];  TR = [c c];  TL = [-c c];
   a0 = arcp(BL, r, 135, 270);  a5 = arcp(BL, r, 180, 315);
@@ -23,6 +26,12 @@ function it = c_column_tie(T)
   end, end
   it{end+1} = d_path(Q1, db, T.s);  it{end+1} = d_path(Q2, db, T.s);
   o = c + r + db/2;
-  it{end+1} = d_dim(-o, -o, o, -o, T.dim_off, sprintf('%.0f', 2*o));
-  it{end+1} = d_dim(o, -o, o, o, T.dim_off, sprintf('%.0f', 2*o));
+  tag = '';  if T.col_dims, tag = ' (est.)'; end
+  it{end+1} = d_dim(-o, -o, o, -o, T.dim_off, sprintf('%.0f%s', 2*o, tag));
+  it{end+1} = d_dim(o, -o, o, o, T.dim_off, sprintf('%.0f%s', 2*o, tag));
+  if T.col_dims
+    h = T.b/2;
+    it{end+1} = d_dim(-h, h, h, h, 50, sprintf('%g', T.b));
+    it{end+1} = d_dim(-h, -h, -h, h, 50, sprintf('%g', T.b));
+  end
 end
