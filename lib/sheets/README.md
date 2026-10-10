@@ -35,10 +35,16 @@ sheet_pdf(B, '/path/to/out/lamina', o);     % JSON + PDF (pour_pdf.py, A2 landsc
 - `c_rc_section`: `ct` is the stirrup AXIS from the faces = cover + dst/2; bar
   centres are yours: corner bar = cover + dst + db/2 from each face.
 - y is up in every drawing (a section's origin is its bottom centre).
+- Scale: `blk_draw(items, h, cap, note, 'std')` prints the drawing at the next
+  standard scale that fits and writes "ESC 1:N" after the caption (or give N).
+  Use it on every detail and plan; without it the drawing just fills the block.
+- Texts: say it on the drawing (c_leader, c_rc_labels, c_member labels), not in
+  the note. Caption = what it is ("CORTE A-A: V-2 25x40"), note = one short line
+  or nothing. Long notes are not read.
 - '@page' in the title block prints "i / n"; write a literal like '1/1' if you prefer.
 
-`examples/component_catalog.m` draws every component on one sheet
-(`examples/component_catalog.pdf`): look there first.
+`examples/component_catalog.m` is the template sheet (A2): an example of every
+component used as a real sheet would (`examples/component_catalog.pdf`). Look there first.
 
 ## Items (one JSON item each)
 ```
@@ -48,6 +54,10 @@ d_path (bar along a polyline)  d_bar  d_half      fillet  arcp  rotp (point help
 
 ## Components (return a cell array of items; join them with it = [it, c_...])
 ```
+c_member             member on a plan: coloured band + label along it (m_conc, m1..m8)
+c_column_mark        column on a plan with its label
+c_legend             swatches + texts (which colour is which section)
+c_rc_labels          '3Ø14', '8Ø16', 'Est. Ø8 c/15' callouts written from the bars
 c_axis, c_grid       grid lines with bubbles; c_grid takes G.v {name, p1, p2} (may be
                      inclined) and G.h {name, y}, cut to a box
 c_node               ball with a label, to mark a joint

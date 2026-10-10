@@ -21,7 +21,9 @@ Blocks:
     {"k": "table", "head": [...], "rows": [[...], ...], "w": [fractions],
      "right": [1-based columns], "red": [[row, col], ...] 1-based, body rows}
     {"k": "drawing", "h": height on paper in mm, "cap": bold title below,
-     "note": text below the title, "items": [...]}   see drawing()
+     "note": text below the title, "items": [...],
+     "scale": "std" (next standard scale that fits, printed "ESC 1:N" after the
+              title) or N (1:N if it fits, else the next standard)}   see drawing()
     {"k": "row", "w": [fractions], "cols": [[blocks], [blocks], ...]}
         blocks side by side
 """
@@ -123,7 +125,20 @@ SHAPE = {
     "vvcut":  ("#6A1B9A", 2.2, None, 0, None),
     "arrow":  ("#333333", 0.8, "#333333", 1.0, None),
     "compass": ("#9A9A9A", 0.5, None, 0, None),
+    # members on plans (c_member, c_legend): concrete, and one colour per steel section
+    "m_conc": ("#7a7a7a", 0.6, "#d9d4c7", 1.0, None),
+    "m_col":  ("#4d4d4d", 0.7, "#a6a6a6", 1.0, None),
+    "m1":     ("#174a7c", 0.5, "#2f80c8", 1.0, None),
+    "m2":     ("#9c4a00", 0.5, "#e67e22", 1.0, None),
+    "m3":     ("#1d5e36", 0.5, "#2e9e5b", 1.0, None),
+    "m4":     ("#5b2c6f", 0.5, "#9b59b6", 1.0, None),
+    "m5":     ("#8e1b10", 0.5, "#d9473b", 1.0, None),
+    "m6":     ("#0e5e55", 0.5, "#1abc9c", 1.0, None),
+    "m7":     ("#5d4037", 0.5, "#a1887f", 1.0, None),
+    "m8":     ("#8a1f5a", 0.5, "#e05a9a", 1.0, None),
 }
+SCALES = [1, 2, 2.5, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 125, 150, 200, 250, 300, 400,
+          500, 750, 1000, 1250, 1500, 2000, 2500, 5000]
 DIMCOL = _c("#333333")
 
 
@@ -237,6 +252,14 @@ def drawing(b, width):
             Y1 = max(Y1, py + size / k)
         k = fit(X0, X1, Y0, Y1)
     x0, x1, y0, y1 = X0, X1, Y0, Y1
+    esc = ""
+    if b.get("scale"):                            # print at a standard scale 1:N (fits h and width)
+        n_fit = mm / k
+        n = next((v for v in SCALES if v >= n_fit * 0.999), math.ceil(n_fit))
+        if b["scale"] != "std" and float(b["scale"]) >= n_fit * 0.999:
+            n = float(b["scale"])
+        k = mm / n
+        esc = f"ESC 1:{n:g}"
     W, H = (x1 - x0) * k + 2 * pad, (y1 - y0) * k + 2 * pad
     ox = (width - W) / 2
     X = lambda x: ox + pad + (x - x0) * k
@@ -272,7 +295,7 @@ def drawing(b, width):
         d.add(g)
     out = [d]
     if b.get("cap"):
-        out.append(P_(b["cap"], S.par["cap"]))
+        out.append(P_(b["cap"] + (f"   {esc}" if esc else ""), S.par["cap"]))
     if b.get("note"):
         out.append(P_(b["note"], S.par["capnote"]))
     return out

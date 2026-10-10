@@ -31,6 +31,12 @@ of the folder you work in before opening code, and open only what you need.
   sheet script, do not touch the printer.
 - `casa_saav/data/gg.txt` (ETABS export, 16 MB) is not in git. Ask the user
   for it if a step needs it.
+- Assumptions: when a request leaves an input out (a length, a grade, a
+  spacing, an unbraced length...), do not fill it in silently. Ask, or use a
+  value and list it: every sheet or calculation made for a request carries a
+  note "Supuestos: ..." with each input that was not given (also in the reply).
+- Sheets: details at a standard scale (blk_draw ..., 'std'), information on the
+  drawing as labels (members, bars, plates, rods), captions short, notes one line.
 - Commit or push only when the user asks.
 
 ## Planned (not done yet)
