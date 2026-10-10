@@ -64,12 +64,12 @@ function M = model_end_plate_column(P, R, o)
   T = struct('kind', 'rebar', 'grp', 'cage', 'style', 'r_tie', 'r', 2.5*dh, 'mark', 'E10', ...
              'desc', sprintf('estribo del nudo Ø%g cerrado', dh));
   for y = P.joint.hoop_y
-    M = jm_bar(M, sprintf('estribo y=%g', y), hoop(b, cov + dh/2, y), dh, T);
+    M = jm_bar(M, sprintf('estribo y=%g', y), jm_loop(-(b/2 - cov - dh/2), b/2 - cov - dh/2, cov + dh/2, b - cov - dh/2, y), dh, T);
   end
   if isfield(P.column, 'ties_top')
     tt = P.column.ties_top;
     T2 = setf(setf(setf(T, 'mark', sprintf('E%g', tt.d)), 'r', 2.5*tt.d), 'desc', sprintf('estribo Ø%g sobre las vigas', tt.d));
-    for y = tt.y, M = jm_bar(M, sprintf('estribo y=%g', y), hoop(b, cov + tt.d/2, y), tt.d, T2); end
+    for y = tt.y, M = jm_bar(M, sprintf('estribo y=%g', y), jm_loop(-(b/2 - cov - tt.d/2), b/2 - cov - tt.d/2, cov + tt.d/2, b - cov - tt.d/2, y), tt.d, T2); end
   end
 
   % ---- beam bars (context): behind along z with hooks into the column, crossing along x
@@ -101,9 +101,10 @@ function M = model_end_plate_column(P, R, o)
         'kind', 'rod'), 'style', 'r_anc'), 'mark', 'A1'), 'desc', sprintf('varilla roscada Ø%g A193 B7, L = %g', db, L_rod)), 'phase', 'before'));
     M = jm_box(M, sprintf('P1 x=%+g y=%g', x, y), [x - hd.a/2, y - hd.a/2, hef], [x + hd.a/2, y + hd.a/2, hef + hd.t], ...
                setf(setf(setf(R0, 'style', 'r_bp'), 'mark', 'P1'), 'desc', sprintf('PL %gx%gx%g, agujero Ø%g', hd.a, hd.a, hd.t, P.rods.dh)));
-    M = nut(M, x, y, hef + hd.t, 1, hd, nw, R0, 'r_nut', 'before', db);
-    if getf(P.rods, 'leveling', false), M = nut(M, x, y, -tg, 1, hd, nw, R0, 'r_ancg', 'after', db); end
-    M = nut(M, x, y, zo, -1, hd, nw, R0, 'r_ancg', 'after', db);
+    N = struct('t_wsh', hd.t_wsh, 'h_nut', hd.h_nut, 'dw', hd.dw, 'nw', nw, 'db', db);
+    M = jm_washer_nut(M, [x y hef + hd.t], 3, N, setf(setf(R0, 'style', 'r_nut'), 'phase', 'before'));
+    if getf(P.rods, 'leveling', false), M = jm_washer_nut(M, [x y -tg], 3, N, setf(setf(R0, 'style', 'r_ancg'), 'phase', 'after')); end
+    M = jm_washer_nut(M, [x y zo], -3, N, setf(setf(R0, 'style', 'r_ancg'), 'phase', 'after'));
   end, end
   B0 = struct('kind', 'rebar', 'style', 'r_bas', 'mark', 'BA', 'r', 3.5*ba.db, ...
               'desc', sprintf('bastón Ø%g: recto %g + pata %g', ba.db, L_bst, tail));
@@ -125,21 +126,6 @@ function M = model_end_plate_column(P, R, o)
 end
 
 % ---------------------------------------------------------------------------
-function Q = hoop(b, co, y)
-  % closed tie at depth y, centreline co from the faces (corners rounded by jm_bar)
-  a = b/2 - co;
-  Q = [0 y co; a y co; a y b - co; -a y b - co; -a y co; 0 y co];
-end
-
-function M = nut(M, x, y, z0, dir, hd, nw, R0, st, ph, db)
-  % washer then nut on the rod, from z0 in direction dir (+1 into the column)
-  z1 = z0 + dir*hd.t_wsh;  z2 = z1 + dir*hd.h_nut;
-  W = setf(setf(setf(setf(setf(R0, 'kind', 'nut'), 'style', st), 'phase', ph), 'mark', 'W'), 'desc', sprintf('arandela Ø%g x %g', hd.dw, hd.t_wsh));
-  M = jm_bar(M, sprintf('arandela x=%+g y=%g z=%g', x, y, z0), [x y z0; x y z1], hd.dw, W);
-  M = jm_bar(M, sprintf('tuerca x=%+g y=%g z=%g', x, y, z0), [x y z1; x y z2], nw, ...
-             setf(setf(W, 'mark', 'T'), 'desc', sprintf('tuerca Ø%g', db)));
-end
-
 function v = getf(s, f, d)
   if isfield(s, f), v = s.(f); else, v = d; end
 end

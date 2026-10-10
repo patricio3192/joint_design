@@ -13,6 +13,9 @@ jm_clash         clear distance between pieces -> CLASH / spacing / contact / ti
 jm_view          orthographic view or section -> lib/sheets items (blk_draw)
 jm_quantities    count, length and steel mass by piece mark
 jm_fillet3       round the corners of a 3D polyline
+jm_loop          closed rectangular tie (polyline for jm_bar)
+jm_washer_nut    washer + nut on a rod, along an axis
+jm_tables        sheet tables (Spanish) of the clash list and the quantities
 ```
 
 ## Use
@@ -37,5 +40,6 @@ context, checked only against new pieces), `qty`, `mark`, `desc`, `style`
 - contact: touching; normal for crossing bars that are tied together.
 - tight: clear below 10 mm (information).
 
-## Example
+## Examples
 `casa_saav/end_plate_model.m`: joint C4, 78 pieces, sheet `reports/end_plate_model.pdf`.
+`lib/sandwich_column/examples/example_sandwich_column.m`: column sandwich, 59 pieces.

@@ -12,6 +12,7 @@ conf_factor.m              sqrt(A2/A1) <= 2 for a loaded area on the beam side f
 aci_shear_breakout.m       concrete breakout of anchors in shear (ACI 17.7.2)
 aci_beam_shear_torsion.m   shear and torsion of the concrete beam and their steel (ACI 318-19 ch. 22)
 aisc_f2_ltb.m              flexural strength of the steel beam, F2 with LTB
+end_plate_welds.m          welds of the end plate to the beam (module 10; also used by sandwich_column)
 ```
 Also uses `lib/concrete_common` (iif, print_check).
 

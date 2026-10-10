@@ -12,6 +12,7 @@ lib/                     libraries: no project data inside
   etabs/                 ETABS text export -> joint database (forces at every joint)
   end_plate_concrete/    steel end plate on a concrete column: check_end_plate_column(P)
   sandwich_concrete/     steel beams on both faces of a concrete beam: check_sandwich_beam(P)
+  sandwich_column/       steel beams on both faces of a concrete column: check_sandwich_column(P)
   concrete_common/       helpers shared by the two concrete libraries
   joint_model/           3D pieces of a joint: clash check, views, quantities
   sheets/                drawing items, components (grid, concrete sections, profiles,
@@ -23,6 +24,7 @@ casa_saav/               the project (Vivienda Ortega): data, one script per con
                          type, sheets, reports
 archived/                superseded designs, kept for reference only
 learning/                study material (yield-line theory)
+verification/            equation check against the code PDFs: instructions, audit, status
 snap.sh                  ./snap.sh "message" saves a git snapshot
 ```
 

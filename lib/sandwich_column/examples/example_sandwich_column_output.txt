@@ -1,0 +1,120 @@
+==============================================================
+  LIMIT STATES - SANDWICH ON A CONCRETE COLUMN 400x400, IPE 200 both faces
+  (AISC 360-16 / DG 39 / DG 1 / ACI 318-19)
+==============================================================
+  Governing face A: Mu = 23.5 kNm, Vu = 21.5 kN; other face Mu = 12.0 kNm, Vu = 14.0 kN
+
+--- 1. DG 39 TABLE 5-1 TESTED RANGE (+/-10%), two-bolt flush ---
+  pf (pfi)  =   33.5 mm   range   30.0 -   62.9 mm   OK
+  g         =   55.0 mm   range   51.4 -  125.7 mm   OK
+  d         =  200.0 mm   range  182.9 -  670.6 mm   OK
+  bp        =  140.0 mm   range  114.3 -  391.2 mm   OK
+  tf        =    8.5 mm   range    4.3 -   21.0 mm   OK
+
+--- 2. COMPRESSION SIDE, FACE A (DG 1 + ACI 22.8.3.2, strict strips) ---
+  h1 (DG 39) = 153.8 mm;  D = 178.0 mm;  plate edge to column side = 130 mm
+  fp = 0.65*0.85*fc*sqrt(A2/A1) = 23.20 MPa (sqrt(A2/A1) = 2.00; A1 = 11318, A2 = 136336 mm2)
+  Bearing: moment carried by compression zone    D =    23.50  C =    29.90 kNm  ratio =  0.79  OK     [DG1 3.4.1 / ACI 22.8.3.2]
+  c = 26.4 mm; C = 164.0 kN at 34.7 mm from the plate bottom -> real arm = 143.3 mm
+  Plate strip below flange (ext <= c)            D =    20.00  C =    26.42 mm   ratio =  0.76  OK     [DG1 Eq. 3.3.14a-1]
+  Plate strip beyond flange tip ((bp-bf)/2 <= c) D =    20.00  C =    26.42 mm   ratio =  0.76  OK     [DG1 Eq. 3.3.14a-1]
+  FLAG: real arm 143.3 < DG 39 h1 153.8: rods also checked with the real arm.
+
+--- 3. ROD TENSION (A193 B7: Fnt = 0.75Fu = 645 MPa; anchored by the opposite plate) ---
+  Rod tension, DG 39 arm h1                      D =    76.42  C =    97.26 kN   ratio =  0.79  OK     [J3-1, Table J3.2; DG39 Tab.5-2]
+  Rod tension, real arm (strict strips)          D =    82.01  C =    97.26 kN   ratio =  0.84  OK     [J3-1, Table J3.2]
+
+--- 4. END PLATE, TENSION SIDE (DG 39), s = 43.9 mm, Yp = 999.2 mm ---
+  End-plate yielding phi*Mpl (Table 5-2)         D =    23.50  C =    32.37 kNm  ratio =  0.73  OK     [DG39 Tab.5-2]
+  Plate thickness, thick plate Eq. 5-4a          D =    11.99  C =    12.00 mm   ratio =  1.00  OK     [DG39 Eq.5-4a, 5-1]
+  Info: Eq. 5-5a (thin plate, needs prying check) t_req = 11.43 mm
+
+--- 5. ROD SHEAR AND PLATE BEARING (V per rod = 10.8 kN) ---
+  Rod shear (Fnv = 0.450Fu)                      D =    10.75  C =    58.36 kN   ratio =  0.18  OK     [J3-1, Table J3.2]
+  Bearing / tearout at plate hole                D =    10.75  C =   138.24 kN   ratio =  0.08  OK     [J3-6a, J3-6c]
+
+--- 6. OTHER FACE: PLATE PRESSED BY THE RODS (own model, EQUATIONS.txt) ---
+  rods pull 2T = 164.0 kN; the other beam's top flange takes 73.7 kN; the rest
+  dT = 90.3 kN bears on the column through the plate band 0-84 mm from the top
+  (strict strips, c = 26.4 mm, A = 6450 mm2, fp = 23.20 MPa, sqrt(A2/A1) = 2.00)
+  Other face: bearing of the top band            D =    90.28  C =   149.67 kN   ratio =  0.60  OK     [ACI 22.8.3.2; own band]
+
+--- 7. SPACING AND EDGE DISTANCES ---
+  AISC min spacing, gage (2 2/3 d)               D =    42.67  C =    55.00 mm   ratio =  0.78  OK     [AISC J3.3]
+  AISC min spacing, rows (2 2/3 d)               D =    42.67  C =   118.00 mm   ratio =  0.36  OK     [AISC J3.3]
+  AISC min edge, plate side                      D =    22.00  C =    42.50 mm   ratio =  0.52  OK     [AISC Table J3.4M]
+  AISC min edge, plate top                       D =    22.00  C =    42.00 mm   ratio =  0.52  OK     [AISC Table J3.4M]
+  AISC min edge, plate bottom                    D =    22.00  C =    60.00 mm   ratio =  0.37  OK     [AISC Table J3.4M]
+  ACI min spacing 64 mm not met; WAIVED per ACI 17.9.1 by supplementary reinforcement
+  (column ties next to the rods). ACI gives no sizing rule: engineering judgment.
+  ACI min edge, rods to column side (clear)      D =    40.00  C =   164.50 mm   ratio =  0.24  OK     [ACI Table 17.9.2(a)]
+
+--- 8. IPE 200: FLEXURE AND SHEAR ---
+  bf/2tf = 5.88 <= 0.38sqrt(E/Fy) = 10.75; h/tw = 28.4 <= 3.76sqrt(E/Fy) = 106.3 (Table B4.1b)
+  Flexure LTB, Lb = 2.4 m, Cb = 1                D =    23.50  C =    41.40 kNm  ratio =  0.57  OK     [AISC F2-1..F2-6]
+  Flexure LTB, Lb = 4.8 m, Cb = 1                D =    23.50  C =    25.22 kNm  ratio =  0.93  OK     [AISC F2-1..F2-6]
+  Shear yielding                                 D =    21.50  C =   168.00 kN   ratio =  0.13  OK     [AISC G2-1, G2-2]
+
+--- 9. WELDS (E70XX, FEXX = 482 MPa) ---
+  Flange weld demand Ru = max(Mu/(d-tf), 0.60Fy bf tf) = max(122.7, 127.5) = 127.5 kN
+  Top flange CJP groove weld, E70XX matching filler
+  CJP top flange, base metal (flange yielding)   D =   127.50  C =   191.25 kN   ratio =  0.67  OK     [Table J2.5, J4-1]
+  Bottom flange fillet min size                  D =     5.00  C =     6.00 mm   ratio =  0.83  OK     [AISC Table J2.4]
+  Bottom flange fillet max size (t-2)            D =     6.00  C =     6.50 mm   ratio =  0.92  OK     [AISC J2.2b]
+  Bottom flange fillet (designed for Ru)         D =   127.50  C =   235.17 kN   ratio =  0.54  OK     [AISC J2-4, J2-5]
+  (bottom flange is in compression; Ru used in case of moment reversal; ext = 20 mm >= w)
+  Web tension yielding near tension rods         D =   122.72  C =   230.58 kN   ratio =  0.53  OK     [DG39 3-40; J4-1]
+  Web weld, tension region                       D =   153.72  C =   505.13 kN   ratio =  0.30  OK     [DG39 3-41a; J2-4, J2-5]
+  FLAG: DG 39 tension length pfi + 6 in. = 186 mm covers the whole web of this
+        shallow beam; no weld is left for shear. Lower half of the web (91.5 mm)
+        checked for tension + shear together (resultant at angle theta, J2-5).
+  Web weld, tension + shear (lower half)         D =   436.12  C =  1354.86 N/mm ratio =  0.32  OK     [J2-4, J2-5 (deviation)]
+  Web shear rupture at weld (lower half)         D =    21.50  C =    92.23 kN   ratio =  0.23  OK     [AISC J4-4]
+
+--- 10. JOINT (ACI Ch. 15) ---
+  Vu,j = unbalanced flange force = 90.3 kN; Aj = 400 x 400 = 160000 mm2; gamma = 1.25 (input)
+  Joint shear                                    D =    90.28  C =   687.39 kN   ratio =  0.13  OK     [ACI 15.4.2, T.15.4.2.3]
+  Tie layers within the beam depth: 2 (>= 2) -> OK [ACI 15.3.1.3]
+  Joint tie spacing (incl. to top/bottom of beam) D =   120.00  C =   200.00 mm   ratio =  0.60  OK     [ACI 15.3.1.4 (8 in.)]
+  Unbalanced moment 11.5 kNm goes into the column (design it in the frame model).
+
+--- 11. NOT APPLICABLE / NOT CHECKED HERE ---
+  Through-rods tie plate to plate: breakout in tension, pullout, side-face blowout
+  and pryout do not apply. Shear breakout: no free edge below (the column continues).
+  Column axial-flexure design, beam member design away from the joint: frame model.
+
+==============================================================
+  SUMMARY (ratio = demand / capacity)
+==============================================================
+  Bearing: moment carried by compression zone         0.79  OK
+  Plate strip below flange (ext <= c)                 0.76  OK
+  Plate strip beyond flange tip ((bp-bf)/2 <= c)      0.76  OK
+  Rod tension, DG 39 arm h1                           0.79  OK
+  Rod tension, real arm (strict strips)               0.84  OK
+  End-plate yielding phi*Mpl (Table 5-2)              0.73  OK
+  Plate thickness, thick plate Eq. 5-4a               1.00  OK
+  Rod shear (Fnv = 0.450Fu)                           0.18  OK
+  Bearing / tearout at plate hole                     0.08  OK
+  Other face: bearing of the top band                 0.60  OK
+  AISC min spacing, gage (2 2/3 d)                    0.78  OK
+  AISC min spacing, rows (2 2/3 d)                    0.36  OK
+  AISC min edge, plate side                           0.52  OK
+  AISC min edge, plate top                            0.52  OK
+  AISC min edge, plate bottom                         0.37  OK
+  ACI min edge, rods to column side (clear)           0.24  OK
+  Flexure LTB, Lb = 2.4 m, Cb = 1                     0.57  OK
+  Flexure LTB, Lb = 4.8 m, Cb = 1                     0.93  OK
+  Shear yielding                                      0.13  OK
+  CJP top flange, base metal (flange yielding)        0.67  OK
+  Bottom flange fillet min size                       0.83  OK
+  Bottom flange fillet max size (t-2)                 0.92  OK
+  Bottom flange fillet (designed for Ru)              0.54  OK
+  Web tension yielding near tension rods              0.53  OK
+  Web weld, tension region                            0.30  OK
+  Web weld, tension + shear (lower half)              0.32  OK
+  Web shear rupture at weld (lower half)              0.23  OK
+  Joint shear                                         0.13  OK
+  Joint tie spacing (incl. to top/bottom of beam)     0.60  OK
+  Governing: Plate thickness, thick plate Eq. 5-4a (1.00)
+==============================================================
+--- CLASH CHECK: 59 pieces, 0 findings ---

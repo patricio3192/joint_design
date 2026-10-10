@@ -13,6 +13,9 @@ of the folder you work in before opening code, and open only what you need.
 - `archived/`: superseded designs. Do not edit, do not run, do not copy from it
   without asking. Its paths are not maintained.
 - `learning/`: study pages, not used by any calculation.
+- `verification/`: checking the code equations against the PDFs (on the user's
+  PC). README.md is the procedure, audit_2026-10-09.md the open findings. Two
+  errors there are confirmed and NOT fixed yet (collar M5, shear-tab net area).
 
 ## Rules
 - Octave scripts find everything relative to their own file
@@ -34,5 +37,6 @@ of the folder you work in before opening code, and open only what you need.
   sandwich and collar; then the A1 sheet details 2.1-2.3 drawn from the model
   (needs the grout thickness decision: 30 in the check, 25 on the A1 sheet).
 - A sheet template for joint details (views + sections + pieces + notes).
+- sandwich_column has only a made-up example; no project uses it yet.
 - The collar sheets (lib/collar_joint) can move their grid and key plan to
   c_grid / c_node.

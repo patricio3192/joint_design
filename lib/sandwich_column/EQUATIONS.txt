@@ -1,0 +1,55 @@
+EQUATIONS AND REFERENCES - check_sandwich_column.m
+==================================================
+Units N, mm, MPa. "PDF p." = page index of the PDF file. Files: the same as
+lib/sandwich_concrete/EQUATIONS.txt ([A360], [DG39], [DG1], [ACI]).
+Modules 1-5, 8 and 9 use the SAME equations as lib/sandwich_concrete (its
+EQUATIONS.txt modules 1-5, 9, 10, same pages); only what differs is listed.
+Status: NOT checked against the pages yet (see verification/).
+
+---------------------------------------------------------------------------
+MODULE 2 - Compression side (as sandwich module 2)
+---------------------------------------------------------------------------
+fp(max) = phi 0.85 f'c sqrt(A2/A1) <= 2 phi 0.85 f'c          [ACI] 22.8.3.2, PDF p. 431
+A2 frustum 1V:2H limited by: column side faces ((b - bp)/2), column top (if
+  any), column depth (both faces loaded at the same level: x <= h_col, as
+  conf_factor). No limit below (the column continues).          own reading of 22.8.3.2
+
+---------------------------------------------------------------------------
+MODULE 6 - Opposite plate pressed by the rods (OWN MODEL)
+---------------------------------------------------------------------------
+Rod tension 2T (from the governing face) minus the top-flange force of the
+other beam T_o = Mo / arm_o (strict strips at that face) is pressed on the
+column by the other plate: dT = 2T - T_o.
+Bearing area: band from the plate top to 2 x dist_top (centred on the tension
+  rods), widths as the strict strips of bearing_strips (flange band
+  min(bp, bf + 2c), strip below the flange, web zone tw + 2c), holes deducted;
+  c = tp sqrt(phi Fy/(2 fp))                                   [DG1] Eq. 3.3.14a-1, PDF p. 32
+dT <= fp A_band, fp as module 2 with A1 = bp x band            [ACI] 22.8.3.2, PDF p. 431
+
+---------------------------------------------------------------------------
+MODULE 7 - Spacing and edge distances
+---------------------------------------------------------------------------
+As sandwich module 8, plus:
+Min edge = specified cover (not torqued) / 6da (torqued), to the column side
+  faces and to the column top if it ends                       [ACI] Table 17.9.2(a), PDF p. 273
+
+---------------------------------------------------------------------------
+MODULE 10 - Joint (ACI Ch. 15)
+---------------------------------------------------------------------------
+Vu on a plane at mid-height of the joint from the member forces   [ACI] 15.4.1.1, PDF p. 215
+  here (OWN MODEL): top half dT (module 6), bottom half C_gov - C_other = dT;
+  column shear not counted (conservative)
+phi Vn >= Vu, phi = 0.75                                      [ACI] 15.4.2.1, 15.4.2.2, PDF p. 215
+Vn = gamma lambda sqrt(f'c) Aj, gamma from Table 15.4.2.3 (input; 15 in-lb =
+  1.25 SI)                                                    [ACI] Table 15.4.2.3, PDF p. 216
+Aj = h_col x min(b_col, bw + h_col, bw + 2x), bw = plate width (OWN reading
+  for a steel beam)                                           [ACI] 15.4.2.4, PDF p. 216
+>= 2 tie layers within the beam depth                         [ACI] 15.3.1.3, PDF p. 214
+Tie spacing <= 200 mm (8 in.)                                 [ACI] 15.3.1.4, PDF p. 214
+
+---------------------------------------------------------------------------
+MODULE 11 - Not applicable
+---------------------------------------------------------------------------
+Through-rods tie plate to plate: tension breakout, pullout, side-face blowout,
+pryout as sandwich module 12. Shear breakout needs an edge in the direction of
+the shear (17.7.2): the column continues below.
