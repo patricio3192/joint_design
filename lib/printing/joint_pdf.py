@@ -406,6 +406,15 @@ def _wrap(text, font, size, width):
     return out
 
 
+def warn_pages(pdf, frame):
+    """Warn when the blocks took more pages than the frame lists sheets: a drawing or a
+    column was too tall and the rest of the row moved to a new page."""
+    n = getattr(pdf, "page", 1)
+    if frame and n > len(aslist(frame.get("sheets"))):
+        print(f"  WARNING: the sheet came out on {n} pages but the frame lists "
+              f"{len(aslist(frame.get('sheets')))} sheet(s): lower a drawing height (blk_draw h).")
+
+
 def main(src, dst):
     global S
     with open(src) as f:
@@ -470,6 +479,7 @@ def main(src, dst):
         canvas.restoreState()
 
     pdf.build(flow(doc["blocks"], width), onFirstPage=page, onLaterPages=page)
+    warn_pages(pdf, frame)
     print(f"  {dst}")
 
 

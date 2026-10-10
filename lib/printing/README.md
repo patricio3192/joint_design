@@ -5,7 +5,8 @@ drawings in model mm; see the docstring of `joint_pdf.py`). These scripts only
 print it; every number and line of text comes from the JSON.
 
 ```
-joint_pdf.py      JSON -> PDF (A4, A2 landscape)
+joint_pdf.py      JSON -> PDF (A4, A2 landscape); prints a WARNING when a framed sheet
+                  overflows to more pages than it lists
 pour_pdf.py       joint_pdf.py plus the concrete/rebar styles and A1 landscape
 json_dxf.py       JSON -> editable DXF files (needs pip install ezdxf)
 armar_lamina.py   rebuilds the assembled DXF sheets from the edited files

@@ -178,6 +178,7 @@ def main(src, dst):
 
     pdf.build(J.flow(doc["blocks"], width), onFirstPage=page, onLaterPages=page)
     print(f"  {dst}")
+    J.warn_pages(pdf, frame)
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
