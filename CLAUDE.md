@@ -13,6 +13,8 @@ of the folder you work in before opening code, and open only what you need.
 - `archived/`: superseded designs. Do not edit, do not run, do not copy from it
   without asking. Its paths are not maintained.
 - `learning/`: study pages, not used by any calculation.
+- `tasks/`: work for an agent that has the code PDFs (the user's PC): equation
+  check, member design library. Start at tasks/README.md.
 - `verification/`: checking the code equations against the PDFs (on the user's
   PC). README.md is the procedure, audit_2026-10-09.md the open findings. Two
   errors there are confirmed and NOT fixed yet (collar M5, shear-tab net area).

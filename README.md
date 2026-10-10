@@ -24,6 +24,7 @@ casa_saav/               the project (Vivienda Ortega): data, one script per con
                          type, sheets, reports
 archived/                superseded designs, kept for reference only
 learning/                study material (yield-line theory)
+tasks/                   work that needs the code PDFs (for an agent on the user's PC)
 verification/            equation check against the code PDFs: instructions, audit, status
 snap.sh                  ./snap.sh "message" saves a git snapshot
 ```
