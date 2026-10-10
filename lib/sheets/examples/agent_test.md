@@ -26,6 +26,9 @@ elevación con placa, grout de 25 y la varilla entrando 250 en la columna.
 4. Tabla de cantidades y 4 o 5 notas. 5. Cajetín: proyecto PRUEBA, propietario
 N/A, diseño estructural ING. PRUEBA, fecha OCTUBRE 2026, lámina 1/1."
 
+Since 2026-10-10 the request needs no title-block layout: sheet_pdf brings it
+with the size (the agent passes only the project fields).
+
 ## History
 - 2026-10-10, run 1 (Haiku, 26 tool calls, ~5 min): good sheet in 3 runs
   (first came out on 2 pages, then a label overlap). Guesses and fixes made:
@@ -42,3 +45,6 @@ N/A, diseño estructural ING. PRUEBA, fecha OCTUBRE 2026, lámina 1/1."
   the weak-axis Iy trap), tie spacing counted ties outside the beam depth (real
   bug, sandwich_column), help on splitting_reinf and gamma, jm_tables use,
   c_column_tie xc, sheet_pdf stops on overflow, page height guide.
+- 2026-10-10, after the user saw the template sheet: the agent should not lay
+  out a title block. sheet_pdf now has one per size (A1L, A2L, A4) with the
+  project sheets' fields and proportions; the designer comes from office.m.

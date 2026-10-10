@@ -12,10 +12,13 @@ addpath(lib);  addlib();                       % every library (or only sheets +
 it = c_grid(G, box);  it = [it, c_node(0, 0, 'B2')];          % build each drawing as a cell array
 B = {blk_h(1, 'Título'), ...
      blk_row([0.6 0.4], {{blk_draw(it, 180, 'PLANTA', 'nota')}, {blk_table(head, rows, widths, [], [])}})};
-o.tb = {'PROYECTO:', 'X';  'FECHA:', 'OCTUBRE 2026';  'LÁMINA:', '@page'};   % title block (frame)
-sheet_pdf(B, '/path/to/out/lamina', o);     % JSON + PDF (pour_pdf.py, A2 landscape); error if it overflows
+o.page = 'A2L';                                % A1L, A2L or A4: the size brings the office title block
+o.project = struct('proyecto', 'X', 'propietario', 'Y', 'contenido', 'Detalles de conexiones');
+sheet_pdf(B, '/path/to/out/lamina', o);        % JSON + PDF; error if it overflows
 ```
-`help sheet_pdf` lists the page sizes (A2L, A1L, A4) and the title-block options.
+Do not build a title block: each size has one (PROYECTO, PROPIETARIO, DISEÑO
+ARQUITECTÓNICO, DISEÑO ESTRUCTURAL from office.m, CONTENIDO, FECHA = this month,
+LÁMINA); give only the project fields you have. `help sheet_pdf` lists them.
 `examples/component_catalog.m` and `casa_saav/sheets/make_concrete_sheet.m` are full sheets.
 
 ## Conventions (read once)

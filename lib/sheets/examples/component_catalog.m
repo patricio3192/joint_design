@@ -94,7 +94,7 @@ c4 = {blk_h(2, '4. Piezas, cantidades y notas'), ...
       blk_h(3, '**Notas** (blk_note)')};
 for i = 1:numel(notes), c4{end+1} = blk_note(sprintf('%d. %s', i, notes{i})); end
 B = {blk_h(1, 'Lámina de plantillas (lib/sheets)'), blk_row([0.5 0.5], {c1, c2}), blk_row([0.5 0.5], {c3, c4})};
-o = struct('page', 'A2L', 'fs', 1.0, 'title', 'Plantillas', 'tbh', 28, 'tbk', 1.0, ...
-           'tb', {{'PROYECTO:', 'EJEMPLO (estructura inventada)';  'CONTENIDO:', 'Una muestra de cada plantilla';
-                   'FECHA:', 'OCTUBRE 2026';  'LÁMINA:', '@page'}}, 'widths', [30 35 20 15]);
+o = struct('page', 'A2L', 'title', 'Plantillas', ...             % the size brings its title block
+           'project', struct('proyecto', 'EJEMPLO (estructura inventada)', 'estructural', 'PRUEBA', ...
+                             'contenido', 'Lámina de plantillas', 'subtitle', 'Una muestra de cada componente de lib/sheets.'));
 sheet_pdf(B, fullfile(here, 'component_catalog'), o);

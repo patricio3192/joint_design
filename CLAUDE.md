@@ -35,8 +35,10 @@ of the folder you work in before opening code, and open only what you need.
   spacing, an unbraced length...), do not fill it in silently. Ask, or use a
   value and list it: every sheet or calculation made for a request carries a
   note "Supuestos: ..." with each input that was not given (also in the reply).
-- Sheets: details at a standard scale (blk_draw ..., 'std'), information on the
-  drawing as labels (members, bars, plates, rods), captions short, notes one line.
+- Sheets: pick the size in sheet_pdf (A1L, A2L, A4); it brings the office title
+  block, so never build one. Give only the project fields (proyecto,
+  propietario, arquitecto, contenido). Details at a standard scale (blk_draw
+  ..., 'std'), information on the drawing as labels, captions short, notes one line.
 - Commit or push only when the user asks.
 
 ## Planned (not done yet)
