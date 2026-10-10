@@ -37,7 +37,10 @@ LÁMINA); give only the project fields you have. `help sheet_pdf` lists them.
   below. Vertical bottom-to-top: off > 0 to the left. `c_dim_chain` the same.
 - `c_rc_section`: any bar layout is just rows of `S.bars` [x y d] (second
   layer, skin bars, mixed diameters; `S.bar_s` one style per bar); c_rc_labels
-  writes one callout per layer. One perimeter stirrup only (no crossties yet).
+  writes one callout per layer. Interior closed stirrups: `S.inner` rows
+  [xa ya xb yb db] (two opposite corner bars); crossties (grapas): `S.xties` rows
+  [xA yA xB yB db], hooks `S.xhooks` (default 90 at A, 135 at B: alternate A and B
+  between ties). For columns with more than 8 bars use c_rc_section, not c_column_tie.
   `c_rc_dims(S, struct('st', true))` adds the stirrup's outside size.
 - `c_rc_section`: `ct` is the stirrup AXIS from the faces = cover + dst/2; bar
   centres are yours: corner bar = cover + dst + db/2 from each face.
@@ -69,7 +72,8 @@ c_axis, c_grid       grid lines with bubbles; c_grid takes G.v {name, p1, p2} (m
                      inclined) and G.h {name, y}, cut to a box
 c_node               ball with a label, to mark a joint
 c_rebar              bar along a polyline, bends rounded, optional label (extra bars, bastones)
-c_rc_section         rectangular concrete section: outline, stirrup with 135 deg hooks, bars
+c_rc_section         rectangular concrete section: outline, stirrup with 135 deg hooks,
+                     interior stirrups, crossties (grapas), bars (any layout)
 c_rc_dims            its width and depth
 c_column_tie         square column with its 8 bars and one tie with 135 deg hooks
 c_plate              plate with rows of holes and the dimension chain
